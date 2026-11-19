@@ -1,0 +1,14 @@
+{
+  "name": "@hes/application",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Application layer: use-case ports (dependency inversion towards the domain)",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "types": "./src/index.ts",
+  "dependencies": {
+    "@hes/domain": "0.1.0"
+  }
+}
