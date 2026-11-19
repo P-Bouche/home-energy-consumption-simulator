@@ -10,21 +10,27 @@ concurrency:
   cancel-in-progress: true
 
 # Until the P0 scaffolding lands (package.json + npm workspaces), this
-# repository contains documentation only: every job below is skipped.
-# Once package.json exists, jobs run on every PR and every push to main.
+# repository contains documentation only: the guard on every step skips
+# cleanly. Once package.json exists, jobs run fully on every PR and push
+# to main. (Guard is at step level: hashFiles is not supported in
+# job-level `if`.)
 jobs:
   lint:
     name: Lint (ESLint)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        if: hashFiles('package.json') != ''
       - uses: actions/setup-node@v4
+        if: hashFiles('package.json') != ''
         with:
           node-version-file: .nvmrc
           cache: npm
       - name: Install dependencies
+        if: hashFiles('package.json') != ''
         run: npm ci
       - name: Run ESLint
+        if: hashFiles('package.json') != ''
         run: npm run lint
 
   typecheck:
@@ -32,13 +38,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        if: hashFiles('package.json') != ''
       - uses: actions/setup-node@v4
+        if: hashFiles('package.json') != ''
         with:
           node-version-file: .nvmrc
           cache: npm
       - name: Install dependencies
+        if: hashFiles('package.json') != ''
         run: npm ci
       - name: Run TypeScript typecheck (strict)
+        if: hashFiles('package.json') != ''
         run: npm run typecheck
 
   test:
@@ -52,7 +62,7 @@ jobs:
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: hecs_test
         ports:
-          - 5432:5432
+          - "5432:5432"
         options: >-
           --health-cmd "pg_isready -U postgres -d hecs_test"
           --health-interval 5s
@@ -62,16 +72,20 @@ jobs:
       DATABASE_URL: postgres://postgres:postgres@localhost:5432/hecs_test
     steps:
       - uses: actions/checkout@v4
+        if: hashFiles('package.json') != ''
       - uses: actions/setup-node@v4
+        if: hashFiles('package.json') != ''
         with:
           node-version-file: .nvmrc
           cache: npm
       - name: Install dependencies
+        if: hashFiles('package.json') != ''
         run: npm ci
       - name: Run unit + integration tests with coverage
+        if: hashFiles('package.json') != ''
         run: npm run test:coverage
       - name: Upload coverage report
-        if: always()
+        if: always() && hashFiles('package.json') != ''
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
