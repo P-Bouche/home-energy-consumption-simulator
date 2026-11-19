@@ -16,7 +16,6 @@ jobs:
   lint:
     name: Lint (ESLint)
     runs-on: ubuntu-latest
-    if: hashFiles('package.json') != ''
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -31,7 +30,6 @@ jobs:
   typecheck:
     name: Typecheck (tsc --noEmit)
     runs-on: ubuntu-latest
-    if: hashFiles('package.json') != ''
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -46,7 +44,6 @@ jobs:
   test:
     name: Tests (Vitest) + coverage gate
     runs-on: ubuntu-latest
-    if: hashFiles('package.json') != ''
     services:
       postgis:
         image: postgis/postgis:16-3.4
