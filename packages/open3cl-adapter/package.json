@@ -1,0 +1,16 @@
+{
+  "name": "@hes/open3cl-adapter",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "The only package allowed to import @open3cl/engine (ADR-0001). Implements SimulationPort.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "types": "./src/index.ts",
+  "dependencies": {
+    "@hes/application": "0.1.0",
+    "@hes/domain": "0.1.0",
+    "@open3cl/engine": "1.11.6"
+  }
+}
