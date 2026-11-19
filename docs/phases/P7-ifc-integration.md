@@ -70,7 +70,7 @@ flowchart TB
 # Deliverables
 
 1. `packages/ifc-importer` + mapping config + fixtures.
-2. ADR-0002: choice of IFC reader library (schema coverage, license, performance).
+2. ADR-0003: choice of IFC reader library (schema coverage, license, performance).
 3. CRS conversion + validation report; report v3.
 4. Web upload flow + report view.
 5. Doc: supported IFC versions, mapped entity table, known limitations.
@@ -111,7 +111,7 @@ flowchart TB
 
 # Acceptance Criteria
 
-AC-P7-01…04 green on `main`; ADR-0002 accepted; mapping table published.
+AC-P7-01…04 green on `main`; ADR-0003 accepted; mapping table published.
 
 # Exit Criteria
 
@@ -127,4 +127,4 @@ AC-P7-01…04 green on `main`; ADR-0002 accepted; mapping table published.
 - [ ] CRS/units conversion verified < 1 mm round-trip error
 - [ ] All stored values confidence-tagged; validation report complete
 - [ ] Imported building renders in 3D and simulates via Open3CL unchanged
-- [ ] ADR-0002 accepted; hostile-file fuzz tests pass; coverage ≥ 80%; CI green
+- [ ] ADR-0003 accepted; hostile-file fuzz tests pass; coverage ≥ 80%; CI green
