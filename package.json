@@ -1,0 +1,33 @@
+{
+  "name": "home-energy-consumption-simulator",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Residential Digital Energy Twin based on the Open3CL (3CL-DPE) engine",
+  "engines": {
+    "node": ">=24.14.1"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "benchmark": "node packages/open3cl-adapter/benchmark/run-benchmark.ts"
+  },
+  "dependencies": {
+    "@open3cl/engine": "1.11.6"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "@types/node": "^24.0.0",
+    "@vitest/coverage-v8": "^3.0.0",
+    "eslint": "^9.0.0",
+    "typescript": "^5.9.0",
+    "typescript-eslint": "^8.0.0",
+    "vitest": "^3.0.0"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@hes/domain": ["packages/domain/src/index.ts"],
+      "@hes/application": ["packages/application/src/index.ts"],
+      "@hes/open3cl-adapter": ["packages/open3cl-adapter/src/index.ts"]
+    }
+  },
+  "include": [
+    "packages/*/src/**/*.ts",
+    "packages/*/test/**/*.ts",
+    "packages/*/benchmark/**/*.ts",
+    "apps/*/src/**/*.ts",
+    "apps/*/test/**/*.ts",
+    "vitest.config.ts"
+  ]
+}
