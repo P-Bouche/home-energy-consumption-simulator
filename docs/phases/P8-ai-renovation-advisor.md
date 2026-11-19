@@ -78,7 +78,7 @@ Open3CL remains the only source of impact numbers (ADR-0001); the LLM never comp
 1. Action catalog (≥ 8 renovation actions) mapped to P4 commands; each action has a fixture test that produces a scenario and simulates it.
 2. `GenerateRecommendationsUseCase` + `POST/GET` endpoints + schema v5.
 3. Ranking service + re-rank endpoint (no simulations).
-4. LLM explanation adapter with anonymization, consent gate, and numeric-claim checker; ADR-0003 for the LLM/privacy decision.
+4. LLM explanation adapter with anonymization, consent gate, and numeric-claim checker; ADR-0004 for the LLM/privacy decision.
 5. Web recommendations panel.
 6. Hallucination guard tests + privacy review sign-off.
 
@@ -115,13 +115,13 @@ Open3CL remains the only source of impact numbers (ADR-0001); the LLM never comp
 | Risk | Level | Mitigation |
 | --- | --- | --- |
 | LLM hallucination produces false claims | High | Template-filled explanations + numeric-claim checker + suppression; LLM never sees raw personal data by default |
-| Privacy/GDPR breach via DPE data sent to LLM provider | High | Anonymized aggregates only; explicit consent; audit log; ADR-0003; DPIA |
+| Privacy/GDPR breach via DPE data sent to LLM provider | High | Anonymized aggregates only; explicit consent; audit log; ADR-0004; DPIA |
 | Recommendation confidence overstated | Medium | Confidence derived from input-data confidence; displayed prominently |
 | Cost data unreliable → bad ranking | Medium | Costs user-editable, labeled estimates; sensitivity shown |
 
 # Acceptance Criteria
 
-AC-P8-01…04 green on `main`; ADR-0003 accepted; privacy sign-off recorded.
+AC-P8-01…04 green on `main`; ADR-0004 accepted; privacy sign-off recorded.
 
 # Exit Criteria
 
@@ -137,5 +137,5 @@ AC-P8-01…04 green on `main`; ADR-0003 accepted; privacy sign-off recorded.
 - [ ] 100% of recommendations traceable to a SimulationResult (FK + test)
 - [ ] Explanation checker suppresses any unbacked figure
 - [ ] Ranking pure + re-rank < 200 ms with zero engine calls
-- [ ] Consent-gated anonymized LLM path; audit log; ADR-0003 accepted
+- [ ] Consent-gated anonymized LLM path; audit log; ADR-0004 accepted
 - [ ] Coverage ≥ 80%; CI green
