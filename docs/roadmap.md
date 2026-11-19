@@ -2,6 +2,8 @@
 
 Phases are sequential but overlapping where noted. Each phase lists objective, deliverables, dependencies, risks, and success criteria.
 
+Detailed phase documentation (requirements, architecture, test plans, risks, exit criteria, definition of done): [P0](phases/P0-open3cl-feasibility.md) · [P1](phases/P1-dpe-import.md) · [P2](phases/P2-energy-simulation.md) · [P3](phases/P3-3d-reconstruction.md) · [P4](phases/P4-building-editor.md) · [P5](phases/P5-scenario-management.md) · [P6](phases/P6-pdf-import.md) · [P7](phases/P7-ifc-integration.md) · [P8](phases/P8-ai-renovation-advisor.md) · [P9](phases/P9-iot-digital-twin.md) · [P10](phases/P10-photogrammetry.md)
+
 ## P0 — Open3CL Feasibility
 
 - **Objective:** prove end-to-end that the Open3CL engine can be embedded and driven from this platform.
