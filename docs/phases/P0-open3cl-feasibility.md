@@ -10,6 +10,8 @@
 
 P0 is a de-risking spike, not a product phase. Its single question: **can the Open3CL engine be embedded in this platform and meet the < 3 s simulation budget on real DPE files?** Everything else is built on this answer.
 
+Canonical prompt to start a Vibe session for this phase: [P0-vibe-prompt.md](P0-vibe-prompt.md).
+
 # Objective
 
 Prove, with executable evidence, that:
