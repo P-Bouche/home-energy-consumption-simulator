@@ -4,7 +4,6 @@
 | --- | --- |
 | Phase | P2 — Energy Simulation |
 | Status | Planned |
-| Estimated duration | 8–12 weeks |
 | Team | 2 backend engineers, 1 architect |
 | Depends on | P1 exit criteria (frozen Building fixtures, stable repository, import report v1) |
 | Blocks | P4, P5, P8, P9 — every feature that needs a computed result |
@@ -55,16 +54,13 @@ Expose `POST /buildings/:id/simulations` that maps the domain `Building` to the 
 
 # Architecture
 
-```
-Web "Run simulation" ──► POST /buildings/:id/simulations ──► RunSimulationUseCase
-                                                                    │  SimulationPort
-                                                                    ▼
-                                              packages/open3cl-adapter (only engine importer)
-                                                                    │  maps Building → engine XML/JSON
-                                                                    ▼
-                                              Open3CL engine (pinned) ──► SimulationResult (domain)
-                                                                    │
-                                              SimulationRepository port ──► Postgres adapter (+ cache by input hash)
+```mermaid
+flowchart TB
+    web["Web 'Run simulation'"] -->|"POST /buildings/:id/simulations"| uc["RunSimulationUseCase"]
+    uc -->|"SimulationPort"| adapter["packages/open3cl-adapter (only engine importer)"]
+    adapter -->|"maps Building to engine XML/JSON"| engine["Open3CL engine (pinned)"]
+    engine --> result["SimulationResult (domain)"]
+    result -->|"SimulationRepository port"| repo[("Postgres adapter + cache by input hash")]
 ```
 
 `Building → Open3CL Adapter → Open3CL → SimulationResult` remains the only calculation flow (ADR-0001).

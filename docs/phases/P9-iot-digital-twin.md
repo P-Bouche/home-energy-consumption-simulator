@@ -4,7 +4,6 @@
 | --- | --- |
 | Phase | P9 — IoT Digital Twin |
 | Status | Planned |
-| Estimated duration | 12–18 weeks |
 | Team | 2 backend engineers, 1 IoT engineer, 1 legal/privacy reviewer |
 | Depends on | P2 exit (SimulationResult v1) as the reference; benefits from P8 |
 | Blocks | none — extends the twin with live data |
@@ -56,17 +55,16 @@ Ingest energy telemetry from connected devices (smart meters, sub-metering plugs
 
 # Architecture
 
-```
-IoT device ──MQTT/TLS──► Broker ──► IngestionService (NestJS) ──► ValidateMeasurementUseCase
-                                                                        │
-HTTP webhook ─────────────► POST /telemetry ──────────────────────────┤
-                                                                        ▼
-                                              Measurement aggregate (domain) ──► MeasurementRepository ──► Postgres (time-series)
-                                                                        │
-                                                                        ▼
-                                              CompareMeasuredVsSimulatedUseCase (domain, uses SimulationResult)
-                                                                        │
-                                              Web dashboard (live chart, deviation badge, alerts)
+```mermaid
+flowchart TB
+    device["IoT device"] -->|"MQTT/TLS"| broker["Broker"]
+    broker --> ing["IngestionService (NestJS)"]
+    hook["HTTP webhook: POST /telemetry"] --> ing
+    ing --> uc["ValidateMeasurementUseCase"]
+    uc --> m["Measurement aggregate (domain)"]
+    m --> repo[("MeasurementRepository → Postgres (time-series)")]
+    m --> cmp["CompareMeasuredVsSimulatedUseCase (domain, uses SimulationResult)"]
+    cmp --> dash["Web dashboard (live chart, deviation badge, alerts)"]
 ```
 
 # Domain Model Impact

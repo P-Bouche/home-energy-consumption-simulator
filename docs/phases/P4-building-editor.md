@@ -4,7 +4,6 @@
 | --- | --- |
 | Phase | P4 — Building Editor |
 | Status | Planned |
-| Estimated duration | 10–14 weeks |
 | Team | 2 full-stack engineers, 1 domain expert |
 | Depends on | P1 (buildings), P2 (re-simulation), P3 (selectable 3D elements) |
 | Blocks | P5 (scenarios are sets of edits) |
@@ -54,16 +53,13 @@ Provide a building editor (2D panel + 3D picking) where every modification is a 
 
 # Architecture
 
-```
-Editor UI (MUI form / 3D picking) ──► Zustand ──► EditBuildingUseCase (application)
-                                                        │  commands + invariants
-                                                        ▼
-                                              Building aggregate (domain, versioned)
-                                                        │
-                              BuildingRepository (optimistic lock) + AuditLog port ──► Postgres
-                                                        │
-                                                        ▼
-                                              BuildingUpdated event → triggers RunSimulationUseCase (P2)
+```mermaid
+flowchart TB
+    ui["Editor UI (MUI form / 3D picking)"] --> store["Zustand"]
+    store --> uc["EditBuildingUseCase (application) — commands + invariants"]
+    uc --> agg["Building aggregate (domain, versioned)"]
+    agg --> repo[("BuildingRepository (optimistic lock) + AuditLog port → Postgres")]
+    agg -->|"BuildingUpdated event"| sim["RunSimulationUseCase (P2)"]
 ```
 
 # Domain Model Impact

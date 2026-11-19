@@ -4,7 +4,6 @@
 | --- | --- |
 | Phase | P1 — DPE XML Import |
 | Status | Planned |
-| Estimated duration | 8–10 weeks |
 | Team | 2 backend engineers, 1 frontend engineer, 1 domain expert (DPE) |
 | Depends on | P0 exit criteria (scaffolding, ADR-0001, frozen fixture corpus, green CI) |
 | Blocks | P2, P3, P4 and everything downstream |
@@ -59,19 +58,13 @@ Allow a user to upload a DPE XML file and obtain a persisted, validated `Buildin
 
 # Architecture
 
-```
-Web upload page ──► POST /imports/dpe ──► NestJS controller (thin)
-                                              │
-                                              ▼
-                              ImportDpeXmlUseCase (application)
-                                              │  uses ImportParserPort
-                                              ▼
-                              packages/dpe-xml-importer (adapter, pure core)
-                                              │  builds
-                                              ▼
-                              Building aggregate (domain) ── BuildingImported event
-                                              │
-                              BuildingRepository port ──► Postgres/PostGIS adapter
+```mermaid
+flowchart TB
+    web["Web upload page"] -->|"POST /imports/dpe"| ctrl["NestJS controller (thin)"]
+    ctrl --> uc["ImportDpeXmlUseCase (application)"]
+    uc -->|"uses ImportParserPort"| imp["packages/dpe-xml-importer (adapter, pure core)"]
+    imp -->|"builds"| b["Building aggregate (domain) — emits BuildingImported"]
+    b -->|"BuildingRepository port"| db[("Postgres / PostGIS adapter")]
 ```
 
 The importer never imports NestJS or ORM code; the domain never imports the XML library.
@@ -97,7 +90,7 @@ The importer never imports NestJS or ORM code; the domain never imports the XML 
 
 **Must be completed before this phase starts (P0 exit):** scaffolding on `main` with green CI; ADR-0001 Accepted; `SimulationPort` frozen; fixture corpus checked in; benchmark harness reusable.
 
-**External:** DPE schema references for each supported diagnostic year; anonymized real DPE fixtures (legal/privacy review for any non-public file).
+**External:** DPE schema references for each supported diagnostic year; real DPE fixtures, including the ADEME-published XML and DPE report provided by the project owner (legal/privacy review for any non-public file before check-in).
 
 # Test Plan
 

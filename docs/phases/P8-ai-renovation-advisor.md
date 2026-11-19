@@ -4,7 +4,6 @@
 | --- | --- |
 | Phase | P8 — AI Renovation Advisor |
 | Status | Planned |
-| Estimated duration | 10–14 weeks |
 | Team | 2 backend engineers, 1 ML engineer, 1 legal/privacy reviewer |
 | Depends on | P2 exit (SimulationResult v1), P5 exit (ScenarioComparison frozen) |
 | Blocks | none — value-added layer on top of simulation |
@@ -54,18 +53,15 @@ Generate renovation action recommendations that are each backed by a computed `S
 
 # Architecture
 
-```
-Web "Recommendations" panel ──► GenerateRecommendationsUseCase (application)
-                                      │  1. build candidate scenarios from action catalog (domain)
-                                      │  2. simulate each via SimulationPort (P2, cached)
-                                      │  3. compare via ComparisonService (P5)
-                                      ▼
-                          RankingService (domain, pure) ──► ranked Recommendation[] (with backing IDs)
-                                      │  explanation text
-                                      ▼
-                          ExplanationPort ──► LLM adapter (anonymized numbers only, consent-gated)
-                                      │
-                          RecommendationRepository ──► Postgres (schema v5)
+```mermaid
+flowchart TB
+    web["Web 'Recommendations' panel"] --> uc["GenerateRecommendationsUseCase (application)"]
+    uc -->|"1. build candidate scenarios from action catalog"| dom["domain"]
+    uc -->|"2. simulate each via SimulationPort (P2, cached)"| sim["SimulationPort"]
+    uc -->|"3. compare via ComparisonService (P5)"| cmp["ComparisonService"]
+    uc --> rank["RankingService (domain, pure) → ranked Recommendation[] with backing IDs"]
+    rank --> expl["ExplanationPort → LLM adapter (anonymized numbers only, consent-gated)"]
+    rank --> repo[("RecommendationRepository → Postgres (schema v5)")]
 ```
 
 Open3CL remains the only source of impact numbers (ADR-0001); the LLM never computes energy figures.

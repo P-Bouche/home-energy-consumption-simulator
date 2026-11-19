@@ -4,7 +4,6 @@
 | --- | --- |
 | Phase | P3 — 3D Reconstruction |
 | Status | Planned |
-| Estimated duration | 10–14 weeks |
 | Team | 2 frontend engineers (R3F/Three.js), 1 backend engineer |
 | Depends on | P1 exit criteria (buildings importable). Runs in parallel with P2 |
 | Blocks | P4 (editor needs selectable 3D elements), P10 |
@@ -53,16 +52,13 @@ Render any imported building in 3D (walls, roof, floors, windows, doors, rooms) 
 
 # Architecture
 
-```
-Web 3D viewer (R3F) ◄── Zustand store ◄── ReconstructBuildingUseCase (application)
-                                                  │
-                                                  ▼
-                              ReconstructionService (domain) + GeometryPort
-                                                  │
-                                                  ▼
-                              packages/geometry (adapter: domain → mesh buffers)
-                                                  │
-                              BuildingRepository (Postgres)
+```mermaid
+flowchart LR
+    viewer["Web 3D viewer (R3F)"] <--> store["Zustand store"]
+    store <--> uc["ReconstructBuildingUseCase (application)"]
+    uc --> svc["ReconstructionService (domain) + GeometryPort"]
+    svc --> geo["packages/geometry (adapter: domain to mesh buffers)"]
+    uc --> repo[("BuildingRepository (Postgres)")]
 ```
 
 Heat-loss overlay data comes from `SimulationResult` (read-only projection); P3 does not calculate anything — Open3CL does (ADR-0001).

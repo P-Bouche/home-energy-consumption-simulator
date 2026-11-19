@@ -4,7 +4,6 @@
 | --- | --- |
 | Phase | P10 — Photogrammetry / LiDAR |
 | Status | Planned |
-| Estimated duration | 16–24 weeks |
 | Team | 1 computer-vision engineer, 2 backend engineers, 1 3D specialist |
 | Depends on | P3 exit (3D pipeline + coordinate system), P6/P7 merge-by-confidence contract; P9 optional (live twin) |
 | Blocks | none — final enrichment phase of the current roadmap |
@@ -55,18 +54,13 @@ Accept a point cloud (E57/PLY/LAS) or photogrammetry mesh (OBJ/GLTF), segment wa
 
 # Architecture
 
-```
-Web upload + alignment UI ──► POST /imports/capture ──► ImportCaptureUseCase
-                                                              │  CaptureParserPort
-                                                              ▼
-                              packages/pointcloud-importer (pure core: cloud → planes/openings)
-                                                              │  segment + align (ICP vs P3 geometry)
-                                                              ▼
-                              domain candidates (Wall/Roof/…) with Confidence(source=lidar/photogrammetry)
-                                                              │
-                              Building.mergeGeometry (frozen P6/P7 contract) ──► versioned, audited update
-                                                              │
-                              BuildingUpdated → RunSimulationUseCase (P2) → new SimulationResult + deltas
+```mermaid
+flowchart TB
+    web["Web upload + alignment UI"] -->|"POST /imports/capture"| uc["ImportCaptureUseCase"]
+    uc -->|"CaptureParserPort"| imp["packages/pointcloud-importer (pure core: cloud → planes/openings)"]
+    imp -->|"segment + align (ICP vs P3 geometry)"| cand["domain candidates (Wall/Roof/…) with Confidence(source=lidar/photogrammetry)"]
+    cand --> merge["Building.mergeGeometry (frozen P6/P7 contract) → versioned, audited update"]
+    merge -->|"BuildingUpdated"| sim["RunSimulationUseCase (P2) → new SimulationResult + deltas"]
 ```
 
 # Domain Model Impact
