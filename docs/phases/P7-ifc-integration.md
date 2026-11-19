@@ -4,7 +4,6 @@
 | --- | --- |
 | Phase | P7 — IFC Integration |
 | Status | Planned |
-| Estimated duration | 12–16 weeks |
 | Team | 2 backend engineers, 1 BIM specialist |
 | Depends on | P1 exit; benefits from P6 merge path (geometry confidence) |
 | Blocks | P10 alignment quality |
@@ -53,16 +52,12 @@ Parse an IFC file (IFC2x3/IFC4), map its building elements to the domain model w
 
 # Architecture
 
-```
-Web upload ──► POST /imports/ifc ──► ImportIfcUseCase
-                                        │  IfcParserPort
-                                        ▼
-                    packages/ifc-importer (pure core: IFC → RawIfcModel → domain candidates)
-                                        │  data-driven mapping config
-                                        ▼
-                    domain entities (Building/Zone/Room/Wall/…) with Confidence(source="ifc")
-                                        │
-                    BuildingRepository ──► Postgres; report v3 persisted
+```mermaid
+flowchart TB
+    web["Web upload"] -->|"POST /imports/ifc"| uc["ImportIfcUseCase"]
+    uc -->|"IfcParserPort"| imp["packages/ifc-importer (pure core: IFC → RawIfcModel → domain candidates)"]
+    imp -->|"data-driven mapping config"| ent["domain entities (Building/Zone/Room/Wall/…) with Confidence(source='ifc')"]
+    ent --> repo[("BuildingRepository → Postgres; report v3 persisted")]
 ```
 
 # Domain Model Impact

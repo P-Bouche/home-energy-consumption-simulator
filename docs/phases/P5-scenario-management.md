@@ -4,7 +4,6 @@
 | --- | --- |
 | Phase | P5 — Scenario Management |
 | Status | Planned |
-| Estimated duration | 8–12 weeks |
 | Team | 2 full-stack engineers, 1 product owner |
 | Depends on | P2 exit (SimulationResult v1), P4 exit (editable, versioned Building) |
 | Blocks | P8 (AI advisor ranks scenarios) |
@@ -54,14 +53,14 @@ Let a user create scenarios ("Insulate walls", "Replace boiler + windows", …),
 
 # Architecture
 
-```
-Web comparison UI ──► CompareScenariosUseCase (application)
-                            │  reads ScenarioRepository + SimulationRepository
-                            ▼
-              Scenario aggregate (domain) ── applies P4 commands to a Building copy (pure)
-                            │  simulate via SimulationPort (P2 adapter, cached)
-                            ▼
-              ScenarioComparison (domain value object) ──► JSON API ──► UI table
+```mermaid
+flowchart TB
+    ui["Web comparison UI"] --> uc["CompareScenariosUseCase (application)"]
+    uc --> repos["ScenarioRepository + SimulationRepository"]
+    agg["Scenario aggregate (domain) — applies P4 commands to a Building copy (pure)"] -->|"simulate via SimulationPort (P2 adapter, cached)"| adapter["open3cl-adapter"]
+    uc --> agg
+    uc --> cmp["ScenarioComparison (domain value object)"]
+    cmp --> api["JSON API"] --> table["UI comparison table"]
 ```
 
 # Domain Model Impact

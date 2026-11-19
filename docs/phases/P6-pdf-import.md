@@ -4,7 +4,6 @@
 | --- | --- |
 | Phase | P6 — PDF Import |
 | Status | Planned |
-| Estimated duration | 10–14 weeks |
 | Team | 2 backend engineers, 1 computer-vision engineer |
 | Depends on | P1 exit (domain model, confidence metadata, import report pattern) |
 | Blocks | P10 (PDF plans complement photogrammetry) |
@@ -53,16 +52,13 @@ Extract room/wall/opening geometry from a PDF floorplan, let the user calibrate 
 
 # Architecture
 
-```
-Web upload + calibration UI ──► POST /imports/pdf ──► ImportPdfUseCase
-                                                          │  PdfParserPort
-                                                          ▼
-                                packages/pdf-floorplan-importer (pure core: PDF → RawGeometry)
-                                                          │  detection heuristics
-                                                          ▼
-                                Wall/Room/Opening candidates (domain) ──► merge into Building
-                                                          │
-                                BuildingRepository ──► Postgres (+ report v2 persisted)
+```mermaid
+flowchart TB
+    web["Web upload + calibration UI"] -->|"POST /imports/pdf"| uc["ImportPdfUseCase"]
+    uc -->|"PdfParserPort"| imp["packages/pdf-floorplan-importer (pure core: PDF → RawGeometry)"]
+    imp -->|"detection heuristics"| cand["Wall/Room/Opening candidates (domain)"]
+    cand -->|"merge into Building"| b["Building"]
+    b --> repo[("BuildingRepository → Postgres + report v2 persisted")]
 ```
 
 # Domain Model Impact

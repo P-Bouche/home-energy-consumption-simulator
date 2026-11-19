@@ -4,7 +4,6 @@
 | --- | --- |
 | Phase | P0 — Open3CL Feasibility |
 | Status | Planned |
-| Estimated duration | 4–6 weeks |
 | Team | 1 backend engineer, 1 software architect (part-time) |
 | Depends on | Nothing — this is the entry phase |
 | Blocks | P1 and, transitively, the entire roadmap |
@@ -58,16 +57,12 @@ Prove, with executable evidence, that:
 
 # Architecture
 
-```
-CLI spike (apps/cli-spike, temporary)
-        │  uses
-        ▼
-packages/application ── SimulationPort (interface)
-        ▲
-        │  implements
-packages/open3cl-adapter ──► Open3CL engine (npm, pinned)
-        │
-packages/domain ── SimulationResult (value object, framework-free)
+```mermaid
+flowchart TB
+    cli["CLI spike (apps/cli-spike, temporary)"] -->|"uses"| app["packages/application — SimulationPort (interface)"]
+    adapter["packages/open3cl-adapter"] -->|"implements"| app
+    adapter -->|"calls pinned engine"| engine["Open3CL engine (npm, pinned)"]
+    adapter --> domain["packages/domain — SimulationResult (value object, framework-free)"]
 ```
 
 The adapter maps an engine-native DPE document to `SimulationResult`. No domain `Building` model yet — that is P1's job; P0 only proves the engine boundary.
@@ -88,7 +83,7 @@ The adapter maps an engine-native DPE document to `SimulationResult`. No domain 
 
 # Dependencies
 
-**Must be completed before this phase starts:** nothing — entry phase. External prerequisites: Node.js LTS, pnpm/npm, access to the Open3CL engine package and its public DPE test corpus.
+**Must be completed before this phase starts:** nothing — entry phase. External prerequisites: Node.js LTS, pnpm/npm, access to the Open3CL engine package and its public DPE test corpus. Fixture supply: the project owner provides an actual DPE XML and the other files published by ADEME (including the DPE report); they join the corpus after privacy/anonymization review.
 
 # Test Plan
 
@@ -131,7 +126,7 @@ All AC-P0-01…04 pass on `main`, the benchmark report is published, and ADR-000
 2. Benchmark report approved; p95 < 3 s demonstrated.
 3. ADR-0001 Accepted.
 4. `SimulationPort` interface frozen (later phases extend, never break, it).
-5. Fixture corpus checked in under `packages/open3cl-adapter/test/fixtures/`.
+5. Fixture corpus checked in under `packages/open3cl-adapter/test/fixtures/` — the engine's test corpus plus the owner-provided ADEME DPE XML and DPE report.
 
 # Branch Name
 
