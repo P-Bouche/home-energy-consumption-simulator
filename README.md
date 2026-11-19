@@ -1,85 +1,55 @@
 # Home Energy Consumption Simulator
 
-An open-source **residential Digital Energy Twin** built on the Open3CL (3CL-DPE) calculation engine. It imports French DPE XML diagnostics, reconstructs the building in 3D, runs regulatory energy simulations, and compares renovation scenarios — with Open3CL as the single source of truth for every energy calculation.
+An open-source **residential Digital Energy Twin** platform based on the **Open3CL** (3CL-DPE) calculation engine. Starting from a French DPE XML diagnostic, it reconstructs the building, renders it in 3D, runs regulatory energy simulations, and compares renovation scenarios.
 
-# Project Overview
+## Project Overview
 
-Home Energy Consumption Simulator turns a French **DPE (Diagnostic de Performance Énergétique)** XML file into an editable, simulable 3D model of a dwelling. From that single import, the application progressively reconstructs the building, runs Open3CL simulations, and lets users compare renovation scenarios to quantify energy and emissions savings.
+Home Energy Consumption Simulator turns a French **DPE (Diagnostic de Performance Énergétique)** file into an editable, simulable 3D model of a dwelling. The central domain entity is the **Building**; every feature extends or interacts with it. Open3CL is the single source of truth for all energy calculations: `Building → Open3CL Adapter → Open3CL → SimulationResult`.
 
-The central domain entity is the **Building**; every feature extends or interacts with this model.
+## Strategic Vision
 
-# Vision
+- Make regulatory-grade energy simulation **accessible, transparent, and actionable** for homeowners and professionals.
+- Never present inferred data as certain: every inferred value carries `value`, `source`, `confidence`, and `importDate`.
+- Grow from a single diagnostic import toward a **living digital twin** connected to real consumption data (IoT) and 3D capture (photogrammetry/LiDAR).
 
-- Make regulatory-grade energy simulation **accessible and transparent**: anyone with a DPE file can understand and act on their home's energy performance.
-- Keep **Open3CL as the only calculation engine**. No alternative energy model is ever introduced — the application adapts data *to* Open3CL, never the reverse.
-- Never present inferred data as certain. Real DPE files are often incomplete, so every inferred value carries its **value, source, confidence score, and import date**.
-- Grow from a single diagnostic import toward a living digital twin connected to real-world data (IoT).
+## Project Goals
 
-# Key Features
+1. Import French DPE XML files in under 1 second with full confidence metadata.
+2. Reconstruct and visualize the building in 3D in under 2 seconds.
+3. Run Open3CL simulations in under 3 seconds and compare renovation scenarios in under 1 second.
+4. Support PDF floorplan and IFC/OpenBIM imports alongside DPE XML.
+5. Provide AI-assisted renovation recommendations grounded in simulation deltas.
 
-Progressively delivered capabilities:
+## Planned Features
 
-- [ ] French DPE XML import
-- [ ] Building reconstruction from DPE data
-- [ ] 3D visualization of the building and its heat losses
-- [ ] Building editing (walls, roofs, floors, windows, doors, systems)
-- [ ] Energy simulation through Open3CL
-- [ ] Renovation scenario comparison
-- [ ] PDF floorplan import
-- [ ] IFC / OpenBIM import
-- [ ] AI-assisted renovation recommendations
-- [ ] IoT integration (future)
+- French DPE XML import
+- Building reconstruction
+- Open3CL energy simulation
+- Renovation scenario comparison
+- 3D visualization (React Three Fiber / Three.js)
+- Building editing
+- PDF floorplan import
+- IFC/OpenBIM integration
+- AI-assisted renovation recommendations
+- IoT integration (future)
+- Photogrammetry and LiDAR support (future)
 
-# Architecture Overview
+## Architecture Summary
 
-The codebase follows **Clean Architecture**, **Hexagonal Architecture**, and **Domain-Driven Design**, with **SOLID** principles and **dependency injection** throughout. Business logic never lives in the UI, domain models are framework-free, and there are no circular dependencies or god classes.
+Clean Architecture + Hexagonal Architecture + DDD + SOLID + dependency injection. Dependencies point inward: `domain` (framework-free `Building` model) ← `application` (use cases, ports) ← `infrastructure` (NestJS API, importers, Open3CL adapter, PostgreSQL/PostGIS) and `presentation` (React UI). Business logic never lives in the UI; the Open3CL engine is reached only through the `open3cl-adapter` package. See [docs/architecture.md](docs/architecture.md) and [ADR-0001](docs/decisions/ADR-0001-open3cl-as-core-engine.md).
 
-Layered structure:
-
-- **Domain (core):** entities and value objects — `Building`, `Zone`, `Room`, `Wall`, `Roof`, `Floor`, `Window`, `Door`, `ThermalZone`, `HeatingSystem`, `VentilationSystem`, `PhotovoltaicSystem`, `Scenario`, `SimulationResult`.
-- **Application:** use cases orchestrating the domain (import DPE, reconstruct building, run simulation, compare scenarios).
-- **Infrastructure (adapters):** DPE XML importer, PDF floorplan importer, IFC importer, PostgreSQL/PostGIS persistence, and the **Open3CL adapter**.
-- **Presentation:** React web application.
-
-Simulation data flow — Open3CL is the single source of truth:
-
-```
-Building → Open3CL Adapter → Open3CL → SimulationResult
-```
-
-**Data confidence rule:** any value not present in the source file is inferred and stored as `{ value, source, confidence, importDate }`, and is always presented as inferred, never as measured fact.
-
-# Technology Stack
+## Technology Stack
 
 | Layer | Technology |
 | --- | --- |
 | Frontend | React, TypeScript, Vite, React Three Fiber, Three.js, Zustand, Material UI |
 | Backend | Node.js, TypeScript, NestJS |
 | Database | PostgreSQL, PostGIS |
-| Simulation | Open3CL (3CL-DPE engine) |
+| Simulation engine | Open3CL (3CL-DPE) |
 | Infrastructure | Docker, Docker Compose |
 | Testing | Vitest, Jest, Playwright |
 
-# Project Roadmap
-
-1. **Foundation** — project scaffolding, domain core, French DPE XML import, Open3CL adapter and first simulation.
-2. **Reconstruction & 3D** — building reconstruction and 3D visualization; interactive building editing.
-3. **Scenarios** — renovation scenario modeling and side-by-side comparison.
-4. **Import breadth** — PDF floorplan import, then IFC / OpenBIM import.
-5. **Intelligence & connectivity** — AI-assisted renovation recommendations, then IoT integration.
-
-Performance targets:
-
-| Operation | Target |
-| --- | --- |
-| DPE import | < 1 s |
-| Open3CL simulation | < 3 s |
-| 3D reconstruction | < 2 s |
-| Scenario comparison | < 1 s |
-
-# Repository Structure
-
-Planned monorepo layout:
+## Repository Structure
 
 ```
 home-energy-consumption-simulator/
@@ -88,7 +58,7 @@ home-energy-consumption-simulator/
 │   └── api/                      # NestJS backend (REST API, import pipeline)
 ├── packages/
 │   ├── domain/                   # Framework-free DDD core (Building and entities)
-│   ├── application/              # Use cases
+│   ├── application/              # Use cases and ports
 │   ├── open3cl-adapter/          # The only bridge to the Open3CL engine
 │   ├── dpe-xml-importer/         # French DPE XML parsing
 │   ├── pdf-floorplan-importer/   # PDF floorplan extraction
@@ -96,81 +66,32 @@ home-energy-consumption-simulator/
 ├── infrastructure/
 │   ├── postgres/                 # PostGIS schema and migrations
 │   └── docker/                   # Docker Compose stack
-├── docs/                         # ADRs, domain model, API reference
-└── tests/
-    └── e2e/                      # Playwright end-to-end tests
+├── docs/                         # Architecture, roadmap, ADRs
+│   ├── architecture.md
+│   ├── roadmap.md
+│   └── decisions/
+├── tests/e2e/                    # Playwright end-to-end tests
+├── AGENTS.md                     # Rules for AI agents and contributors
+└── README.md
 ```
 
-# Development Workflow
+## Branching Strategy
 
-Every feature follows the same process, before any code is written:
+- `main` is the protected default branch; it only receives reviewed, CI-green pull requests.
+- Work on short-lived branches: `feature/<scope>-<slug>` for product work, `vibe/<slug>-<id>` for agent-driven tasks.
+- Conventional Commits (`feat:`, `fix:`, `docs:`, ...). No direct pushes or force-pushes to `main`.
 
-1. Restate the objective.
-2. Analyze requirements.
-3. Identify risks.
-4. Propose architecture.
-5. Define tests.
-6. Implement.
-7. Validate results.
+## Development Workflow
 
-Quality gates for all contributions:
+Every feature follows: (1) restate objective, (2) analyze requirements, (3) identify risks, (4) propose architecture, (5) define tests, (6) implement, (7) validate. Quality gates: TypeScript strict mode, no unjustified `any`, JSDoc on public APIs, minimum 80% test coverage (Vitest/Jest/Playwright). See [AGENTS.md](AGENTS.md) for the full rules.
 
-- TypeScript **strict mode**; no `any` unless justified.
-- **Minimum 80 % test coverage** (Vitest/Jest unit + integration, Playwright e2e).
-- JSDoc on all public APIs; thorough error handling.
-- Modular code following the architecture rules above.
+## Roadmap Summary
 
-# Branching Strategy
+P0 Open3CL feasibility → P1 DPE XML import → P2 energy simulation → P3 3D reconstruction → P4 building editor → P5 scenario management → P6 PDF import → P7 IFC integration → P8 AI advisor → P9 IoT digital twin → P10 photogrammetry/LiDAR. Full detail in [docs/roadmap.md](docs/roadmap.md).
 
-- `main` is the protected default branch and only receives reviewed, CI-green pull requests.
-- Work happens on short-lived branches: `feature/<scope>-<short-description>` for product work, `vibe/<slug>-<id>` for agent-driven tasks.
-- Commits follow **Conventional Commits** (e.g. `feat:`, `fix:`, `docs:`).
-- Every change goes through a pull request with a filled-in description; lint, typecheck, and tests must pass before merge.
-- No direct pushes or force-pushes to `main`.
+## Documentation
 
-# Getting Started
-
-> The repository is at the bootstrap stage: the architecture and this README are in place, and the application scaffolding is the next milestone. The commands below describe the target workflow once scaffolding lands.
-
-Prerequisites: Node.js (LTS), npm, Docker and Docker Compose.
-
-```bash
-# Clone the repository
-git clone https://github.com/P-Bouche/home-energy-consumption-simulator.git
-cd home-energy-consumption-simulator
-
-# Start the database (PostgreSQL + PostGIS)
-docker compose up -d
-
-# Install dependencies and start the stack
-npm install
-npm run dev        # API (NestJS) + web app (Vite)
-
-# Run the test suites
-npm test           # Vitest / Jest
-npm run test:e2e   # Playwright
-```
-
-# Documentation
-
-- `docs/` — Architecture Decision Records (ADRs), the domain model reference, the Open3CL integration guide, DPE XML field mapping, and the generated API reference.
-- This README is the entry point; each package documents its public API with JSDoc.
-- Assumptions and confidence levels for inferred building data are documented alongside the import pipeline.
-
-# Current Status
-
-**Bootstrap phase.** The repository is initialized on `main` with the architecture, domain model, and quality requirements defined in this document. The next milestones are:
-
-1. Application scaffolding (web app, API, packages, Docker Compose stack).
-2. Domain core (`Building` and related entities).
-3. French DPE XML import.
-4. Open3CL adapter and first end-to-end simulation.
-
-# Future Improvements
-
-- IoT integration: connect real consumption telemetry to the digital twin.
-- Portfolio view across multiple buildings.
-- Export of simulation results and reports (PDF) and of the model (IFC).
-- Internationalization (French / English) and accessibility hardening.
-- Offline-capable progressive web app for on-site diagnostics.
-- Continuous performance monitoring against the targets above.
+- [AGENTS.md](AGENTS.md) — project context, architecture rules, coding standards, workflow, testing, expected response format
+- [docs/architecture.md](docs/architecture.md) — principles, system context, bounded contexts, Open3CL integration strategy
+- [docs/roadmap.md](docs/roadmap.md) — phases P0–P10 with deliverables, risks, and success criteria
+- [docs/decisions/ADR-0001-open3cl-as-core-engine.md](docs/decisions/ADR-0001-open3cl-as-core-engine.md) — Open3CL as the core engine
