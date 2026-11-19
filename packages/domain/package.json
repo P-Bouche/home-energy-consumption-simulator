@@ -1,0 +1,11 @@
+{
+  "name": "@hes/domain",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Framework-free domain core (DDD): SimulationResult value object and domain errors",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "types": "./src/index.ts"
+}
