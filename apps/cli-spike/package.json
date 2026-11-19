@@ -1,0 +1,16 @@
+{
+  "name": "@hes/cli-spike",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "P0 CLI spike: node . simulate <file.xml> prints the Open3CL simulation result as JSON",
+  "main": "./src/cli.ts",
+  "bin": {
+    "hes-simulate": "./src/cli.ts"
+  },
+  "dependencies": {
+    "@hes/application": "0.1.0",
+    "@hes/domain": "0.1.0",
+    "@hes/open3cl-adapter": "0.1.0"
+  }
+}
