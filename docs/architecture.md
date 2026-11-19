@@ -9,41 +9,29 @@
 
 ## 2. System Context
 
-```
-┌──────────────┐  DPE XML / PDF plan / IFC   ┌─────────────────────────────┐
-│              │ ──────────────────────────► │                             │
-│    User      │                             │   Home Energy Consumption   │────┐
-│  (browser)   │ ◄────────────────────────── │   Simulator                 │    │
-│              │  3D view, results, scenarios│  ┌──────────┐  ┌──────────┐ │    │
-└──────────────┘                             │  │ Web (UI) │  │ API      │ │    │
-                                             │  │ React    │  │ NestJS   │ │    │
-                                             │  └────┬─────┘  └────┬─────┘ │    │
-                                             │       └──────┬──────┘       │    │
-                                             │              ▼                │    │
-                                             │     Application layer       │    │
-                                             │     (use cases, ports)      │    │
-                                             │              │              │    │
-                                             └──────────────┼──────────────┘    │
-                                                            ▼                │
-                                              ┌──────────────────────┐     │
-                                              │  Domain (Building…)  │     │
-                                              └──────────┬───────────┘     │
-                                                         │ SimulationPort  │
-                                                         ▼                 │
-                                              ┌──────────────────────┐     │
-                                              │  Open3CL Adapter     │─────┘
-                                              └──────────┬───────────┘
-                                                         │
-                                                         ▼
-                                              ┌──────────────────────┐
-                                              │  Open3CL engine      │
-                                              │  (3CL-DPE)           │
-                                              └──────────────────────┘
-                                                            ▲
-                                              ┌─────────────┴─────────────┐
-                                              │  PostgreSQL + PostGIS      │
-                                              │  (persistence, geo)        │
-                                              └────────────────────────────┘
+```mermaid
+flowchart LR
+    user["User (browser)"]
+
+    subgraph simulator["Home Energy Consumption Simulator"]
+        web["Web (React + Vite, R3F 3D)"]
+        api["API (NestJS)"]
+        app["Application layer<br/>(use cases, ports)"]
+        domain["Domain (Building…)"]
+        adapter["Open3CL Adapter"]
+    end
+
+    engine["Open3CL engine (3CL-DPE)"]
+    db[("PostgreSQL + PostGIS")]
+
+    user -->|"DPE XML / PDF plan / IFC upload"| web
+    web -->|"REST"| api
+    api --> app
+    app --> domain
+    domain -->|"SimulationPort"| adapter
+    adapter -->|"simulate"| engine
+    api -->|"persistence"| db
+    web -->|"3D view, results, scenarios"| user
 ```
 
 ## 3. Bounded Contexts
@@ -62,23 +50,14 @@
 
 Context map:
 
-```
- ┌───────────────┐   domain data    ┌──────────────────┐
- │ Diagnostic    │ ───────────────► │ Building Model   │◄────────┐
- │ Import        │                  │ (core)           │         │
- └───────────────┘                  └────────┬─────────┘         │
-                                             │                   │
-                              ┌──────────────┼──────────┐        │
-                              ▼              ▼          ▼        │
-                    ┌──────────────┐ ┌──────────────┐ ┌────────┴─────┐
-                    │ Simulation   │ │ Scenario     │ │ Visualization│
-                    │ (Open3CL)    │ │ Management   │ │ / Editing    │
-                    └──────┬───────┘ └──────────────┘ └──────────────┘
-                           │ SimulationResult
-                           ▼
-                    ┌──────────────┐     ┌──────────────┐
-                    │ AI Advisor   │     │ IoT Twin     │
-                    └──────────────┘     └──────────────┘
+```mermaid
+flowchart LR
+    import["Diagnostic Import<br/>(DPE XML / PDF / IFC)"] -->|"domain data"| building["Building Model (core)"]
+    building --> simulation["Simulation (Open3CL)"]
+    building --> scenarios["Scenario Management"]
+    building --> viz["Visualization / Editing"]
+    simulation -->|"SimulationResult"| advisor["AI Advisor"]
+    simulation --> iot["IoT Twin"]
 ```
 
 ## 4. Domain Architecture
@@ -101,7 +80,8 @@ Context map:
 - **Web:** React + Vite + React Three Fiber + Three.js for 3D; Zustand for state; Material UI for components. No business logic in components.
 - **Persistence:** PostgreSQL + PostGIS; schema and migrations versioned under `infrastructure/postgres`.
 - **Adapters:** `packages/dpe-xml-importer`, `packages/pdf-floorplan-importer`, `packages/ifc-importer`, `packages/open3cl-adapter`.
-- **Docker Compose** provides the full local stack: API, web, database.
+- **Docker Compose** provides the full stack (API, web, database) both locally and on a dedicated server — see [deployment](deployment.md).
+- **Deployment model:** self-hosted via Docker Compose; the Open3CL engine runs embedded, so no external simulation service is required.
 
 ## 7. Open3CL Integration Strategy
 

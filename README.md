@@ -85,6 +85,15 @@ home-energy-consumption-simulator/
 
 Every feature follows: (1) restate objective, (2) analyze requirements, (3) identify risks, (4) propose architecture, (5) define tests, (6) implement, (7) validate. Quality gates: TypeScript strict mode, no unjustified `any`, JSDoc on public APIs, minimum 80% test coverage (Vitest/Jest/Playwright). See [AGENTS.md](AGENTS.md) for the full rules.
 
+## Deployment
+
+The platform is **self-hostable with Docker / Docker Compose** — the Open3CL engine runs embedded in the API, so no external simulation service is needed.
+
+- **Local development:** `docker compose -f infrastructure/docker/docker-compose.yml up -d` starts PostgreSQL/PostGIS, the NestJS API, and the web app.
+- **Dedicated server / VPS:** clone the repo on the server, fill `.env` (DB credentials, public URL, ports), then run the same compose stack with the `docker-compose.prod.yml` override behind a reverse proxy with TLS. Postgres stays bound to localhost; backups via scheduled `pg_dump` of the `postgres_data` volume.
+
+Full guide: [docs/deployment.md](docs/deployment.md).
+
 ## Roadmap Summary
 
 P0 Open3CL feasibility → P1 DPE XML import → P2 energy simulation → P3 3D reconstruction → P4 building editor → P5 scenario management → P6 PDF import → P7 IFC integration → P8 AI advisor → P9 IoT digital twin → P10 photogrammetry/LiDAR. Full detail in [docs/roadmap.md](docs/roadmap.md).
@@ -93,5 +102,6 @@ P0 Open3CL feasibility → P1 DPE XML import → P2 energy simulation → P3 3D 
 
 - [AGENTS.md](AGENTS.md) — project context, architecture rules, coding standards, workflow, testing, expected response format
 - [docs/architecture.md](docs/architecture.md) — principles, system context, bounded contexts, Open3CL integration strategy
+- [docs/deployment.md](docs/deployment.md) — local and dedicated-server deployment with Docker Compose
 - [docs/roadmap.md](docs/roadmap.md) — phases P0–P10 with deliverables, risks, and success criteria
 - [docs/decisions/ADR-0001-open3cl-as-core-engine.md](docs/decisions/ADR-0001-open3cl-as-core-engine.md) — Open3CL as the core engine
