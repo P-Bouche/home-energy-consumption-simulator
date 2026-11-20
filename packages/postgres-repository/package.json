@@ -1,0 +1,19 @@
+{
+  "name": "@hes/postgres-repository",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Postgres adapter implementing the BuildingRepository port (pg, no ORM). Owns schema migrations under infrastructure/postgres.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "types": "./src/index.ts",
+  "dependencies": {
+    "@hes/application": "0.1.0",
+    "@hes/domain": "0.1.0",
+    "pg": "^8.23.1"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.23.1"
+  }
+}

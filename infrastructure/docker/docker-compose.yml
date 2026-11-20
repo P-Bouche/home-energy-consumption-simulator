@@ -1,0 +1,26 @@
+name: hes
+
+# P1 stack: PostgreSQL + PostGIS only. The API and web services join this
+# compose file in their own phases (apps/api, apps/web) with build contexts.
+# Postgres is bound to localhost only — never expose it publicly.
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: hes-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-hecs}
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
