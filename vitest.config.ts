@@ -5,13 +5,16 @@ const resolve = (path: string): string => fileURLToPath(new URL(path, import.met
 
 export default defineConfig({
   resolve: {
-    alias: {
-      '@hes/domain': resolve('./packages/domain/src/index.ts'),
-      '@hes/application': resolve('./packages/application/src/index.ts'),
-      '@hes/open3cl-adapter': resolve('./packages/open3cl-adapter/src/index.ts'),
-      '@hes/dpe-xml-importer': resolve('./packages/dpe-xml-importer/src/index.ts'),
-      '@hes/postgres-repository': resolve('./packages/postgres-repository/src/index.ts')
-    }
+    alias: [
+      { find: '@hes/domain', replacement: resolve('./packages/domain/src/index.ts') },
+      { find: '@hes/application', replacement: resolve('./packages/application/src/index.ts') },
+      { find: '@hes/open3cl-adapter', replacement: resolve('./packages/open3cl-adapter/src/index.ts') },
+      { find: '@hes/dpe-xml-importer', replacement: resolve('./packages/dpe-xml-importer/src/index.ts') },
+      { find: '@hes/postgres-repository', replacement: resolve('./packages/postgres-repository/src/index.ts') },
+      // regex finds (before the '@hes/geometry' prefix match) so the subpath resolves to the three.js adapter
+      { find: /^@hes\/geometry\/three$/, replacement: resolve('./packages/geometry/src/three-adapter.ts') },
+      { find: /^@hes\/geometry$/, replacement: resolve('./packages/geometry/src/index.ts') }
+    ]
   },
   test: {
     include: ['packages/*/test/**/*.test.ts', 'apps/*/test/**/*.test.ts', 'tests/**/*.test.ts'],

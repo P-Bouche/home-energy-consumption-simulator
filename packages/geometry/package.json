@@ -1,0 +1,21 @@
+{
+  "name": "@hes/geometry",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "P3 geometry adapter: domain Geometry -> plain mesh buffers (pure core, no three.js) + GeometryPort adapter; the './three' subpath converts buffers to THREE.BufferGeometry (web only)",
+  "exports": {
+    ".": "./src/index.ts",
+    "./three": "./src/three-adapter.ts"
+  },
+  "types": "./src/index.ts",
+  "dependencies": {
+    "@hes/application": "0.1.0",
+    "@hes/domain": "0.1.0",
+    "three": "^0.187.0"
+  },
+  "devDependencies": {
+    "@hes/dpe-xml-importer": "0.1.0",
+    "@types/three": "^0.187.0"
+  }
+}
