@@ -1,2 +1,2 @@
 export { PostgresBuildingRepository } from './postgres-building-repository.ts';
-export { runMigrations } from './run-migrations.ts';
+export { MIGRATION_LOCK_ID, runMigrations } from './run-migrations.ts';
