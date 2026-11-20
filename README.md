@@ -1,150 +1,54 @@
 # Home Energy Consumption Simulator
 
-An open-source **residential Digital Energy Twin** platform based on the **Open3CL** (3CL-DPE) calculation engine. Starting from a French DPE XML diagnostic, it reconstructs the building, renders it in 3D, runs regulatory energy simulations, and compares renovation scenarios.
+An open-source **residential Digital Energy Twin** based on the **Open3CL** (3CL-DPE) engine: import a French DPE XML diagnostic, get an editable 3D model of the dwelling, run regulatory energy simulations, and compare renovation scenarios.
 
-## Project Overview
+**Status:** P0 (engine feasibility) and P1 (DPE XML import with confidence metadata) are done — see the [roadmap](docs/roadmap.md).
 
-Home Energy Consumption Simulator turns a French **DPE (Diagnostic de Performance Énergétique)** file into an editable, simulable 3D model of a dwelling. The central domain entity is the **Building**; every feature extends or interacts with it. Open3CL is the single source of truth for all energy calculations: `Building → Open3CL Adapter → Open3CL → SimulationResult`.
+## Quick start
 
-## Strategic Vision
-
-- Make regulatory-grade energy simulation **accessible, transparent, and actionable** for homeowners and professionals.
-- Never present inferred data as certain: every inferred value carries `value`, `source`, `confidence`, and `importDate`.
-- Grow from a single diagnostic import toward a **living digital twin** connected to real consumption data (IoT) and 3D capture (photogrammetry/LiDAR).
-
-## Project Goals
-
-1. Import French DPE XML files in under 1 second with full confidence metadata.
-2. Reconstruct and visualize the building in 3D in under 2 seconds.
-3. Run Open3CL simulations in under 3 seconds and compare renovation scenarios in under 1 second.
-4. Support PDF floorplan and IFC/OpenBIM imports alongside DPE XML.
-5. Provide AI-assisted renovation recommendations grounded in simulation deltas.
-
-## Planned Features
-
-- French DPE XML import
-- Building reconstruction
-- Open3CL energy simulation
-- Renovation scenario comparison
-- 3D visualization (React Three Fiber / Three.js)
-- Building editing
-- PDF floorplan import
-- IFC/OpenBIM integration
-- AI-assisted renovation recommendations
-- IoT integration (future)
-- Photogrammetry and LiDAR support (future)
-
-## Architecture Summary
-
-Clean Architecture + Hexagonal Architecture + DDD + SOLID + dependency injection. Dependencies point inward: `domain` (framework-free `Building` model) ← `application` (use cases, ports) ← `infrastructure` (NestJS API, importers, Open3CL adapter, PostgreSQL/PostGIS) and `presentation` (React UI). Business logic never lives in the UI; the Open3CL engine is reached only through the `open3cl-adapter` package. See [docs/architecture.md](docs/architecture.md) and [ADR-0001](docs/decisions/ADR-0001-open3cl-as-core-engine.md).
-
-## Technology Stack
-
-| Layer | Technology |
-| --- | --- |
-| Frontend | React, TypeScript, Vite, React Three Fiber, Three.js, Zustand, Material UI |
-| Backend | Node.js, TypeScript, NestJS |
-| Database | PostgreSQL, PostGIS |
-| Simulation engine | Open3CL (3CL-DPE) |
-| Infrastructure | Docker, Docker Compose |
-| Testing | Vitest, Jest, Playwright |
-
-## Repository Structure
-
-```
-home-energy-consumption-simulator/
-├── apps/
-│   ├── web/                      # React + Vite frontend (R3F 3D view, MUI)
-│   └── api/                      # NestJS backend (REST API, import pipeline)
-├── packages/
-│   ├── domain/                   # Framework-free DDD core (Building and entities)
-│   ├── application/              # Use cases and ports
-│   ├── open3cl-adapter/          # The only bridge to the Open3CL engine
-│   ├── dpe-xml-importer/         # French DPE XML parsing
-│   ├── pdf-floorplan-importer/   # PDF floorplan extraction
-│   └── ifc-importer/             # IFC / OpenBIM import
-├── infrastructure/
-│   ├── postgres/                 # PostGIS schema and migrations
-│   └── docker/                   # Docker Compose stack
-├── docs/                         # Architecture, roadmap, ADRs
-│   ├── architecture.md
-│   ├── roadmap.md
-│   └── decisions/
-├── tests/e2e/                    # Playwright end-to-end tests
-├── AGENTS.md                     # Rules for AI agents and contributors
-└── README.md
-```
-
-## Branching Strategy
-
-- `main` is the protected default branch; it only receives reviewed, CI-green pull requests.
-- Work on short-lived branches: `feature/<scope>-<slug>` for product work, `vibe/<slug>-<id>` for agent-driven tasks.
-- Conventional Commits (`feat:`, `fix:`, `docs:`, ...). No direct pushes or force-pushes to `main`.
-
-## Development Workflow
-
-Every feature follows: (1) restate objective, (2) analyze requirements, (3) identify risks, (4) propose architecture, (5) define tests, (6) implement, (7) validate. Quality gates: TypeScript strict mode, no unjustified `any`, JSDoc on public APIs, minimum 80% test coverage (Vitest/Jest/Playwright). See [AGENTS.md](AGENTS.md) for the full rules.
-
-## Local Development
-
-### Prerequisites
-
-- **Node.js 24.14.1** — the repo pins it in `.nvmrc`; use [fnm](https://github.com/Schniz/fnm) or nvm so the version switches automatically on `cd`.
-- **Docker Desktop** — only needed for the PostgreSQL/PostGIS persistence mode.
-- On Windows, allow local PowerShell scripts once: `Set-ExecutionPolicy RemoteSigned -Scope CurrentUser`.
-
-### Quick start (Windows)
+Requirements: **Node 24.14.1** (pinned in `.nvmrc`, use [fnm](https://github.com/Schniz/fnm)/nvm) and **Docker** for persistence. All details in [docs/local-development.md](docs/local-development.md).
 
 ```powershell
-cd home-energy-consumption-simulator
-.\start-dev.ps1                 # full stack: Postgres (Docker) + API + web
-.\start-dev.ps1 -Mode memory    # no database required (data is lost on restart)
+# Windows: one command (starts Postgres, then API + web in two windows)
+.\start-dev.ps1                 # or -Mode memory to skip Docker
 ```
 
-The script:
-
-1. Starts PostgreSQL/PostGIS via `docker compose` and waits for the healthcheck (skipped in `memory` mode);
-2. Runs `npm ci` on the first launch if `node_modules` is missing;
-3. Opens two titled windows: **API** on http://localhost:3000 (OpenAPI at `/docs`) and **Web** on http://localhost:5173, each with the right `DATABASE_URL`.
-
-Stop with `.\stop-dev.ps1` (stops the database; data is kept in the `postgres_data` volume; close the API/web windows manually).
-
-### Manual start (any OS)
-
 ```bash
+# Any OS
 npm ci
-docker compose -f infrastructure/docker/docker-compose.yml up -d --wait   # optional
+docker compose -f infrastructure/docker/docker-compose.yml up -d --wait
 DATABASE_URL=postgres://postgres:postgres@localhost:5432/hecs npm run dev:api   # or DATABASE_URL=memory://
-npm run dev:web                # second terminal -> http://localhost:5173
+npm run dev:web                  # -> http://localhost:5173
 ```
 
-### Quality gates
+API: http://localhost:3000 (OpenAPI at `/docs`) — Web: http://localhost:5173
 
-```bash
-npm run lint && npm run typecheck
-npm run test                    # PostgreSQL suites are skipped unless DATABASE_URL is set
-DATABASE_URL=postgres://postgres:postgres@localhost:5432/hecs npm run test
-npx playwright install chromium && npm run test:e2e
+## What it does
+
+- **DPE XML import** into a Building-centered domain model, under 1 s, with full confidence metadata (`value`, `source`, `confidence`, `importDate`) — inferred data is never presented as certain.
+- **Open3CL energy simulation** (regulatory 3CL-DPE) and, later, renovation **scenario comparison**.
+- Roadmap toward: 3D reconstruction (React Three Fiber), building editor, PDF/IFC import, AI renovation advisor, IoT digital twin.
+
+## Architecture
+
+Clean Architecture + Hexagonal + DDD. Dependencies point inward: `domain` ← `application` ← `infrastructure` + `presentation`; the Open3CL engine is reached only through the `open3cl-adapter` package. Details: [docs/architecture.md](docs/architecture.md) · [ADR-0001](docs/decisions/ADR-0001-open3cl-as-core-engine.md).
+
+## Repository structure
+
 ```
-
-## Deployment
-
-The platform is **self-hostable with Docker / Docker Compose** — the Open3CL engine runs embedded in the API, so no external simulation service is needed.
-
-- **Local development:** see [Local Development](#local-development) above.
-- **Dedicated server / VPS:** clone the repo on the server, fill `.env` (DB credentials, public URL, ports), then run the same compose stack with the `docker-compose.prod.yml` override behind a reverse proxy with TLS. Postgres stays bound to localhost; backups via scheduled `pg_dump` of the `postgres_data` volume.
-
-Full guide: [docs/deployment.md](docs/deployment.md).
-
-## Roadmap Summary
-
-P0 Open3CL feasibility → P1 DPE XML import → P2 energy simulation → P3 3D reconstruction → P4 building editor → P5 scenario management → P6 PDF import → P7 IFC integration → P8 AI advisor → P9 IoT digital twin → P10 photogrammetry/LiDAR. Full detail in [docs/roadmap.md](docs/roadmap.md).
+apps/                web (React + Vite + R3F) · api (NestJS)
+packages/            domain · application · open3cl-adapter · dpe-xml-importer · postgres-repository
+infrastructure/      postgres (migrations) · docker (compose)
+docs/                architecture, roadmap, phases, ADRs, local dev, deployment, CI
+tests/e2e/           Playwright end-to-end
+AGENTS.md            contributor rules (architecture, coding standards, workflow, testing)
+```
 
 ## Documentation
 
-- [AGENTS.md](AGENTS.md) — project context, architecture rules, coding standards, workflow, testing, expected response format
-- [docs/architecture.md](docs/architecture.md) — principles, system context, bounded contexts, Open3CL integration strategy
-- [docs/deployment.md](docs/deployment.md) — local and dedicated-server deployment with Docker Compose
-- [docs/ci.md](docs/ci.md) — CI workflows, required checks, branch protection, coverage policy
-- [docs/roadmap.md](docs/roadmap.md) — phases P0–P10 with deliverables, risks, and success criteria
-- [docs/decisions/ADR-0001-open3cl-as-core-engine.md](docs/decisions/ADR-0001-open3cl-as-core-engine.md) — Open3CL as the core engine
+- [AGENTS.md](AGENTS.md) — read first before contributing: architecture rules, coding standards, workflow, testing, coverage policy
+- [docs/local-development.md](docs/local-development.md) — prerequisites, quick start, modes, quality gates, troubleshooting
+- [docs/architecture.md](docs/architecture.md) — principles, bounded contexts, integration strategy
+- [docs/roadmap.md](docs/roadmap.md) — product vision, goals, and phases P0–P10
+- [docs/deployment.md](docs/deployment.md) — self-hosting with Docker Compose (local to VPS)
+- [docs/ci.md](docs/ci.md) — CI workflows, required checks, branch protection
