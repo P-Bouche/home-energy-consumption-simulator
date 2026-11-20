@@ -58,7 +58,22 @@ flow `Building → Open3CL Adapter → Open3CL → SimulationResult` (ADR-0001) 
   chosen**: `tsc` project references emitting `dist/`, or relying on Node 24 type stripping
   in production. Decision deferred to P1/P2, recorded here so it is not forgotten.
 
+## Build / Runtime Strategy (decided in P1)
+
+The deferred build question is answered for the P1 stack as follows:
+
+- **Library packages** (`domain`, `application`, `dpe-xml-importer`, `postgres-repository`,
+  `open3cl-adapter`) ship TypeScript **sources** (`exports` → `src/index.ts`) and contain only
+  erasable TypeScript syntax, so Node 24 (`.nvmrc` 24.14.1) runs them directly via native type
+  stripping. `tsc --noEmit` + Vitest aliases duplicate the workspace mapping for tooling.
+- **apps/api (NestJS)** uses decorators, which type stripping does not support, so it runs via
+  **tsx** (`npm run start -w apps/api`). Constructor injection uses explicit `@Inject(token)`
+  everywhere, so no `emitDecoratorMetadata` is required and the same code runs under Vitest
+  (esbuild, `experimentalDecorators: true` in `tsconfig.base.json`). A compiled production
+  image (tsc/swc emit to `dist/`) can be added at deployment time without changing any port.
+
 ## Reassessment Conditions
 
 Reopen if: simulation latency approaches the 3 s budget in-process; the engine becomes a
-long-running service upstream; or a hard requirement for process isolation emerges.
+long-running service upstream; a hard requirement for process isolation emerges; or the API
+needs a compiled production build (add swc/tsc emit behind the same entry point).

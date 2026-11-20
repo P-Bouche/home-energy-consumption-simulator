@@ -71,8 +71,9 @@ flowchart LR
 ## 5. Application Architecture
 
 - Use cases per bounded context, e.g. `ImportDpeXmlUseCase`, `ReconstructBuildingUseCase`, `RunSimulationUseCase`, `CompareScenariosUseCase`, `UpdateWallUseCase`.
-- **Ports** (interfaces) defined in the application layer: `BuildingRepository`, `ImportParserPort`, `SimulationPort`, `ScenarioRepository`.
+- **Ports** (interfaces) defined in the application layer: `BuildingRepository`, `DpeImporterPort`, `SimulationPort`, `ScenarioRepository`.
 - Application layer depends only on the domain; infrastructure implements the ports (dependency inversion).
+- **Implemented in P1:** `ImportDpeXmlUseCase` / `GetBuildingUseCase` with ports `DpeImporterPort` (implemented by `packages/dpe-xml-importer`) and `BuildingRepository` (implemented by `packages/postgres-repository`), exposed by `apps/api` as `POST /imports/dpe` and `GET /buildings/:id`. Mapping doc: [phases/P1-import-mapping.md](phases/P1-import-mapping.md).
 
 ## 6. Infrastructure Architecture
 

@@ -3,7 +3,7 @@
 | Field | Value |
 | --- | --- |
 | Phase | P1 — DPE XML Import |
-| Status | Planned |
+| Status | Implemented (see mapping doc [P1-import-mapping.md](P1-import-mapping.md) and benchmark report [P1-import-benchmark-report.md](P1-import-benchmark-report.md)) |
 | Team | 2 backend engineers, 1 frontend engineer, 1 domain expert (DPE) |
 | Depends on | P0 exit criteria (scaffolding, ADR-0001, frozen fixture corpus, green CI) |
 | Blocks | P2, P3, P4 and everything downstream |
