@@ -15,6 +15,12 @@
       "@hes/dpe-xml-importer": [
         "packages/dpe-xml-importer/src/index.ts"
       ],
+      "@hes/geometry": [
+        "packages/geometry/src/index.ts"
+      ],
+      "@hes/geometry/three": [
+        "packages/geometry/src/three-adapter.ts"
+      ],
       "@hes/postgres-repository": [
         "packages/postgres-repository/src/index.ts"
       ]
