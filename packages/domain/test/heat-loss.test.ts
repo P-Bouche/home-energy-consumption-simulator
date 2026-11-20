@@ -103,6 +103,22 @@ describe('projectHeatLoss (read-only overlay projection, FR-P3-04)', () => {
     expect(overlay.shares.some((s) => s.kind === 'room')).toBe(false);
   });
 
+  it('categories without matching geometry elements are excluded from the total (shares stay proportional to totalEnvelopeLossWk)', () => {
+    // the test geometry has walls + one window, but no doors: deperdition_porte
+    // must not inflate the total nor appear in the shares
+    const overlay = projectHeatLoss(
+      mockResult({ deperdition_mur: 100, deperdition_baie_vitree: 50, deperdition_porte: 50 }),
+      geometry
+    );
+    expect(overlay.totalEnvelopeLossWk).toBeCloseTo(150, 6);
+    expect(overlay.shares.some((s) => s.kind === 'door')).toBe(false);
+    expect(overlay.shares.reduce((a, s) => a + s.share, 0)).toBeCloseTo(1, 9);
+    // share × total = lossWk for every share
+    for (const s of overlay.shares) {
+      expect(s.share * overlay.totalEnvelopeLossWk).toBeCloseTo(s.lossWk, 6);
+    }
+  });
+
   it('sum of shares × 100 rounded is exactly 100 (display contract)', () => {
     const overlay = projectHeatLoss(
       mockResult({ deperdition_mur: 71.229, deperdition_baie_vitree: 49.698, deperdition_porte: 12.5 }),

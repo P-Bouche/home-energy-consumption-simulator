@@ -1,11 +1,24 @@
 import { useEffect } from 'react';
 import { Alert, Box, Button, FormControlLabel, LinearProgress, Switch, Typography } from '@mui/material';
-import { Canvas } from '@react-three/fiber';
+import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
+import type { PerspectiveCamera as ThreePerspectiveCamera } from 'three';
 import { BuildingModel } from '../components/BuildingModel.tsx';
 import { ElementPanel } from '../components/ElementPanel.tsx';
 import { ViewerOverlays } from '../components/ViewerOverlays.tsx';
-import { useViewerStore } from '../store/viewer-store.ts';
+import { useHeatLossOverlay, useViewerStore } from '../store/viewer-store.ts';
+
+/**
+ * Exposes the live R3F camera on window.__hesCamera so e2e tests can project /
+ * raycast with the exact viewer camera. Test hook only.
+ */
+function CameraBridge() {
+  const camera = useThree((s) => s.camera);
+  useEffect(() => {
+    (window as unknown as Record<string, unknown>).__hesCamera = camera as ThreePerspectiveCamera;
+  }, [camera]);
+  return null;
+}
 
 /**
  * 3D viewer page (P3, FR-P3-01): loads the reconstructed geometry of the
@@ -20,6 +33,7 @@ export function ViewerPage({ buildingId }: Readonly<{ buildingId: string }>) {
   const simulation = useViewerStore((s) => s.simulation);
   const showHeatLoss = useViewerStore((s) => s.showHeatLoss);
   const toggleHeatLoss = useViewerStore((s) => s.toggleHeatLoss);
+  const { error: overlayError } = useHeatLossOverlay();
 
   useEffect(() => {
     void loadGeometry(buildingId);
@@ -62,6 +76,11 @@ export function ViewerPage({ buildingId }: Readonly<{ buildingId: string }>) {
           {error}
         </Alert>
       )}
+      {overlayError !== null && (
+        <Alert severity="warning" data-testid="overlay-error" sx={{ mx: 2 }}>
+          Pertes de chaleur indisponibles : {overlayError}
+        </Alert>
+      )}
       <Box sx={{ display: 'flex', flex: 1, minHeight: 0 }}>
         <Box sx={{ flex: 1, minWidth: 0, position: 'relative' }} data-testid="viewer-3d">
           {geometry !== null && (
@@ -70,6 +89,7 @@ export function ViewerPage({ buildingId }: Readonly<{ buildingId: string }>) {
                 <ambientLight intensity={0.75} />
                 <directionalLight position={[max ? max.x : 10, (max?.y ?? 10) + 10, (max?.z ?? 2.5) + 8]} intensity={1.1} />
                 <OrbitControls makeDefault target={target} />
+                <CameraBridge />
                 <BuildingModel />
               </Canvas>
               <ViewerOverlays />

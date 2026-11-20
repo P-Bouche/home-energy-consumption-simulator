@@ -30,14 +30,19 @@ const INFERRED_COLOR: [number, number, number] = [0.96, 0.62, 0.13];
 const SELECTED_COLOR: [number, number, number] = [0.12, 0.45, 0.95];
 const HOVERED_LIFT = 0.12;
 
+function mix(a: [number, number, number], b: [number, number, number], t: number): [number, number, number] {
+  return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
+}
+
 /**
  * Resolves the RGB color of an element given its visual state. Priority:
- * heat-loss overlay share > selected > hovered > inferred > kind default.
+ * selected (blended 50/50 with the underlying loss/inferred/kind color so the
+ * selection stays visible under the heat-loss overlay) > hovered lift >
+ * heat-loss share > inferred > kind default.
  */
 export function elementColor(state: ElementVisualState): [number, number, number] {
-  if (state.lossShare !== null) return colorForShare(state.lossShare);
-  if (state.selected) return SELECTED_COLOR;
-  const base = state.inferred ? INFERRED_COLOR : KIND_COLORS[state.kind];
+  const base = state.lossShare !== null ? colorForShare(state.lossShare) : state.inferred ? INFERRED_COLOR : KIND_COLORS[state.kind];
+  if (state.selected) return mix(base, SELECTED_COLOR, 0.5);
   if (state.hovered) {
     return [
       Math.min(1, base[0] + HOVERED_LIFT),

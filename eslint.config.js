@@ -49,7 +49,7 @@ export default tseslint.config(
     // adapter and the web viewer. The engine restriction is repeated here
     // because a later config block overrides the same rule for the same files.
     files: ['**/*.{ts,mts,js,mjs,tsx}'],
-    ignores: ['packages/open3cl-adapter/**', 'packages/geometry/**', 'apps/web/**'],
+    ignores: ['packages/open3cl-adapter/**', 'packages/geometry/**', 'apps/web/**', 'tests/e2e/**'],
     rules: {
       'no-restricted-imports': [
         'error',
