@@ -1,0 +1,25 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@hes/domain": [
+        "../../packages/domain/src/index.ts"
+      ],
+      "@hes/application": [
+        "../../packages/application/src/index.ts"
+      ],
+      "@hes/dpe-xml-importer": [
+        "../../packages/dpe-xml-importer/src/index.ts"
+      ],
+      "@hes/postgres-repository": [
+        "../../packages/postgres-repository/src/index.ts"
+      ]
+    },
+    "experimentalDecorators": true
+  },
+  "include": [
+    "src/**/*.ts",
+    "test/**/*.ts"
+  ]
+}
