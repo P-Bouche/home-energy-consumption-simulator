@@ -6,7 +6,7 @@ import type {
   SimulationResultId,
   SimulationResultRecord
 } from '@hes/domain';
-import type { SimulationRepository } from '@hes/application';
+import { SimulationAlreadyInFlightError, type SimulationRepository } from '@hes/application';
 
 /**
  * In-memory SimulationRepository used when DATABASE_URL=memory:// (local
@@ -19,14 +19,17 @@ export class InMemorySimulationRepository implements SimulationRepository {
   private readonly results = new Map<SimulationResultId, SimulationResultRecord>();
   private readonly jobs = new Map<SimulationJobId, SimulationJob>();
 
-  saveResult(record: SimulationResultRecord): Promise<void> {
+  saveResult(record: SimulationResultRecord): Promise<SimulationResultRecord> {
     const existing = [...this.results.values()].find(
       (r) => r.buildingId === record.buildingId && r.inputHash === record.inputHash
     );
     if (existing === undefined) {
       this.results.set(record.id, record);
+      return Promise.resolve(record);
     }
-    return Promise.resolve();
+    // Lost the persistence race: return the already-stored winning record so
+    // the caller never holds an unpersisted id.
+    return Promise.resolve(existing);
   }
 
   findResultById(id: SimulationResultId): Promise<SimulationResultRecord | null> {
@@ -55,11 +58,7 @@ export class InMemorySimulationRepository implements SimulationRepository {
       (j) => j.buildingId === job.buildingId && j.inputHash === job.inputHash && !j.isTerminal()
     );
     if (active !== undefined) {
-      const error = new Error(
-        `duplicate in-flight job for building ${job.buildingId} hash ${job.inputHash}`
-      ) as Error & { code?: string };
-      error.code = '23505';
-      return Promise.reject(error);
+      return Promise.reject(new SimulationAlreadyInFlightError(active.id, job.inputHash));
     }
     this.jobs.set(job.id, job);
     return Promise.resolve();

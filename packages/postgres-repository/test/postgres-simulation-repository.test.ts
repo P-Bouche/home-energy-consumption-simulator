@@ -6,6 +6,7 @@ import {
   type SimulationJob,
   type SimulationResultRecord
 } from '@hes/domain';
+import { SimulationAlreadyInFlightError } from '@hes/application';
 import { PostgresSimulationRepository } from '../src/index.ts';
 
 const date = new Date('2026-11-20T10:00:00.000Z');
@@ -78,13 +79,20 @@ function jobRow(job: SimulationJob): Row {
 }
 
 describe('PostgresSimulationRepository', () => {
-  it('saveResult inserts with ON CONFLICT DO NOTHING on (building_id, input_hash) — the cache', async () => {
-    const { pool, queries } = fakePool();
+  it('saveResult inserts with ON CONFLICT DO NOTHING on (building_id, input_hash) — the cache — and returns the persisted record', async () => {
+    const record = makeRecord();
+    const recordJson = { ...record, createdAt: record.createdAt.toISOString() };
+    const { pool, queries } = fakePool((text) => {
+      if (text.includes('INSERT INTO simulations')) return [{ result: recordJson }];
+      return [];
+    });
     const repo = new PostgresSimulationRepository(pool);
-    await repo.saveResult(makeRecord());
+    const saved = await repo.saveResult(record);
+    expect(saved.id).toBe(record.id);
     expect(queries).toHaveLength(1);
     expect(queries[0]?.text).toContain('INSERT INTO simulations');
     expect(queries[0]?.text).toContain('ON CONFLICT (building_id, input_hash) DO NOTHING');
+    expect(queries[0]?.text).toContain('RETURNING result');
     const values = queries[0]?.values as unknown[];
     expect(values[0]).toBe('22222222-2222-4222-8222-222222222222');
     expect(values[2]).toBe(hash);
@@ -92,6 +100,28 @@ describe('PostgresSimulationRepository', () => {
     const result = JSON.parse(values[4] as string) as { inputHash: string; energyLabel: string };
     expect(result.inputHash).toBe(hash);
     expect(result.energyLabel).toBe('D');
+  });
+
+  it('saveResult on conflict (rowCount 0) re-reads and returns the winning persisted row, never an unpersisted record', async () => {
+    const loser = makeRecord();
+    const winner = makeRecord({ id: '99999999-9999-4999-8999-999999999999' });
+    const winnerJson = { ...winner, createdAt: winner.createdAt.toISOString() };
+    const { pool, queries } = fakePool((text) => {
+      if (text.includes('INSERT INTO simulations')) return []; // ON CONFLICT DO NOTHING: no row returned
+      if (text.includes('input_hash = $2')) return [{ result: winnerJson }]; // the winner re-read
+      return [];
+    });
+    const repo = new PostgresSimulationRepository(pool);
+    const saved = await repo.saveResult(loser);
+    expect(saved.id).toBe(winner.id);
+    expect(queries).toHaveLength(2);
+    expect(queries[1]?.text).toContain('SELECT result FROM simulations');
+  });
+
+  it('saveResult throws when a conflict has no winning row (defensive: impossible with the unique constraint)', async () => {
+    const { pool } = fakePool(() => []);
+    const repo = new PostgresSimulationRepository(pool);
+    await expect(repo.saveResult(makeRecord())).rejects.toThrow(/conflict without a winning row/);
   });
 
   it('findResultById / findResultByInputHash / findResultsByBuildingId revive records from jsonb', async () => {
@@ -124,6 +154,27 @@ describe('PostgresSimulationRepository', () => {
     expect(queries[0]?.text).toContain('INSERT INTO simulation_jobs');
     const values = queries[0]?.values as unknown[];
     expect(values[3]).toBe('queued');
+  });
+
+  it('saveJob maps a unique violation (SQLSTATE 23505) from the partial index to SimulationAlreadyInFlightError (409, not 500)', async () => {
+    const { pool } = fakePool(() => {
+      const error = new Error('duplicate key value violates unique constraint') as Error & { code?: string };
+      error.code = '23505';
+      throw error;
+    });
+    const repo = new PostgresSimulationRepository(pool);
+    const job = makeJob();
+    await expect(repo.saveJob(job)).rejects.toBeInstanceOf(SimulationAlreadyInFlightError);
+    await expect(repo.saveJob(job)).rejects.toMatchObject({ code: 'SIMULATION_IN_FLIGHT', jobId: job.id, inputHash: hash });
+  });
+
+  it('saveJob rethrows non-unique-violation errors unchanged', async () => {
+    const failure = new Error('connection reset');
+    const { pool } = fakePool(() => {
+      throw failure;
+    });
+    const repo = new PostgresSimulationRepository(pool);
+    await expect(repo.saveJob(makeJob())).rejects.toBe(failure);
   });
 
   it('updateJob writes the state transition (running/done/failed)', async () => {

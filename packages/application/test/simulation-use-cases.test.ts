@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
   Building,
-  computeBuildingInputHash,
   createImportReport,
   createSimulationResult,
   EngineExecutionError,
@@ -24,6 +23,7 @@ import {
 } from '@hes/domain';
 import {
   BuildingNotFoundError,
+  computeBuildingInputHash,
   GetSimulationHistoryUseCase,
   GetSimulationJobUseCase,
   GetSimulationUseCase,
@@ -107,9 +107,16 @@ class FakeSimulationRepository implements SimulationRepository {
   readonly jobs = new Map<SimulationJobId, SimulationJob>();
   engineSaves = 0;
 
-  async saveResult(record: SimulationResultRecord): Promise<void> {
+  async saveResult(record: SimulationResultRecord): Promise<SimulationResultRecord> {
+    const existing = [...this.results.values()].find(
+      (r) => r.buildingId === record.buildingId && r.inputHash === record.inputHash
+    );
+    if (existing !== undefined) {
+      return existing;
+    }
     this.results.set(record.id, record);
     this.engineSaves += 1;
+    return record;
   }
   async findResultById(id: SimulationResultId): Promise<SimulationResultRecord | null> {
     return this.results.get(id) ?? null;

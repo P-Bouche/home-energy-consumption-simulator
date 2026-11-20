@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto';
 import type { Building } from './building.ts';
 import type { BanCoordinates } from './building.ts';
 import type {
@@ -16,7 +15,6 @@ import type {
   Zone
 } from './entities.ts';
 import type { Confidence } from './confidence.ts';
-import type { SimulationInputHash } from './simulation-record.ts';
 
 /**
  * Read-only projection of a {@link Building} used by the Open3CL adapter
@@ -95,31 +93,3 @@ export function toSimulationView(building: Building): BuildingSimulationView {
     sourceDpeXml: building.sourceDpeXml
   });
 }
-
-/**
- * Canonical JSON serialization: object keys are sorted recursively so the
- * hash does not depend on property insertion order.
- */
-export function canonicalJson(value: unknown): string {
-  if (Array.isArray(value)) {
-    return `[${value.map((item) => canonicalJson(item)).join(',')}]`;
-  }
-  if (typeof value === 'object' && value !== null) {
-    const entries = Object.entries(value as Record<string, unknown>)
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([key, entry]) => `${JSON.stringify(key)}:${canonicalJson(entry)}`);
-    return `{${entries.join(',')}}`;
-  }
-  return JSON.stringify(value) ?? 'null';
-}
-
-/**
- * Computes the canonical input hash (sha256 hex) of a building: the hash of
- * the canonical JSON serialization of its persistence shape. Any change to
- * the building (P4 edits) changes the hash, which invalidates the simulation
- * cache automatically (TR-P2-05).
- */
-export function computeBuildingInputHash(building: Building): SimulationInputHash {
-  return createHash('sha256').update(canonicalJson(building.toJson()), 'utf8').digest('hex');
-}
-

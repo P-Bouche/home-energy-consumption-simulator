@@ -17,6 +17,7 @@ export {
   SimulationNotFoundError
 } from './errors.ts';
 export { consoleLogger, type Logger } from './logger.ts';
+export { canonicalJson, computeBuildingInputHash } from './building-input-hash.ts';
 export {
   IMPORT_DPE_XML_USE_CASE,
   ImportDpeXmlUseCase,
