@@ -3,7 +3,7 @@
 | Field | Value |
 | --- | --- |
 | Phase | P3 — 3D Reconstruction |
-| Status | Planned |
+| Status | Implemented (geometry/coordinate system + inference rules catalog: [docs/geometry.md](../geometry.md); benchmark report: [P3-geometry-benchmark-report.md](P3-geometry-benchmark-report.md)) |
 | Team | 2 frontend engineers (R3F/Three.js), 1 backend engineer |
 | Depends on | P1 exit criteria (buildings importable). Runs in parallel with P2 |
 | Blocks | P4 (editor needs selectable 3D elements), P10 |
