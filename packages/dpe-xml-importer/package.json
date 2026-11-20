@@ -1,0 +1,16 @@
+{
+  "name": "@hes/dpe-xml-importer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "French DPE XML importer: pure core mapping DPE XML to the domain Building aggregate (no NestJS/ORM imports, never imports @open3cl/engine)",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "types": "./src/index.ts",
+  "dependencies": {
+    "@hes/application": "0.1.0",
+    "@hes/domain": "0.1.0",
+    "fast-xml-parser": "^5.12.1"
+  }
+}
