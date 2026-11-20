@@ -74,6 +74,7 @@ flowchart LR
 - **Ports** (interfaces) defined in the application layer: `BuildingRepository`, `DpeImporterPort`, `SimulationPort`, `ScenarioRepository`.
 - Application layer depends only on the domain; infrastructure implements the ports (dependency inversion).
 - **Implemented in P1:** `ImportDpeXmlUseCase` / `GetBuildingUseCase` with ports `DpeImporterPort` (implemented by `packages/dpe-xml-importer`) and `BuildingRepository` (implemented by `packages/postgres-repository`), exposed by `apps/api` as `POST /imports/dpe` and `GET /buildings/:id`. Mapping doc: [phases/P1-import-mapping.md](phases/P1-import-mapping.md).
+- **Implemented in P2:** `RunSimulationUseCase` / `GetSimulationHistoryUseCase` / `GetSimulationUseCase` / `GetSimulationJobUseCase` + `SimulationJobRunner`, with ports `SimulationPort` (extended with `simulateBuilding(building)`; implemented only by `packages/open3cl-adapter`) and `SimulationRepository` (Postgres schema v2 + in-memory), exposed as `POST /buildings/:id/simulations`, `GET /buildings/:id/simulations`, `GET /simulations/:id`, `GET /simulations/jobs/:id`. Mapping doc: [phases/P2-simulation-mapping.md](phases/P2-simulation-mapping.md).
 
 ## 6. Infrastructure Architecture
 
@@ -86,7 +87,7 @@ flowchart LR
 
 ## 7. Open3CL Integration Strategy
 
-- `SimulationPort` (application) declares `simulate(building: Building): Promise<SimulationResult>`.
+- `SimulationPort` (application) declares `simulate(dpeXml: string)` (P0) and `simulateBuilding(building: Building)` (P2).
 - `packages/open3cl-adapter` is the **only** module allowed to import the Open3CL engine. It maps the domain `Building` to the engine input (XML/JSON), executes the engine, and maps the output to `SimulationResult`.
 - The engine version is **pinned**; contract tests run against real DPE fixtures from the engine's test corpus.
 - Flow: `Building → Open3CL Adapter → Open3CL → SimulationResult`. No alternative engine, no local re-implementation of 3CL formulas.

@@ -8,7 +8,7 @@ GitHub Actions only. Node version is pinned via `.nvmrc` (Node 24 LTS — `@open
 | --- | --- | --- |
 | `.github/workflows/ci.yml` | every PR + push to `main` | `Lint (ESLint)` (engine boundary + domain purity), `Typecheck (tsc --noEmit)`, `Tests (Vitest) + coverage gate` (PostGIS service container for PG-backed tests, 80% thresholds on all four metrics, coverage artifact) |
 | `.github/workflows/e2e.yml` | PR/push touching `apps/**`, `packages/**`, `tests/e2e/**`, `playwright.config.ts`, lockfile | `E2E (Playwright, AC-P1-05)` — the root `playwright.config.ts` starts the API (`DATABASE_URL=memory://`) and the Vite dev server via `webServer`; report artifact on failure |
-| `.github/workflows/benchmark.yml` | every PR + push to `main` + manual dispatch | `Open3CL p95 latency benchmark (Node from .nvmrc)` — fails when p95 >= 3000 ms; report artifact. P2 extends it with `benchmark:simulation` |
+| `.github/workflows/benchmark.yml` | every PR + push to `main` + manual dispatch | `Open3CL p95 latency benchmark (Node from .nvmrc)` — fails when p95 >= 3000 ms; runs both `npm run benchmark` (raw engine path) and `npm run benchmark:simulation` (building→simulation path, AC-P2-01); report artifacts |
 
 Planned later: `docker.yml` (build api/web images to ghcr.io), `dependabot.yml`.
 
@@ -35,7 +35,8 @@ npm run lint
 npm run typecheck
 npm run test:coverage   # PG-backed tests need DATABASE_URL (compose db: docker compose -f infrastructure/docker/docker-compose.yml up -d db)
 npm run test:e2e        # self-contained: playwright.config.ts starts API (memory://) + Vite dev server
-npm run benchmark       # fails when p95 >= 3000 ms
+npm run benchmark       # raw engine path; fails when p95 >= 3000 ms
+npm run benchmark:simulation  # building→simulation path (AC-P2-01); fails when p95 >= 3000 ms
 ```
 
 ## Coverage policy
