@@ -3,6 +3,7 @@ import { Alert, Box, Button, Container, LinearProgress, Typography } from '@mui/
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { useImportStore } from '../store/import-store.ts';
 import { ImportReportView } from '../components/ImportReportView.tsx';
+import { SimulationPanel } from '../components/SimulationPanel.tsx';
 
 /**
  * Upload page: file picker → POST /api/imports/dpe → import report view.
@@ -61,12 +62,13 @@ export function UploadPage() {
           {error}
         </Alert>
       )}
-      {status === 'done' && report !== null && (
+      {status === 'done' && report !== null && buildingId !== null && (
         <>
           <Alert severity="success" sx={{ mt: 2 }} data-testid="upload-success">
             Bâtiment importé : {buildingId}
           </Alert>
           <ImportReportView report={report} />
+          <SimulationPanel buildingId={buildingId} />
         </>
       )}
     </Container>
