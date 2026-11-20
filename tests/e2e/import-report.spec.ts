@@ -20,7 +20,7 @@ test('upload a DPE XML and see the import report', async ({ page }) => {
   await expect(page.getByTestId('report-inferred')).toContainText('Champs inférés');
   await expect(page.getByTestId('report-unrecognized')).toContainText('non reconnus');
   await expect(page.getByTestId('report-missing')).toContainText('absents');
-  await expect(page.getByText('confiance 0.9')).toBeVisible();
+  await expect(page.getByText('confiance 0.9').first()).toBeVisible();
 });
 
 test('uploading invalid XML shows the 422 error', async ({ page }) => {

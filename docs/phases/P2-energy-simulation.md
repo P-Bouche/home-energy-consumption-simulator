@@ -10,6 +10,8 @@
 
 P2 turns an imported `Building` into a regulatory `SimulationResult` through Open3CL — the only permitted calculation path.
 
+Canonical prompt to start a Vibe session for this phase: [P2-vibe-prompt.md](P2-vibe-prompt.md) (requires PR #9 / Phase P1 merged on `main` first).
+
 # Objective
 
 Expose `POST /buildings/:id/simulations` that maps the domain `Building` to the Open3CL input, executes the pinned engine, persists a `SimulationResult`, and returns it — with p95 latency under 3 seconds.
