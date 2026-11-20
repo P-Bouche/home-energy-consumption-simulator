@@ -15,7 +15,8 @@ describe('domain purity boundary (ESLint no-restricted-imports in packages/domai
     "import { XMLParser } from 'fast-xml-parser';",
     "import pg from 'pg';",
     "import { Controller } from '@nestjs/common';",
-    "import { createElement } from 'react';"
+    "import { createElement } from 'react';",
+    "import { randomUUID } from 'node:crypto';"
   ];
 
   for (const statement of forbidden) {
@@ -26,8 +27,8 @@ describe('domain purity boundary (ESLint no-restricted-imports in packages/domai
     });
   }
 
-  it('allows framework-free imports in packages/domain', async () => {
-    const code = "import { randomUUID } from 'node:crypto';\nexport const id = randomUUID();\n";
+  it('allows platform-free imports in packages/domain (relative modules only)', async () => {
+    const code = "import { ENERGY_LABELS } from './energy-label.ts';\nexport const labels = ENERGY_LABELS;\n";
     const violations = await lintAs('packages/domain/src/ok.ts', code);
     expect(violations).toHaveLength(0);
   });
