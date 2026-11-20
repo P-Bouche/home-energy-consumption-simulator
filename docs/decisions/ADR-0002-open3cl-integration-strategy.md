@@ -50,8 +50,9 @@ flow `Building → Open3CL Adapter → Open3CL → SimulationResult` (ADR-0001) 
 
 - The typed `declare module '@open3cl/engine'` shim must be maintained when the engine API
   changes (detected immediately by typecheck + contract tests).
-- Engine is synchronous: long simulations block the event loop; if that ever matters, move to
-  option 4 behind the same port (worker_threads or service) without touching callers.
+- Engine is synchronous and CPU-bound: resolved in P2 by running it in a dedicated
+  `worker_threads` worker (see "Execution Strategy (decided in P2)" below) instead of on the
+  main thread.
 - P0 packages export `src/index.ts` directly (no build step; Node >= 24 native type stripping
   runs the CLI spike, and `tsconfig` paths + Vitest aliases duplicate the package mapping).
   That is fine for the spike, but **before the NestJS API (P1/P2) a build strategy must be
@@ -71,6 +72,32 @@ The deferred build question is answered for the P1 stack as follows:
   everywhere, so no `emitDecoratorMetadata` is required and the same code runs under Vitest
   (esbuild, `experimentalDecorators: true` in `tsconfig.base.json`). A compiled production
   image (tsc/swc emit to `dist/`) can be added at deployment time without changing any port.
+
+## Execution Strategy (decided in P2)
+
+The engine (`calcul_3cl` / `calcul_3cl_xml`) is synchronous and CPU-bound, so P2 runs it in a
+dedicated `node:worker_threads` worker instead of on the API event loop (PR #14 review finding:
+a queued simulation would freeze all HTTP traffic for its whole duration):
+
+- `packages/open3cl-adapter/src/engine-worker.mjs` is the **only** runtime import of
+  `@open3cl/engine` (plain JS, `execArgv: []`, so no loader flags are inherited). It receives
+  `{ id, task }` messages (`task.kind: 'xml' | 'json'`), calls the engine with
+  `{ sanitize: true }`, and replies `{ id, ok: true, result }` or `{ id, ok: false, message }`.
+- `packages/open3cl-adapter/src/engine-runner.ts` (`EngineRunner`, process-wide singleton
+  `getEngineRunner()`) owns the worker: one worker per process serializes engine calls
+  naturally. The worker is `unref()`'d so it never keeps the process alive; while runs are
+  pending a ref'd keep-alive interval keeps the event loop alive so responses are received
+  (CLI spike, benchmarks). A crashed worker rejects its pending runs and is lazily recreated on
+  the next `run()`.
+- `Open3clAdapter.runEngine` is now `async` and routes every engine call through the runner;
+  the error mapping is unchanged (worker-side throw → `EngineExecutionError`, `null` result
+  → `UnsupportedDpeModelError`). The adapter's public API (`SimulationPort`) is unchanged, so
+  callers (API, CLI, benchmarks) needed no modification.
+- Measured overhead of the hop: sub-millisecond to a few ms per call for corpus-sized documents
+  (structured clone of the XML/result), negligible against the p95 23.9 ms engine time.
+
+A dedicated engine **service** (option 4) remains a possible deployment mode later behind the
+same `SimulationPort`; it is still not needed for the latency budget.
 
 ## Reassessment Conditions
 

@@ -1,4 +1,4 @@
-import { calcul_3cl, calcul_3cl_xml, getVersion, type EngineDpeResult } from '@open3cl/engine';
+import { getVersion, type EngineDpeResult } from '@open3cl/engine';
 import type { SimulationPort } from '@hes/application';
 import {
   EngineExecutionError,
@@ -8,6 +8,7 @@ import {
   type Building,
   type SimulationResult
 } from '@hes/domain';
+import { getEngineRunner } from './engine-runner.ts';
 import { mapEngineResult } from './map-engine-result.ts';
 import { buildEngineInput, type MappingDefault } from './map-building-to-engine-input.ts';
 
@@ -26,9 +27,12 @@ const defaultLogger: AdapterLogger = {
 /**
  * SimulationPort adapter backed by the pinned Open3CL engine (@open3cl/engine@1.11.6).
  *
- * This class is the single place in the monorepo that calls the engine
- * (enforced by ESLint no-restricted-imports). Open3CL stays the single source
- * of truth: no 3CL formula is re-implemented here, only input/output mapping.
+ * This package is the single place in the monorepo that touches the engine
+ * (enforced by ESLint no-restricted-imports). The engine itself runs in a
+ * dedicated worker thread (engine-runner.ts + engine-worker.mjs): it is
+ * synchronous and CPU-bound, so calling it on the main thread would block the
+ * API event loop for the whole simulation. Open3CL stays the single source of
+ * truth: no 3CL formula is re-implemented here, only input/output mapping.
  */
 export class Open3clAdapter implements SimulationPort {
   private readonly logger: AdapterLogger;
@@ -50,7 +54,7 @@ export class Open3clAdapter implements SimulationPort {
     if (typeof dpeXml !== 'string' || dpeXml.trim().length === 0) {
       throw new InvalidDpeError('DPE XML content must be a non-empty string.');
     }
-    return this.runEngine(() => calcul_3cl_xml(dpeXml, { sanitize: true }));
+    return this.runEngine(() => getEngineRunner().run({ kind: 'xml', xml: dpeXml }));
   }
 
   /**
@@ -88,9 +92,9 @@ export class Open3clAdapter implements SimulationPort {
     }
     const input = mapping.input;
     return this.runEngine(() =>
-      input.kind === 'xml'
-        ? calcul_3cl_xml(input.xml, { sanitize: true })
-        : calcul_3cl(input.json, { sanitize: true })
+      getEngineRunner().run(
+        input.kind === 'xml' ? { kind: 'xml', xml: input.xml } : { kind: 'json', json: input.json }
+      )
     );
   }
 
@@ -101,10 +105,10 @@ export class Open3clAdapter implements SimulationPort {
     return getVersion();
   }
 
-  private runEngine(run: () => EngineDpeResult | null): SimulationResult {
+  private async runEngine(run: () => Promise<EngineDpeResult | null>): Promise<SimulationResult> {
     let engineResult: EngineDpeResult | null;
     try {
-      engineResult = run();
+      engineResult = await run();
     } catch (error) {
       throw new EngineExecutionError('Open3CL engine threw while processing the DPE input.', {
         cause: error
