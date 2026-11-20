@@ -1,6 +1,22 @@
 import { Building, importReportFromJson, type BuildingId, type ImportReport } from '@hes/domain';
 import type { BuildingRepository, SaveBuildingInput, StoredBuilding } from '@hes/application';
-import type { Pool } from 'pg';
+import type { Pool, PoolClient } from 'pg';
+
+/**
+ * Rolls back the current transaction without masking the original error:
+ * when the connection already died, `ROLLBACK` itself throws, and that
+ * secondary failure is attached to the original error instead of replacing
+ * it.
+ */
+async function rollbackQuietly(client: PoolClient, originalError: unknown): Promise<void> {
+  try {
+    await client.query('ROLLBACK');
+  } catch (rollbackError) {
+    if (originalError instanceof Error) {
+      (originalError as Error & { rollbackError?: unknown }).rollbackError = rollbackError;
+    }
+  }
+}
 
 /**
  * Postgres adapter for the BuildingRepository port (no ORM — the domain
@@ -53,7 +69,7 @@ export class PostgresBuildingRepository implements BuildingRepository {
       await client.query('COMMIT');
       return building.id;
     } catch (error) {
-      await client.query('ROLLBACK');
+      await rollbackQuietly(client, error);
       throw error;
     } finally {
       client.release();

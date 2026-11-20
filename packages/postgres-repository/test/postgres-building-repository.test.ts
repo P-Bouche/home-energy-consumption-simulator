@@ -120,6 +120,26 @@ describe('PostgresBuildingRepository', () => {
     expect(storedData.ceilingHeightM.importDate).toBe('2026-11-20T10:00:00.000Z');
   });
 
+  it('save() propagates the original error even when ROLLBACK itself throws (dead connection)', async () => {
+    const client = {
+      query: (text: string) => {
+        if (text.includes('INSERT INTO buildings') || text === 'ROLLBACK') {
+          return Promise.reject(new Error(text === 'ROLLBACK' ? 'connection dead' : 'db down'));
+        }
+        return Promise.resolve({ rows: [], rowCount: 0, command: '', oid: 0, fields: [] } as QueryResult);
+      },
+      release: () => undefined
+    } as unknown as PoolClient;
+    const pool = { connect: () => Promise.resolve(client) } as unknown as Pool;
+    const repo = new PostgresBuildingRepository(pool);
+    const error = await repo
+      .save({ building: makeBuilding('11111111-1111-4111-8111-111111111111'), report: makeReport() })
+      .catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(Error);
+    expect((error as Error).message).toBe('db down');
+    expect((error as Error & { rollbackError?: Error }).rollbackError?.message).toBe('connection dead');
+  });
+
   it('save() rolls back and rethrows on failure (no silent catch)', async () => {
     const queries: CapturedQuery[] = [];
     const client = {
