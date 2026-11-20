@@ -9,6 +9,9 @@ export class BuildingResponseDto {
   @ApiProperty({ description: 'the Building aggregate (JSON persistence shape)', type: 'object', additionalProperties: true })
   building!: BuildingJson;
 
+  @ApiProperty({ description: 'optimistic-locking version of the aggregate (P4; send it back as If-Match on edits)', type: Number })
+  version!: number;
+
   @ApiProperty({ description: 'import report v1', type: 'object', additionalProperties: true })
   report!: ImportReportJson;
 }

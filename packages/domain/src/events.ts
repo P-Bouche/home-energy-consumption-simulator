@@ -1,3 +1,5 @@
+import type { BuildingCommand } from './commands.ts';
+import type { ConfidenceJson } from './confidence.ts';
 import type { BuildingId } from './entities.ts';
 import type { SimulationErrorCode } from './errors.ts';
 import type { SimulationInputHash, SimulationJobId, SimulationResultId } from './simulation-record.ts';
@@ -8,6 +10,50 @@ import type { SimulationInputHash, SimulationJobId, SimulationResultId } from '.
 export interface DomainEvent {
   readonly type: string;
   readonly occurredAt: Date;
+}
+
+/**
+ * One field-level change applied to the building by a command (P4): the field
+ * name, and the previous / new values as Confidence JSON (so the audit trail
+ * keeps the provenance — e.g. `source: "user"`, confidence 1.0).
+ */
+export interface FieldChange {
+  readonly field: string;
+  readonly oldValue: ConfidenceJson<unknown> | null;
+  readonly newValue: ConfidenceJson<unknown> | null;
+}
+
+/**
+ * Emitted by the Building aggregate when a validated command has been applied
+ * (P4, TR-P4-06). Carries the command and the old→new field changes so the
+ * application layer can build the audit entry.
+ */
+export class BuildingUpdated implements DomainEvent {
+  readonly type = 'BuildingUpdated';
+  readonly buildingId: BuildingId;
+  readonly userId: string;
+  readonly command: BuildingCommand;
+  readonly commandType: string;
+  readonly changes: readonly FieldChange[];
+  readonly version: number;
+  readonly occurredAt: Date;
+
+  constructor(input: {
+    buildingId: BuildingId;
+    userId: string;
+    command: BuildingCommand;
+    changes: readonly FieldChange[];
+    version: number;
+    occurredAt: Date;
+  }) {
+    this.buildingId = input.buildingId;
+    this.userId = input.userId;
+    this.command = input.command;
+    this.commandType = input.command.type;
+    this.changes = Object.freeze([...input.changes]);
+    this.version = input.version;
+    this.occurredAt = input.occurredAt;
+  }
 }
 
 /**

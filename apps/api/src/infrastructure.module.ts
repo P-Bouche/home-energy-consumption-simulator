@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { Pool } from 'pg';
 import {
+  AUDIT_LOG,
   BUILDING_REPOSITORY,
   DPE_IMPORTER_PORT,
   GEOMETRY_PORT,
@@ -8,6 +9,7 @@ import {
   SIMULATION_PORT,
   SIMULATION_REPOSITORY,
   SimulationJobRunner,
+  type AuditLog,
   type BuildingRepository,
   type SimulationRepository,
   type SimulationPort
@@ -15,8 +17,9 @@ import {
 import { DpeXmlImporter } from '@hes/dpe-xml-importer';
 import { GeometryAdapter } from '@hes/geometry';
 import { createOpen3clAdapter } from '@hes/open3cl-adapter';
-import { PostgresBuildingRepository, PostgresSimulationRepository, runMigrations } from '@hes/postgres-repository';
+import { PostgresAuditLog, PostgresBuildingRepository, PostgresSimulationRepository, runMigrations } from '@hes/postgres-repository';
 import { CONFIG, loadConfig, type ApiConfig } from './config.ts';
+import { InMemoryAuditLog } from './in-memory-audit-log.ts';
 import { InMemoryBuildingRepository } from './in-memory-building-repository.ts';
 import { InMemorySimulationRepository } from './in-memory-simulation-repository.ts';
 
@@ -76,6 +79,12 @@ export const PG_CONTEXT = Symbol('PgContext');
       inject: [PG_CONTEXT]
     },
     {
+      provide: AUDIT_LOG,
+      useFactory: (pg: PgContext | null): AuditLog =>
+        pg === null ? new InMemoryAuditLog() : new PostgresAuditLog(pg.pool),
+      inject: [PG_CONTEXT]
+    },
+    {
       provide: SIMULATION_JOB_RUNNER,
       useFactory: (
         buildingRepository: BuildingRepository,
@@ -93,6 +102,7 @@ export const PG_CONTEXT = Symbol('PgContext');
     SIMULATION_PORT,
     BUILDING_REPOSITORY,
     SIMULATION_REPOSITORY,
+    AUDIT_LOG,
     SIMULATION_JOB_RUNNER
   ]
 })

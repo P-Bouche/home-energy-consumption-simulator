@@ -17,6 +17,21 @@ export interface SaveBuildingInput {
 }
 
 /**
+ * Input accepted by {@link BuildingRepository.update} (P4): an edited
+ * aggregate plus the version the caller based its edit on.
+ */
+export interface UpdateBuildingInput {
+  readonly building: Building;
+  readonly report: ImportReport;
+  /**
+   * The version the caller read before editing. Implementations MUST reject
+   * the update with {@link StaleVersionError} when the persisted version
+   * differs (optimistic locking, HTTP 409).
+   */
+  readonly expectedVersion: number;
+}
+
+/**
  * Port (hexagonal architecture) for persisting and reading Building
  * aggregates. Implemented by the Postgres adapter (packages/postgres-repository);
  * the application layer depends on this interface only.
@@ -35,6 +50,18 @@ export interface BuildingRepository {
    * @returns the stored aggregate, or null when the id is unknown
    */
   findById(id: BuildingId): Promise<StoredBuilding | null>;
+
+  /**
+   * Persists an edited Building aggregate with optimistic locking (P4,
+   * TR-P4-02): the update only lands when the persisted version still equals
+   * `expectedVersion`. Implementations should do the check and the write in
+   * one transaction (Postgres: `SELECT … FOR UPDATE` + conditional `UPDATE`).
+   *
+   * @returns the stored aggregate after the update
+   * @throws StaleVersionError when another edit landed first (HTTP 409)
+   * @throws BuildingNotFoundError when the id is unknown (HTTP 404)
+   */
+  update(input: UpdateBuildingInput): Promise<StoredBuilding>;
 }
 
 /**

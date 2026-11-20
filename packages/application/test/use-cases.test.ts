@@ -16,7 +16,8 @@ import {
   type DpeImportResult,
   type DpeImporterPort,
   type SaveBuildingInput,
-  type StoredBuilding
+  type StoredBuilding,
+  type UpdateBuildingInput
 } from '../src/index.ts';
 
 const date = new Date('2026-11-20T10:00:00.000Z');
@@ -86,6 +87,11 @@ class FakeRepository implements BuildingRepository {
   }
   findById(id: string): Promise<StoredBuilding | null> {
     return Promise.resolve(this.store.get(id) ?? null);
+  }
+  update(input: UpdateBuildingInput): Promise<StoredBuilding> {
+    const stored: StoredBuilding = { building: input.building, report: input.report };
+    this.store.set(input.building.id, stored);
+    return Promise.resolve(stored);
   }
 }
 

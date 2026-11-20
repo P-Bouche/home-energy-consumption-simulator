@@ -37,7 +37,8 @@ import {
   type SaveBuildingInput,
   type SimulationPort,
   type SimulationRepository,
-  type StoredBuilding
+  type StoredBuilding,
+  type UpdateBuildingInput
 } from '../src/index.ts';
 
 const date = new Date('2026-11-20T10:00:00.000Z');
@@ -99,6 +100,11 @@ class FakeBuildingRepository implements BuildingRepository {
   }
   async findById(id: BuildingId): Promise<StoredBuilding | null> {
     return this.store.get(id) ?? null;
+  }
+  async update(input: UpdateBuildingInput): Promise<StoredBuilding> {
+    const stored: StoredBuilding = { building: input.building, report: input.report };
+    this.store.set(input.building.id, stored);
+    return stored;
   }
 }
 

@@ -1,6 +1,43 @@
 import type { BuildingId, SimulationInputHash, SimulationJobId, SimulationResultId } from '@hes/domain';
 
 /**
+ * Raised when an edit targets a building version that is no longer current
+ * (another edit landed first). Mapped to HTTP 409 with the expected and
+ * current versions so the client can reload and retry (FR-P4-06).
+ */
+export class StaleVersionError extends Error {
+  readonly code = 'STALE_VERSION';
+  readonly buildingId: BuildingId;
+  readonly expectedVersion: number;
+  readonly currentVersion: number;
+
+  constructor(buildingId: BuildingId, expectedVersion: number, currentVersion: number) {
+    super(
+      `stale version for building ${buildingId}: expected ${expectedVersion} but the current version is ${currentVersion}`
+    );
+    this.name = 'StaleVersionError';
+    this.buildingId = buildingId;
+    this.expectedVersion = expectedVersion;
+    this.currentVersion = currentVersion;
+  }
+}
+
+/**
+ * Raised when undo is requested but the building has no audit entry yet
+ * (nothing to undo). Mapped to HTTP 400.
+ */
+export class NothingToUndoError extends Error {
+  readonly code = 'NOTHING_TO_UNDO';
+  readonly buildingId: BuildingId;
+
+  constructor(buildingId: BuildingId) {
+    super(`building ${buildingId} has no recorded change to undo`);
+    this.name = 'NothingToUndoError';
+    this.buildingId = buildingId;
+  }
+}
+
+/**
  * Raised when no building exists for the requested id (mapped to HTTP 404).
  */
 export class BuildingNotFoundError extends Error {

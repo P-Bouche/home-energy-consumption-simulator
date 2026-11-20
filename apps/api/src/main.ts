@@ -14,12 +14,12 @@ import { CONFIG, type ApiConfig } from './config.ts';
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule, { logger: ['log', 'error', 'warn'] });
   const config = app.get<ApiConfig>(CONFIG);
-  app.enableCors({ origin: config.corsOrigin, methods: ['GET', 'POST', 'OPTIONS'] });
+  app.enableCors({ origin: config.corsOrigin, methods: ['GET', 'POST', 'PATCH', 'OPTIONS'] });
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Home Energy Consumption Simulator API')
     .setDescription(
-      'P1: DPE XML import into the Building aggregate (PostgreSQL/PostGIS). P2: Open3CL energy simulation of a building (POST /buildings/:id/simulations), historized results, input-hash cache, queued jobs.'
+      'P1: DPE XML import into the Building aggregate (PostgreSQL/PostGIS). P2: Open3CL energy simulation of a building (POST /buildings/:id/simulations), historized results, input-hash cache, queued jobs. P4: building editor (PATCH /buildings/:id with If-Match, GET /buildings/:id/audit, POST /buildings/:id/undo).'
     )
     .setVersion('0.1.0')
     .build();

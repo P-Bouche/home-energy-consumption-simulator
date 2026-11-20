@@ -2,17 +2,24 @@ export { GEOMETRY_PORT, type GeometryPort } from './ports/geometry-port.ts';
 export { SIMULATION_PORT, type SimulationPort } from './ports/simulation-port.ts';
 export { SIMULATION_REPOSITORY, type SimulationRepository } from './ports/simulation-repository.ts';
 export {
+  AUDIT_LOG,
+  type AuditLog
+} from './ports/audit-log.ts';
+export {
   BUILDING_REPOSITORY,
   type BuildingRepository,
   type SaveBuildingInput,
-  type StoredBuilding
+  type StoredBuilding,
+  type UpdateBuildingInput
 } from './ports/building-repository.ts';
 export { DPE_IMPORTER_PORT, type DpeImporterPort, type DpeImportResult } from './ports/dpe-importer-port.ts';
 export {
   BuildingNotFoundError,
+  NothingToUndoError,
   SimulationAlreadyInFlightError,
   SimulationJobNotFoundError,
-  SimulationNotFoundError
+  SimulationNotFoundError,
+  StaleVersionError
 } from './errors.ts';
 export { consoleLogger, type Logger } from './logger.ts';
 export { canonicalJson, computeBuildingInputHash } from './building-input-hash.ts';
@@ -64,3 +71,21 @@ export {
   GetSimulationJobUseCase,
   type GetSimulationJobUseCaseDeps
 } from './use-cases/get-simulation-job.use-case.ts';
+export {
+  EDIT_BUILDING_USE_CASE,
+  EditBuildingUseCase,
+  type EditBuildingOptions,
+  type EditBuildingResult,
+  type EditBuildingUseCaseDeps
+} from './use-cases/edit-building.use-case.ts';
+export {
+  UNDO_LAST_CHANGE_USE_CASE,
+  UndoLastChangeUseCase,
+  type UndoLastChangeUseCaseDeps
+} from './use-cases/undo-last-change.use-case.ts';
+export {
+  GET_AUDIT_LOG_USE_CASE,
+  GetAuditLogUseCase,
+  type GetAuditLogResult,
+  type GetAuditLogUseCaseDeps
+} from './use-cases/get-audit-log.use-case.ts';

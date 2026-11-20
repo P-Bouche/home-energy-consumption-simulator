@@ -139,13 +139,18 @@ describe('runMigrations', () => {
     expect(calls.map((c) => c.text)).toContain('ROLLBACK');
   });
 
-  it('the checked-in migration set is schema v1 + v2 (P2 simulations)', () => {
+  it('the checked-in migration set is schema v1 + v2 (P2 simulations) + v3 (P4 audit)', () => {
     const realDir = fileURLToPath(new URL('../../../infrastructure/postgres/migrations', import.meta.url));
     const files = readdirSync(realDir).filter((f) => f.endsWith('.sql')).sort();
-    expect(files).toEqual(['0001_init.sql', '0002_simulations.sql']);
+    expect(files).toEqual(['0001_init.sql', '0002_simulations.sql', '0003_audit.sql']);
     const v2 = readFileSync(path.join(realDir, '0002_simulations.sql'), 'utf8');
     expect(v2).toContain('CREATE TABLE IF NOT EXISTS simulations');
     expect(v2).toContain('CREATE TABLE IF NOT EXISTS simulation_jobs');
     expect(v2).toContain("WHERE status IN ('queued', 'running')");
+    const v3 = readFileSync(path.join(realDir, '0003_audit.sql'), 'utf8');
+    expect(v3).toContain('ADD COLUMN IF NOT EXISTS version');
+    expect(v3).toContain('CREATE TABLE IF NOT EXISTS audit_entries');
+    expect(v3).toContain('audit_entries_no_row_mutation');
+    expect(v3).toContain('audit_entries_no_truncate');
   });
 });

@@ -4,6 +4,7 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { useImportStore } from '../store/import-store.ts';
 import { ImportReportView } from '../components/ImportReportView.tsx';
 import { SimulationPanel } from '../components/SimulationPanel.tsx';
+import { BuildingEditorPanel } from '../components/BuildingEditorPanel.tsx';
 
 /**
  * Upload page: file picker → POST /api/imports/dpe → import report view.
@@ -80,6 +81,7 @@ export function UploadPage() {
           </Box>
           <ImportReportView report={report} />
           <SimulationPanel buildingId={buildingId} />
+          <BuildingEditorPanel buildingId={buildingId} />
         </>
       )}
     </Container>
