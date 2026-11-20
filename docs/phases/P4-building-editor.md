@@ -10,6 +10,8 @@
 
 P4 lets users correct and enrich the imported building: walls, openings, roof, floor, systems — every change validated, audited, and re-simulable.
 
+Canonical prompt to start a Vibe session for this phase: [P4-vibe-prompt.md](P4-vibe-prompt.md).
+
 # Objective
 
 Provide a building editor (2D panel + 3D picking) where every modification is a validated domain command, persisted with an audit trail, marked `source: "user"` with high confidence, and immediately re-simulable through Open3CL.

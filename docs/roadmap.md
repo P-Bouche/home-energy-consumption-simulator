@@ -91,3 +91,20 @@ Detailed phase documentation (requirements, architecture, test plans, risks, exi
 - **Dependencies:** P3.
 - **Risks:** mesh quality and noise; file sizes; alignment drift.
 - **Success criteria:** a LiDAR/photogrammetry capture of a room converts into editable walls/openings and re-simulates via Open3CL.
+
+
+## Parallel Execution Plan (post-P1)
+
+After P1, phases run in parallel tracks. Each phase = one branch + one PR + green CI; merge order is flexible as long as the stated dependencies hold. Shared contracts (`SimulationPort.simulateBuilding`, scenario command tags, `Building.mergeGeometry`, geometry/CRS conventions) are frozen in small contract PRs before the parallel work starts, so phase branches only touch their own packages and conflicts stay minimal.
+
+| Track | Branch | Depends on | Runs in parallel with |
+| --- | --- | --- | --- |
+| P2 — Energy Simulation (critical path) | `feature/P2-energy-simulation` | P1 (merged) | everything |
+| P3 — 3D Reconstruction | `feature/P3-3d-reconstruction` | P1 only | P2, P4, P5 (heat-loss overlay stubbed until P2 merges, then a small integration PR) |
+| P4 — Building Editor (2D-first) | `feature/P4-building-editor` | P1 + P2 contract (`simulateBuilding`); branch off the P2 branch if P2 is in flight | P2, P3, P5 (3D picking integrated after P3 merges) |
+| P5 — Scenario Management (headless: no P3/P4) | `feature/P5-scenario-management` | P1 + P2 contract; branch off the P2 branch if P2 is in flight | P2, P3, P4 (uses declarative change-sets = the P4 command vocabulary; full audit trail lands with P4) |
+| P6/P7 — PDF / IFC import | `feature/P6-pdf-import`, `feature/P7-ifc-import` | P1 only | all of the above |
+
+Recommended launch order: **P2 starts now; P3 starts now; P4 and P5 branch off the P2 branch and merge right after P2.** Canonical prompts: [P2](phases/P2-vibe-prompt.md) · [P3](phases/P3-vibe-prompt.md) · [P4](phases/P4-vibe-prompt.md) · [P5](phases/P5-vibe-prompt.md).
+
+Rule for reviewers: never trust a green check alone — open the CI run and confirm steps executed (not `skipped`); see [docs/ci.md](ci.md).

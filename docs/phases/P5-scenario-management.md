@@ -10,6 +10,8 @@
 
 P5 introduces renovation scenarios: named sets of modifications applied to a building, each simulated through Open3CL, and compared side by side in under 1 second.
 
+Canonical prompt to start a Vibe session for this phase: [P5-vibe-prompt.md](P5-vibe-prompt.md).
+
 # Objective
 
 Let a user create scenarios ("Insulate walls", "Replace boiler + windows", …), run each through Open3CL, and compare consumption, emissions, labels, and estimated cost against the baseline — with comparison results delivered in under 1 second.

@@ -10,6 +10,8 @@
 
 P3 reconstructs a navigable 3D model of the dwelling from the imported `Building`, including heat-loss visualization, in under 2 seconds.
 
+Canonical prompt to start a Vibe session for this phase: [P3-vibe-prompt.md](P3-vibe-prompt.md).
+
 # Objective
 
 Render any imported building in 3D (walls, roof, floors, windows, doors, rooms) with per-element heat-loss coloring, reconstructing missing geometry from the DPE data and marking every inferred element visually.
