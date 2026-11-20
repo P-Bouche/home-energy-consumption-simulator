@@ -46,4 +46,48 @@ export interface ErrorBody {
   readonly error: string;
   readonly message: string;
   readonly schemaErrors?: readonly string[];
+  readonly jobId?: string;
+  readonly code?: string;
+}
+
+/**
+ * Simulation API contract (P2), mirrors the API DTOs in apps/api.
+ */
+export interface SimulationResultJson {
+  readonly id: string;
+  readonly buildingId: string;
+  readonly inputHash: string;
+  readonly engineVersion: string;
+  readonly createdAt: string;
+  readonly consumptionKwh: number;
+  readonly consumptionKwhM2An: number | null;
+  readonly emissionsKg: number;
+  readonly emissionsKgCo2M2An: number | null;
+  readonly energyLabel: string;
+  readonly climateLabel: string;
+  readonly rawEngineOutput: Record<string, unknown>;
+}
+
+export interface SimulationJobJson {
+  readonly id: string;
+  readonly buildingId: string;
+  readonly inputHash: string;
+  readonly status: 'queued' | 'running' | 'done' | 'failed';
+  readonly resultId: string | null;
+  readonly error: { code: string; message: string } | null;
+  readonly createdAt: string;
+  readonly startedAt: string | null;
+  readonly finishedAt: string | null;
+}
+
+export interface RunSimulationResponse {
+  readonly mode: 'sync' | 'cached' | 'async';
+  readonly cached: boolean;
+  readonly result?: SimulationResultJson;
+  readonly job?: SimulationJobJson;
+}
+
+export interface SimulationHistoryResponse {
+  readonly buildingId: string;
+  readonly results: readonly SimulationResultJson[];
 }
