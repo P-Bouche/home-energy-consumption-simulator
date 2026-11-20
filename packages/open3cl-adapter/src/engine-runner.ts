@@ -88,25 +88,21 @@ export class EngineRunner {
   }
 
   private onMessage(message: unknown): void {
-    if (typeof message !== 'object' || message === null) {
+    if (!isEngineWorkerResponse(message)) {
       return;
     }
-    const response = message as Partial<EngineWorkerResponse>;
-    if (typeof response.id !== 'number') {
-      return;
-    }
-    const pending = this.pending.get(response.id);
+    const pending = this.pending.get(message.id);
     if (pending === undefined) {
       return;
     }
-    this.pending.delete(response.id);
+    this.pending.delete(message.id);
     if (this.pending.size === 0) {
       this.disarmKeepAlive();
     }
-    if (response.ok === true) {
-      pending.resolve((response as { result: EngineDpeResult | null }).result);
+    if (message.ok === true) {
+      pending.resolve(message.result);
     } else {
-      pending.reject(new Error(typeof response.message === 'string' ? response.message : 'engine worker failed'));
+      pending.reject(new Error(typeof message.message === 'string' ? message.message : 'engine worker failed'));
     }
   }
 
@@ -136,6 +132,13 @@ export class EngineRunner {
       this.keepAlive = null;
     }
   }
+}
+
+function isEngineWorkerResponse(message: unknown): message is EngineWorkerResponse {
+  if (typeof message !== 'object' || message === null) {
+    return false;
+  }
+  return typeof (message as { id?: unknown }).id === 'number';
 }
 
 let singleton: EngineRunner | null = null;
