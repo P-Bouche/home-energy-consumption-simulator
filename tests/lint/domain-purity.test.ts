@@ -16,6 +16,8 @@ describe('domain purity boundary (ESLint no-restricted-imports in packages/domai
     "import pg from 'pg';",
     "import { Controller } from '@nestjs/common';",
     "import { createElement } from 'react';",
+    "import * as THREE from 'three';",
+    "import { OrbitControls } from '@react-three/drei';",
     "import { randomUUID } from 'node:crypto';"
   ];
 
