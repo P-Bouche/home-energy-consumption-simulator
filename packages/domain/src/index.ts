@@ -5,6 +5,33 @@ export {
   type SimulationResultInput
 } from './simulation-result.ts';
 export {
+  createSimulationResultRecord,
+  simulationResultRecordFromJson,
+  simulationResultRecordToJson,
+  type SimulationInputHash,
+  type SimulationJobId,
+  type SimulationResultId,
+  type SimulationResultRecord,
+  type SimulationResultRecordInput,
+  type SimulationResultRecordJson
+} from './simulation-record.ts';
+export {
+  createSimulationJob,
+  SimulationJob,
+  simulationJobFromJson,
+  simulationJobToJson,
+  type SimulationJobError,
+  type SimulationJobInput,
+  type SimulationJobJson,
+  type SimulationJobStatus
+} from './simulation-job.ts';
+export {
+  canonicalJson,
+  computeBuildingInputHash,
+  toSimulationView,
+  type BuildingSimulationView
+} from './building-simulation-view.ts';
+export {
   EngineExecutionError,
   InvalidDpeError,
   SimulationError,
@@ -57,7 +84,12 @@ export type {
   ZoneId
 } from './entities.ts';
 export { Building, type BanCoordinates, type BuildingInput, type BuildingJson } from './building.ts';
-export { BuildingImported, type DomainEvent } from './events.ts';
+export {
+  BuildingImported,
+  SimulationCompleted,
+  SimulationFailed,
+  type DomainEvent
+} from './events.ts';
 export {
   createImportReport,
   importReportFromJson,
