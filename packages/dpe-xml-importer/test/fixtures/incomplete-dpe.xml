@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Synthetic minimal DPE used by AC-P1-04 tests: structurally valid but
+     deliberately incomplete (no surface_habitable_logement, no hsp, no
+     annee_construction, no envelope, no rooms). Not a real diagnostic. -->
+<dpe version="0.1.0">
+  <numero_dpe>TEST-INCOMPLETE-0001</numero_dpe>
+  <statut>ACTIF</statut>
+  <administratif>
+    <date_etablissement_dpe>2026-01-01</date_etablissement_dpe>
+    <enum_modele_dpe_id>1</enum_modele_dpe_id>
+    <enum_version_id>2.4</enum_version_id>
+  </administratif>
+  <logement>
+    <caracteristique_generale>
+      <surface_habitable_immeuble>95.5</surface_habitable_immeuble>
+      <enum_periode_construction_id>2</enum_periode_construction_id>
+    </caracteristique_generale>
+    <meteo>
+      <enum_zone_climatique_id>3</enum_zone_climatique_id>
+      <enum_classe_altitude_id>1</enum_classe_altitude_id>
+    </meteo>
+    <enveloppe>
+      <inertie>
+        <enum_classe_inertie_id>2</enum_classe_inertie_id>
+      </inertie>
+      <mur_collection />
+      <plancher_bas_collection />
+      <plancher_haut_collection />
+      <baie_vitree_collection />
+      <porte_collection />
+    </enveloppe>
+    <installation_chauffage_collection />
+    <ventilation_collection />
+  </logement>
+</dpe>
