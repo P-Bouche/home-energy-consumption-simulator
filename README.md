@@ -85,11 +85,53 @@ home-energy-consumption-simulator/
 
 Every feature follows: (1) restate objective, (2) analyze requirements, (3) identify risks, (4) propose architecture, (5) define tests, (6) implement, (7) validate. Quality gates: TypeScript strict mode, no unjustified `any`, JSDoc on public APIs, minimum 80% test coverage (Vitest/Jest/Playwright). See [AGENTS.md](AGENTS.md) for the full rules.
 
+## Local Development
+
+### Prerequisites
+
+- **Node.js 24.14.1** — the repo pins it in `.nvmrc`; use [fnm](https://github.com/Schniz/fnm) or nvm so the version switches automatically on `cd`.
+- **Docker Desktop** — only needed for the PostgreSQL/PostGIS persistence mode.
+- On Windows, allow local PowerShell scripts once: `Set-ExecutionPolicy RemoteSigned -Scope CurrentUser`.
+
+### Quick start (Windows)
+
+```powershell
+cd home-energy-consumption-simulator
+.\start-dev.ps1                 # full stack: Postgres (Docker) + API + web
+.\start-dev.ps1 -Mode memory    # no database required (data is lost on restart)
+```
+
+The script:
+
+1. Starts PostgreSQL/PostGIS via `docker compose` and waits for the healthcheck (skipped in `memory` mode);
+2. Runs `npm ci` on the first launch if `node_modules` is missing;
+3. Opens two titled windows: **API** on http://localhost:3000 (OpenAPI at `/docs`) and **Web** on http://localhost:5173, each with the right `DATABASE_URL`.
+
+Stop with `.\stop-dev.ps1` (stops the database; data is kept in the `postgres_data` volume; close the API/web windows manually).
+
+### Manual start (any OS)
+
+```bash
+npm ci
+docker compose -f infrastructure/docker/docker-compose.yml up -d --wait   # optional
+DATABASE_URL=postgres://postgres:postgres@localhost:5432/hecs npm run dev:api   # or DATABASE_URL=memory://
+npm run dev:web                # second terminal -> http://localhost:5173
+```
+
+### Quality gates
+
+```bash
+npm run lint && npm run typecheck
+npm run test                    # PostgreSQL suites are skipped unless DATABASE_URL is set
+DATABASE_URL=postgres://postgres:postgres@localhost:5432/hecs npm run test
+npx playwright install chromium && npm run test:e2e
+```
+
 ## Deployment
 
 The platform is **self-hostable with Docker / Docker Compose** — the Open3CL engine runs embedded in the API, so no external simulation service is needed.
 
-- **Local development:** `docker compose -f infrastructure/docker/docker-compose.yml up -d` starts PostgreSQL/PostGIS, the NestJS API, and the web app.
+- **Local development:** see [Local Development](#local-development) above.
 - **Dedicated server / VPS:** clone the repo on the server, fill `.env` (DB credentials, public URL, ports), then run the same compose stack with the `docker-compose.prod.yml` override behind a reverse proxy with TLS. Postgres stays bound to localhost; backups via scheduled `pg_dump` of the `postgres_data` volume.
 
 Full guide: [docs/deployment.md](docs/deployment.md).
