@@ -3,7 +3,7 @@
 | Field | Value |
 | --- | --- |
 | Phase | P2 — Energy Simulation |
-| Status | Planned |
+| Status | Implemented (see mapping doc [P2-simulation-mapping.md](P2-simulation-mapping.md) and benchmark report [P2-simulation-benchmark-report.md](P2-simulation-benchmark-report.md)) |
 | Team | 2 backend engineers, 1 architect |
 | Depends on | P1 exit criteria (frozen Building fixtures, stable repository, import report v1) |
 | Blocks | P4, P5, P8, P9 — every feature that needs a computed result |

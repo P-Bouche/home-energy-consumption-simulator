@@ -17,6 +17,7 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "benchmark": "node packages/open3cl-adapter/benchmark/run-benchmark.ts",
+    "benchmark:simulation": "node packages/open3cl-adapter/benchmark/run-simulation-benchmark.ts",
     "benchmark:import": "node packages/dpe-xml-importer/benchmark/run-import-benchmark.ts",
     "test:e2e": "playwright test",
     "dev:api": "npm run start -w apps/api",
