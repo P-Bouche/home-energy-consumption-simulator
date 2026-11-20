@@ -18,7 +18,16 @@ export default defineConfig({
   workers: 1,
   reporter: [['list']],
   use: {
-    baseURL: 'http://localhost:5173'
+    baseURL: 'http://localhost:5173',
+    launchOptions: {
+      // headless Chromium: software WebGL (SwiftShader) so the R3F viewer (P3)
+      // renders in CI without a GPU. HES_CHROMIUM_EXECUTABLE optionally points
+      // at a custom chromium binary (local sandboxes without system libs).
+      args: ['--enable-unsafe-swiftshader'],
+      ...(process.env['HES_CHROMIUM_EXECUTABLE'] !== undefined && process.env['HES_CHROMIUM_EXECUTABLE'] !== ''
+        ? { executablePath: process.env['HES_CHROMIUM_EXECUTABLE'] }
+        : {})
+    }
   },
   webServer: [
     {

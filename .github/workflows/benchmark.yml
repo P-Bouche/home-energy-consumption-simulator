@@ -13,10 +13,11 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-# Open3CL latency benchmarks on the Node 24 reference runtime (.nvmrc).
-# Runs unconditionally (the repo has shipped code since P0). Fails when
-# p95 >= 3000 ms. Raw engine path: `npm run benchmark` (P0);
-# building→simulation path: `npm run benchmark:simulation` (P2, AC-P2-01).
+# Benchmarks on the Node 24 reference runtime (.nvmrc).
+# They run unconditionally (the repo has shipped code since P0).
+# - Open3CL raw engine (P0): `npm run benchmark`, fails when p95 >= 3000 ms.
+# - building→simulation (P2, AC-P2-01): `npm run benchmark:simulation`, p95 >= 3000 ms.
+# - Geometry reconstruction (P3, AC-P3-01): `npm run benchmark:geometry`, p95 >= 2000 ms.
 jobs:
   benchmark:
     name: Open3CL p95 latency benchmark (Node from .nvmrc)
@@ -41,4 +42,25 @@ jobs:
           path: |
             docs/phases/P0-benchmark-report.md
             docs/phases/P2-simulation-benchmark-report.md
+          retention-days: 14
+
+  geometry-benchmark:
+    name: Geometry p95 reconstruction benchmark (Node from .nvmrc)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Run geometry benchmark (fails when p95 >= 2000 ms)
+        run: npm run benchmark:geometry
+      - name: Upload geometry benchmark report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: P3-geometry-benchmark-report
+          path: docs/phases/P3-geometry-benchmark-report.md
           retention-days: 14
