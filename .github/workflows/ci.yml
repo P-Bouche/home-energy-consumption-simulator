@@ -9,28 +9,23 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-# Until the P0 scaffolding lands (package.json + npm workspaces), this
-# repository contains documentation only: the guard on every step skips
-# cleanly. Once package.json exists, jobs run fully on every PR and push
-# to main. (Guard is at step level: hashFiles is not supported in
-# job-level `if`.)
+# Jobs run unconditionally: the repo has shipped code since P0 (package.json,
+# workspaces). The former hashFiles() progressive guards were removed — in this
+# repo they silently evaluated to false (every step "skipped" even on main),
+# making CI vacuous. See docs/ci.md.
 jobs:
   lint:
     name: Lint (ESLint)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        if: hashFiles('package.json') != ''
       - uses: actions/setup-node@v4
-        if: hashFiles('package.json') != ''
         with:
           node-version-file: .nvmrc
           cache: npm
       - name: Install dependencies
-        if: hashFiles('package.json') != ''
         run: npm ci
       - name: Run ESLint
-        if: hashFiles('package.json') != ''
         run: npm run lint
 
   typecheck:
@@ -38,17 +33,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        if: hashFiles('package.json') != ''
       - uses: actions/setup-node@v4
-        if: hashFiles('package.json') != ''
         with:
           node-version-file: .nvmrc
           cache: npm
       - name: Install dependencies
-        if: hashFiles('package.json') != ''
         run: npm ci
       - name: Run TypeScript typecheck (strict)
-        if: hashFiles('package.json') != ''
         run: npm run typecheck
 
   test:
@@ -72,43 +63,18 @@ jobs:
       DATABASE_URL: postgres://postgres:postgres@localhost:5432/hecs_test
     steps:
       - uses: actions/checkout@v4
-        if: hashFiles('package.json') != ''
       - uses: actions/setup-node@v4
-        if: hashFiles('package.json') != ''
         with:
           node-version-file: .nvmrc
           cache: npm
       - name: Install dependencies
-        if: hashFiles('package.json') != ''
         run: npm ci
       - name: Run unit + integration tests with coverage
-        if: hashFiles('package.json') != ''
         run: npm run test:coverage
       - name: Upload coverage report
-        if: always() && hashFiles('package.json') != ''
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
           path: coverage/
           retention-days: 14
-
-  e2e:
-    name: E2E (Playwright, AC-P1-05)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        if: hashFiles('package.json') != ''
-      - uses: actions/setup-node@v4
-        if: hashFiles('package.json') != ''
-        with:
-          node-version-file: .nvmrc
-          cache: npm
-      - name: Install dependencies
-        if: hashFiles('package.json') != ''
-        run: npm ci
-      - name: Install Playwright browser
-        if: hashFiles('package.json') != ''
-        run: npx playwright install --with-deps chromium
-      - name: Run e2e tests (API with in-memory repository + Vite dev server)
-        if: hashFiles('package.json') != ''
-        run: npm run test:e2e
