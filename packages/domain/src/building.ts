@@ -6,6 +6,8 @@ import {
   type ConfidenceJson
 } from './confidence.ts';
 import { DomainInvariantError } from './import-errors.ts';
+import type { Geometry } from './geometry.ts';
+import { ReconstructionService } from './reconstruction.ts';
 import type {
   BuildingId,
   Door,
@@ -325,6 +327,16 @@ export class Building {
    */
   get rooms(): readonly Room[] {
     return Object.freeze([...this.roomList]);
+  }
+
+  /**
+   * Reconstructs the 3D geometry of this building (Phase P3). Pure domain
+   * behavior, no I/O: delegates to the {@link ReconstructionService} with its
+   * versioned inference rules; every inferred element keeps its Confidence.
+   * Deterministic: same Building → same Geometry (same meshHash).
+   */
+  reconstructGeometry(): Geometry {
+    return new ReconstructionService().reconstruct(this);
   }
 
   /**

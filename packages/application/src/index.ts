@@ -1,8 +1,6 @@
+export { GEOMETRY_PORT, type GeometryPort } from './ports/geometry-port.ts';
 export { SIMULATION_PORT, type SimulationPort } from './ports/simulation-port.ts';
-export {
-  SIMULATION_REPOSITORY,
-  type SimulationRepository
-} from './ports/simulation-repository.ts';
+export { SIMULATION_REPOSITORY, type SimulationRepository } from './ports/simulation-repository.ts';
 export {
   BUILDING_REPOSITORY,
   type BuildingRepository,
@@ -30,6 +28,12 @@ export {
   type GetBuildingResult,
   type GetBuildingUseCaseDeps
 } from './use-cases/get-building.use-case.ts';
+export {
+  RECONSTRUCT_BUILDING_USE_CASE,
+  ReconstructBuildingUseCase,
+  type ReconstructBuildingResult,
+  type ReconstructBuildingUseCaseDeps
+} from './use-cases/reconstruct-building.use-case.ts';
 export {
   RUN_SIMULATION_USE_CASE,
   RunSimulationUseCase,
