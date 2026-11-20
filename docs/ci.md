@@ -7,8 +7,8 @@ GitHub Actions only. Node version is pinned via `.nvmrc` (Node 24 LTS — `@open
 | Workflow | Trigger | Jobs |
 | --- | --- | --- |
 | `.github/workflows/ci.yml` | every PR + push to `main` | `Lint (ESLint)` (engine boundary + domain purity), `Typecheck (tsc --noEmit)`, `Tests (Vitest) + coverage gate` (PostGIS service container for PG-backed tests, 80% thresholds on all four metrics, coverage artifact) |
-| `.github/workflows/e2e.yml` | PR/push touching `apps/**`, `packages/**`, `tests/e2e/**`, `playwright.config.ts`, lockfile | `E2E (Playwright, AC-P1-05)` — the root `playwright.config.ts` starts the API (`DATABASE_URL=memory://`) and the Vite dev server via `webServer`; report artifact on failure |
-| `.github/workflows/benchmark.yml` | every PR + push to `main` + manual dispatch | `Open3CL p95 latency benchmark (Node from .nvmrc)` — fails when p95 >= 3000 ms; runs both `npm run benchmark` (raw engine path) and `npm run benchmark:simulation` (building→simulation path, AC-P2-01); report artifacts |
+| `.github/workflows/e2e.yml` | PR/push touching `apps/**`, `packages/**`, `tests/e2e/**`, `playwright.config.ts`, lockfile | `E2E (Playwright, AC-P1-05)` — the root `playwright.config.ts` starts the API (`DATABASE_URL=memory://`) and the Vite dev server via `webServer`; report artifact on failure. P3 adds `tests/e2e/viewer.spec.ts` (AC-P3-02/03/04, headless WebGL via SwiftShader) whose per-fixture screenshots are uploaded as the `viewer-screenshots` artifact |
+| `.github/workflows/benchmark.yml` | every PR + push to `main` + manual dispatch | `Open3CL p95 latency benchmark (Node from .nvmrc)` — fails when p95 >= 3000 ms; runs both `npm run benchmark` (raw engine path) and `npm run benchmark:simulation` (building→simulation path, AC-P2-01); report artifacts. P3 adds the `Geometry p95 reconstruction benchmark (Node from .nvmrc)` job running `benchmark:geometry` — fails when p95 >= 2000 ms (AC-P3-01); report artifact |
 
 Planned later: `docker.yml` (build api/web images to ghcr.io), `dependabot.yml`.
 
@@ -37,6 +37,7 @@ npm run test:coverage   # PG-backed tests need DATABASE_URL (compose db: docker 
 npm run test:e2e        # self-contained: playwright.config.ts starts API (memory://) + Vite dev server
 npm run benchmark       # raw engine path; fails when p95 >= 3000 ms
 npm run benchmark:simulation  # building→simulation path (AC-P2-01); fails when p95 >= 3000 ms
+npm run benchmark:geometry  # P3 reconstruction, fails when p95 >= 2000 ms
 ```
 
 ## Coverage policy

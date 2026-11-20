@@ -75,6 +75,7 @@ flowchart LR
 - Application layer depends only on the domain; infrastructure implements the ports (dependency inversion).
 - **Implemented in P1:** `ImportDpeXmlUseCase` / `GetBuildingUseCase` with ports `DpeImporterPort` (implemented by `packages/dpe-xml-importer`) and `BuildingRepository` (implemented by `packages/postgres-repository`), exposed by `apps/api` as `POST /imports/dpe` and `GET /buildings/:id`. Mapping doc: [phases/P1-import-mapping.md](phases/P1-import-mapping.md).
 - **Implemented in P2:** `RunSimulationUseCase` / `GetSimulationHistoryUseCase` / `GetSimulationUseCase` / `GetSimulationJobUseCase` + `SimulationJobRunner`, with ports `SimulationPort` (extended with `simulateBuilding(building)`; implemented only by `packages/open3cl-adapter`) and `SimulationRepository` (Postgres schema v2 + in-memory), exposed as `POST /buildings/:id/simulations`, `GET /buildings/:id/simulations`, `GET /simulations/:id`, `GET /simulations/jobs/:id`. Mapping doc: [phases/P2-simulation-mapping.md](phases/P2-simulation-mapping.md).
+- **Implemented in P3:** `ReconstructBuildingUseCase` with the new `GeometryPort` (implemented by `packages/geometry` on top of the domain `ReconstructionService`), exposed as `GET /buildings/:id/geometry` (deterministic `Geometry` JSON + mesh hash; coordinate system and inference rules: [geometry.md](../geometry.md)). The heat-loss overlay is a read-only projection of the persisted `SimulationResult` (`projectHeatLoss` in the domain, fed by P2's `GET /buildings/:id/simulations`).
 
 ## 6. Infrastructure Architecture
 

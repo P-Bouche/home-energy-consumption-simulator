@@ -2,7 +2,7 @@
 
 An open-source **residential Digital Energy Twin** based on the **Open3CL** (3CL-DPE) engine: import a French DPE XML diagnostic, get an editable 3D model of the dwelling, run regulatory energy simulations, and compare renovation scenarios.
 
-**Status:** P0 (engine feasibility) and P1 (DPE XML import with confidence metadata) are done — see the [roadmap](docs/roadmap.md).
+**Status:** P0 (engine feasibility), P1 (DPE XML import with confidence metadata) and P3 (3D reconstruction + viewer with confidence marking) are done — see the [roadmap](docs/roadmap.md).
 
 ## Quick start
 
