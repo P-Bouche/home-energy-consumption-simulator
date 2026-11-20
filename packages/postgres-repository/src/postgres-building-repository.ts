@@ -1,5 +1,6 @@
 import { Building, importReportFromJson, type BuildingId, type ImportReport } from '@hes/domain';
-import type { BuildingRepository, SaveBuildingInput, StoredBuilding } from '@hes/application';
+import { BuildingNotFoundError, StaleVersionError } from '@hes/application';
+import type { BuildingRepository, SaveBuildingInput, StoredBuilding, UpdateBuildingInput } from '@hes/application';
 import type { Pool, PoolClient } from 'pg';
 
 /**
@@ -80,21 +81,63 @@ export class PostgresBuildingRepository implements BuildingRepository {
   }
 
   /**
-   * Loads the aggregate and report by id; null when unknown.
+   * Persists an edited aggregate with optimistic locking (P4, TR-P4-02) in a
+   * single transaction: `SELECT … FOR UPDATE`, version check, conditional
+   * `UPDATE`. The JSONB document is rewritten; the `version` column is the
+   * lock (not duplicated inside `data`).
+   *
+   * @throws BuildingNotFoundError when the id is unknown
+   * @throws StaleVersionError when the persisted version no longer equals
+   * expectedVersion (another edit won the race → HTTP 409)
+   */
+  async update(input: UpdateBuildingInput): Promise<StoredBuilding> {
+    const { building, report, expectedVersion } = input;
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+      const locked = await client.query('SELECT version FROM buildings WHERE id = $1 FOR UPDATE', [building.id]);
+      const lockedRow = locked.rows[0] as { version: number } | undefined;
+      if (lockedRow === undefined) {
+        throw new BuildingNotFoundError(building.id);
+      }
+      if (lockedRow.version !== expectedVersion) {
+        throw new StaleVersionError(building.id, expectedVersion, lockedRow.version);
+      }
+      const updated = await client.query(
+        'UPDATE buildings SET data = $2, version = $3 WHERE id = $1 AND version = $4',
+        [JSON.stringify(building.toJson()), building.version, building.id, expectedVersion]
+      );
+      if (updated.rowCount !== 1) {
+        throw new StaleVersionError(building.id, expectedVersion, lockedRow.version);
+      }
+      await client.query('COMMIT');
+      return { building, report };
+    } catch (error) {
+      await rollbackQuietly(client, error);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
+   * Loads the aggregate and report by id; null when unknown. The aggregate is
+   * rebuilt with its optimistic-locking version from the `version` column
+   * (schema v3; defaults to 0 for pre-v3 rows).
    */
   async findById(id: BuildingId): Promise<StoredBuilding | null> {
     const result = await this.pool.query(
-      `SELECT b.data AS building, r.report AS report
+      `SELECT b.data AS building, b.version AS version, r.report AS report
        FROM buildings b
        JOIN import_reports r ON r.building_id = b.id
        WHERE b.id = $1`,
       [id]
     );
-    const row = result.rows[0] as { building: unknown; report: unknown } | undefined;
+    const row = result.rows[0] as { building: unknown; version: number; report: unknown } | undefined;
     if (row === undefined) {
       return null;
     }
-    const building = Building.fromJson(row.building as Parameters<typeof Building.fromJson>[0]);
+    const building = Building.fromJson(row.building as Parameters<typeof Building.fromJson>[0], row.version);
     const report = importReportFromJson(row.report as Parameters<typeof importReportFromJson>[0]);
     return { building, report: report as ImportReport };
   }

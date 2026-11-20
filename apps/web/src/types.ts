@@ -43,6 +43,11 @@ export interface ImportDpeResponse {
   readonly report: ImportReportJson;
 }
 
+export interface FieldError {
+  readonly field: string;
+  readonly message: string;
+}
+
 export interface ErrorBody {
   readonly statusCode: number;
   readonly error: string;
@@ -50,6 +55,10 @@ export interface ErrorBody {
   readonly schemaErrors?: readonly string[];
   readonly jobId?: string;
   readonly code?: string;
+  readonly fieldErrors?: readonly FieldError[];
+  readonly issues?: readonly string[];
+  readonly expectedVersion?: number;
+  readonly currentVersion?: number;
 }
 
 /**
@@ -125,4 +134,123 @@ export interface SimulationResultJson {
   readonly energyLabel: string;
   readonly climateLabel: string;
   readonly rawEngineOutput: Record<string, unknown>;
+}
+
+/**
+ * P4 editor API contract (mirrors packages/domain JSON shapes).
+ */
+export interface ConfidenceJson<T> {
+  readonly value: T;
+  readonly source: string;
+  readonly confidence: number;
+  readonly importDate: string;
+}
+
+export interface EnvelopeElementJson {
+  readonly id: string;
+  readonly buildingId: string;
+  readonly description: ConfidenceJson<string>;
+  readonly areaM2: ConfidenceJson<number> | null;
+  readonly uValueWm2K: ConfidenceJson<number> | null;
+}
+
+export interface WallJson extends EnvelopeElementJson {
+  readonly kind: 'wall';
+  readonly orientation: ConfidenceJson<string> | null;
+  readonly wallType: ConfidenceJson<string> | null;
+  readonly adjacencyType: ConfidenceJson<string> | null;
+}
+
+export interface WindowJson extends EnvelopeElementJson {
+  readonly kind: 'window';
+  readonly orientation: ConfidenceJson<string> | null;
+  readonly count: ConfidenceJson<number>;
+  readonly solarFactorSw: ConfidenceJson<number> | null;
+  readonly glazingType: ConfidenceJson<string> | null;
+  readonly frameMaterial: ConfidenceJson<string> | null;
+}
+
+export interface RoofJson extends EnvelopeElementJson {
+  readonly kind: 'roof';
+  readonly roofType: ConfidenceJson<string> | null;
+  readonly adjacencyType: ConfidenceJson<string> | null;
+}
+
+export interface FloorJson extends EnvelopeElementJson {
+  readonly kind: 'floor';
+  readonly floorType: ConfidenceJson<string> | null;
+  readonly adjacencyType: ConfidenceJson<string> | null;
+}
+
+export interface HeatingSystemJson {
+  readonly id: string;
+  readonly buildingId: string;
+  readonly description: ConfidenceJson<string>;
+  readonly installationType: ConfidenceJson<string> | null;
+  readonly heatedAreaM2: ConfidenceJson<number> | null;
+}
+
+export interface VentilationSystemJson {
+  readonly id: string;
+  readonly buildingId: string;
+  readonly description: ConfidenceJson<string>;
+  readonly ventilationType: ConfidenceJson<string> | null;
+  readonly ventilatedAreaM2: ConfidenceJson<number> | null;
+  readonly q4paConv: ConfidenceJson<number> | null;
+}
+
+export interface BuildingJson {
+  readonly id: string;
+  readonly walls: readonly WallJson[];
+  readonly windows: readonly WindowJson[];
+  readonly roofs: readonly RoofJson[];
+  readonly floors: readonly FloorJson[];
+  readonly heatingSystems: readonly HeatingSystemJson[];
+  readonly ventilationSystems: readonly VentilationSystemJson[];
+}
+
+export interface GetBuildingResponse {
+  readonly building: BuildingJson;
+  readonly version: number;
+  readonly report: ImportReportJson;
+}
+
+/**
+ * Versioned P4 command vocabulary (COMMAND_VOCABULARY_VERSION = 1) — shared
+ * contract with the API and P5 scenarios.
+ */
+export type BuildingCommandJson =
+  | { readonly type: 'building.wall.update.v1'; readonly buildingId: string; readonly wallId: string; readonly uValueWm2K?: number | null; readonly areaM2?: number | null; readonly description?: string; readonly orientation?: string | null; readonly wallType?: string | null; readonly adjacencyType?: string | null }
+  | { readonly type: 'building.window.update.v1'; readonly buildingId: string; readonly windowId: string; readonly uValueWm2K?: number | null; readonly areaM2?: number | null; readonly description?: string; readonly orientation?: string | null; readonly count?: number | null; readonly solarFactorSw?: number | null; readonly glazingType?: string | null; readonly frameMaterial?: string | null }
+  | { readonly type: 'building.roof.update.v1'; readonly buildingId: string; readonly roofId: string; readonly uValueWm2K?: number | null; readonly areaM2?: number | null; readonly description?: string; readonly roofType?: string | null; readonly adjacencyType?: string | null }
+  | { readonly type: 'building.floor.update.v1'; readonly buildingId: string; readonly floorId: string; readonly uValueWm2K?: number | null; readonly areaM2?: number | null; readonly description?: string; readonly floorType?: string | null; readonly adjacencyType?: string | null }
+  | { readonly type: 'building.heating-system.update.v1'; readonly buildingId: string; readonly systemId: string; readonly description?: string; readonly installationType?: string | null; readonly heatedAreaM2?: number | null }
+  | { readonly type: 'building.ventilation-system.update.v1'; readonly buildingId: string; readonly systemId: string; readonly description?: string; readonly ventilationType?: string | null; readonly ventilatedAreaM2?: number | null; readonly q4paConv?: number | null };
+
+export interface FieldChangeJson {
+  readonly field: string;
+  readonly oldValue: ConfidenceJson<unknown> | null;
+  readonly newValue: ConfidenceJson<unknown> | null;
+}
+
+export interface AuditEntryJson {
+  readonly id: string;
+  readonly buildingId: string;
+  readonly userId: string;
+  readonly timestamp: string;
+  readonly commandType: string;
+  readonly command: BuildingCommandJson;
+  readonly changes: readonly FieldChangeJson[];
+  readonly version: number;
+}
+
+export interface EditBuildingResponse {
+  readonly building: BuildingJson;
+  readonly version: number;
+  readonly auditEntry: AuditEntryJson;
+}
+
+export interface AuditLogResponse {
+  readonly buildingId: string;
+  readonly entries: readonly AuditEntryJson[];
 }

@@ -22,6 +22,22 @@ export interface Confidence<T> {
 export const MEASURED_SOURCE_PREFIX = 'dpe-xml:';
 
 /**
+ * Source used for values entered by a user in the editor (P4). User-supplied
+ * values are stored with confidence 1.0: the user asserts them explicitly.
+ */
+export const USER_SOURCE = 'user';
+
+/**
+ * Wraps a user-supplied value (P4 editor): `source: "user"`, confidence 1.0.
+ *
+ * @param value - the value entered by the user
+ * @param at - the date of the edit
+ */
+export function userSupplied<T>(value: T, at: Date): Confidence<T> {
+  return createConfidence(value, USER_SOURCE, 1, at);
+}
+
+/**
  * JSON shape of a Confidence value (importDate as ISO-8601 string).
  */
 export interface ConfidenceJson<T> {

@@ -1,6 +1,10 @@
 import type {
+  AuditLogResponse,
+  BuildingCommandJson,
+  EditBuildingResponse,
   ErrorBody,
   GeometryResponse,
+  GetBuildingResponse,
   ImportDpeResponse,
   RunSimulationResponse,
   SimulationHistoryResponse,
@@ -99,4 +103,66 @@ export async function getSimulationJob(jobId: string): Promise<SimulationJobJson
     throw new ApiError(response.status, body, body?.message ?? `job polling failed with status ${response.status}`);
   }
   return (await response.json()) as SimulationJobJson;
+}
+
+/**
+ * Loads a building with its optimistic-locking version: GET /api/buildings/:id.
+ */
+export async function getBuilding(buildingId: string): Promise<GetBuildingResponse> {
+  const response = await fetch(`/api/buildings/${buildingId}`);
+  if (!response.ok) {
+    const body = (await response.json().catch(() => null)) as ErrorBody | null;
+    throw new ApiError(response.status, body, body?.message ?? `get building failed with status ${response.status}`);
+  }
+  return (await response.json()) as GetBuildingResponse;
+}
+
+/**
+ * Applies an edit command: PATCH /api/buildings/:id with `If-Match: <version>`
+ * and `x-user-id`. Throws ApiError with body.fieldErrors on 400 (validation)
+ * and body.currentVersion on 409 (stale version).
+ */
+export async function patchBuilding(
+  buildingId: string,
+  command: BuildingCommandJson,
+  version: number,
+  userId: string
+): Promise<EditBuildingResponse> {
+  const response = await fetch(`/api/buildings/${buildingId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', 'If-Match': String(version), 'x-user-id': userId },
+    body: JSON.stringify(command)
+  });
+  if (!response.ok) {
+    const body = (await response.json().catch(() => null)) as ErrorBody | null;
+    throw new ApiError(response.status, body, body?.message ?? `edit failed with status ${response.status}`);
+  }
+  return (await response.json()) as EditBuildingResponse;
+}
+
+/**
+ * Reads the audit trail: GET /api/buildings/:id/audit.
+ */
+export async function getAuditLog(buildingId: string): Promise<AuditLogResponse> {
+  const response = await fetch(`/api/buildings/${buildingId}/audit`);
+  if (!response.ok) {
+    const body = (await response.json().catch(() => null)) as ErrorBody | null;
+    throw new ApiError(response.status, body, body?.message ?? `audit failed with status ${response.status}`);
+  }
+  return (await response.json()) as AuditLogResponse;
+}
+
+/**
+ * Undoes the last change: POST /api/buildings/:id/undo with `If-Match`.
+ */
+export async function undoBuilding(buildingId: string, version: number, userId: string): Promise<EditBuildingResponse> {
+  const response = await fetch(`/api/buildings/${buildingId}/undo`, {
+    method: 'POST',
+    headers: { 'If-Match': String(version), 'x-user-id': userId }
+  });
+  if (!response.ok) {
+    const body = (await response.json().catch(() => null)) as ErrorBody | null;
+    throw new ApiError(response.status, body, body?.message ?? `undo failed with status ${response.status}`);
+  }
+  return (await response.json()) as EditBuildingResponse;
 }

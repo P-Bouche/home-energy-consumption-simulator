@@ -43,6 +43,8 @@ export {
   MEASURED_SOURCE_PREFIX,
   measured,
   reviveConfidenceDates,
+  USER_SOURCE,
+  userSupplied,
   type Confidence,
   type ConfidenceJson
 } from './confidence.ts';
@@ -114,10 +116,48 @@ export {
   type HeatLossShare
 } from './heat-loss.ts';
 export {
+  auditEntryFromEvent,
+  auditEntryFromJson,
+  auditEntryToJson,
+  createAuditEntry,
+  inverseOfAuditEntry,
+  type AuditEntry,
+  type AuditEntryInput,
+  type AuditEntryJson
+} from './audit.ts';
+export {
+  COMMAND_EDITABLE_FIELDS,
+  COMMAND_ELEMENT,
+  COMMAND_VOCABULARY_VERSION,
+  assertCommandFieldsValid,
+  inverseOfCommand,
+  parseBuildingCommand,
+  validateCommandFields,
+  type BuildingCommand,
+  type CommandTypeTag,
+  type UpdateFloorCommand,
+  type UpdateHeatingSystemCommand,
+  type UpdateRoofCommand,
+  type UpdateVentilationSystemCommand,
+  type UpdateWallCommand,
+  type UpdateWindowCommand
+} from './commands.ts';
+export {
+  CommandError,
+  CommandValidationError,
+  ElementNotFoundError,
+  InvalidCommandError,
+  type CommandErrorCode,
+  type FieldError
+} from './command-errors.ts';
+export { type Either, isLeft, isRight, left, right } from './either.ts';
+export {
   BuildingImported,
+  BuildingUpdated,
   SimulationCompleted,
   SimulationFailed,
-  type DomainEvent
+  type DomainEvent,
+  type FieldChange
 } from './events.ts';
 export {
   createImportReport,

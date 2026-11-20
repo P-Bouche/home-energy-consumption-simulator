@@ -2,9 +2,18 @@ import {
   confidenceFromJson,
   confidenceToJson,
   reviveConfidenceDates,
+  userSupplied,
   type Confidence,
   type ConfidenceJson
 } from './confidence.ts';
+import {
+  COMMAND_EDITABLE_FIELDS,
+  COMMAND_ELEMENT,
+  validateCommandFields,
+  type BuildingCommand
+} from './commands.ts';
+import { CommandValidationError, ElementNotFoundError, type CommandError, type FieldError } from './command-errors.ts';
+import { type Either, left, right } from './either.ts';
 import { DomainInvariantError } from './import-errors.ts';
 import type { Geometry } from './geometry.ts';
 import { ReconstructionService } from './reconstruction.ts';
@@ -22,7 +31,7 @@ import type {
   Window,
   Zone
 } from './entities.ts';
-import { BuildingImported, type DomainEvent } from './events.ts';
+import { BuildingImported, BuildingUpdated, type DomainEvent, type FieldChange } from './events.ts';
 
 /**
  * BAN geolocation coordinates (Lambert-93, EPSG:2154), when the DPE
@@ -66,6 +75,13 @@ export interface BuildingInput {
   readonly ventilationSystems: readonly VentilationSystem[];
   readonly photovoltaicSystems: readonly PhotovoltaicSystem[];
   readonly importedAt: Date;
+  /**
+   * Optimistic-locking version of the aggregate (P4): 0 at import, +1 on every
+   * successfully applied command. Not part of {@link BuildingJson} (the
+   * persistence document is versioned separately in the `buildings.version`
+   * column, so the simulation input hash reflects content only).
+   */
+  readonly version?: number;
   /**
    * The verbatim source DPE XML document this aggregate was imported from
    * (P2), or null when the building was not built from a DPE XML file.
@@ -138,6 +154,11 @@ function cFromJ<T>(j: ConfidenceJson<T> | null): Confidence<T> | null {
  */
 export class Building {
   readonly id: BuildingId;
+  /**
+   * Optimistic-locking version (P4): 0 at import, incremented by every
+   * successfully applied command. Enforced by the repository on update.
+   */
+  readonly version: number;
   readonly dpeNumber: Confidence<string> | null;
   readonly status: Confidence<string> | null;
   readonly address: Confidence<string> | null;
@@ -171,6 +192,7 @@ export class Building {
 
   private constructor(input: BuildingInput) {
     this.id = input.id;
+    this.version = input.version ?? 0;
     this.dpeNumber = input.dpeNumber;
     this.status = input.status;
     this.address = input.address;
@@ -220,11 +242,16 @@ export class Building {
   /**
    * Rebuilds a Building aggregate from its JSON shape (persistence read
    * path). Does not re-emit events.
+   *
+   * @param json - the BuildingJson persistence document
+   * @param version - optimistic-locking version stored in the `buildings.version`
+   * column (P4); defaults to 0 for documents persisted before schema v3
    */
-  static fromJson(json: BuildingJson): Building {
+  static fromJson(json: BuildingJson, version = 0): Building {
     const revived = reviveConfidenceDates(json);
     const input: BuildingInput = {
       id: json.id,
+      version,
       dpeNumber: cFromJ(json.dpeNumber),
       status: cFromJ(json.status),
       address: cFromJ(json.address),
@@ -346,6 +373,187 @@ export class Building {
     const events = [...this.events];
     this.events.length = 0;
     return events;
+  }
+
+  /**
+   * Applies a validated domain command to the aggregate (P4, TR-P4-01) and
+   * returns the NEW aggregate: pure — this instance is never modified. Every
+   * user-supplied value is wrapped in `Confidence { source: "user",
+   * confidence: 1.0 }`, the version is incremented and a {@link BuildingUpdated}
+   * event is emitted. Domain invariants are enforced before anything is
+   * changed: an un-simulable state (negative U-value, window larger than the
+   * walls, …) is rejected and the aggregate is left unchanged.
+   *
+   * @param command - the command to apply (see packages/domain/src/commands.ts)
+   * @param ctx - `now` (edit timestamp) and `userId` (audit provenance)
+   * @returns Right(new Building) on success, Left(CommandError) on rejection
+   */
+  apply(command: BuildingCommand, ctx: { readonly now: Date; readonly userId: string }): Either<CommandError, Building> {
+    if (command.buildingId !== this.id) {
+      return left(
+        new CommandValidationError([
+          { field: 'buildingId', message: `command targets building ${command.buildingId}, not ${this.id}` }
+        ])
+      );
+    }
+    const fieldErrors = validateCommandFields(command);
+    if (fieldErrors.length > 0) {
+      return left(new CommandValidationError(fieldErrors));
+    }
+    const applied = this.applyToElements(command, ctx.now);
+    if (!applied.ok) {
+      return applied;
+    }
+    const { patch, changes } = applied.value;
+    const next = Building.derive(this, patch, this.version + 1);
+    next.events.push(
+      new BuildingUpdated({
+        buildingId: this.id,
+        userId: ctx.userId,
+        command,
+        changes,
+        version: next.version,
+        occurredAt: ctx.now
+      })
+    );
+    return right(next);
+  }
+
+  /**
+   * Pure copy of this aggregate with `commands` applied in order (P4; the
+   * building block P5 scenarios are made of). Returns Left on the first
+   * rejected command; this instance is never modified and all
+   * {@link BuildingUpdated} events are accumulated on the returned aggregate.
+   *
+   * @param commands - commands to apply in order
+   * @param ctx - `now` and `userId`
+   */
+  fork(
+    commands: readonly BuildingCommand[],
+    ctx: { readonly now: Date; readonly userId: string }
+  ): Either<CommandError, Building> {
+    const state: { current: Building; events: DomainEvent[] } = { current: this, events: [] };
+    for (const command of commands) {
+      const result = state.current.apply(command, ctx);
+      if (!result.ok) {
+        return result;
+      }
+      state.events.push(...result.value.pullDomainEvents());
+      state.current = result.value;
+    }
+    for (const event of state.events) {
+      state.current.events.push(event);
+    }
+    return right(state.current);
+  }
+
+  /**
+   * Validates cross-element invariants and computes the element patch + field
+   * changes for a command. Returns Left(ElementNotFoundError /
+   * CommandValidationError) without touching the aggregate.
+   */
+  private applyToElements(
+    command: BuildingCommand,
+    now: Date
+  ): Either<CommandError, { patch: Partial<BuildingInput>; changes: FieldChange[] }> {
+    const { idField, kind } = COMMAND_ELEMENT[command.type];
+    const rec = command as unknown as Record<string, unknown>;
+    const elementId = rec[idField] as string;
+    const fields = COMMAND_EDITABLE_FIELDS[command.type];
+
+    type ElementListKey = 'walls' | 'windows' | 'roofs' | 'floors' | 'heatingSystems' | 'ventilationSystems';
+    const listKey = (
+      {
+        wall: 'walls',
+        window: 'windows',
+        roof: 'roofs',
+        floor: 'floors',
+        'heating-system': 'heatingSystems',
+        'ventilation-system': 'ventilationSystems'
+      } as const
+    )[kind] as ElementListKey;
+    const list = this[listKey] as unknown as readonly Record<string, unknown>[];
+    const index = list.findIndex((el) => el['id'] === elementId);
+    if (index < 0) {
+      return left(new ElementNotFoundError(kind, elementId));
+    }
+    const element = list[index] as Record<string, unknown>;
+
+    const changes: FieldChange[] = [];
+    const patched: Record<string, unknown> = { ...element };
+    for (const field of Object.keys(fields)) {
+      const value = rec[field];
+      if (value === undefined) continue;
+      const oldConfidence = (element[field] ?? null) as Confidence<unknown> | null;
+      const newConfidence = value === null ? null : userSupplied(value, now);
+      patched[field] = newConfidence;
+      changes.push({
+        field,
+        oldValue: oldConfidence === null ? null : (confidenceToJson(oldConfidence) as ConfidenceJson<unknown>),
+        newValue: newConfidence === null ? null : (confidenceToJson(newConfidence) as ConfidenceJson<unknown>)
+      });
+    }
+
+    if (command.type === 'building.window.update.v1' && rec['areaM2'] !== undefined) {
+      const wallsArea = this.walls.reduce((sum, w) => sum + (w.areaM2?.value ?? 0), 0);
+      const windowsArea = this.windows.reduce((sum, w) => {
+        const area = w.id === elementId && rec['areaM2'] !== null ? (rec['areaM2'] as number) : (w.areaM2?.value ?? 0);
+        return sum + area;
+      }, 0);
+      if (wallsArea > 0 && windowsArea > wallsArea) {
+        const error: FieldError = {
+          field: 'areaM2',
+          message: `total window area (${windowsArea} m²) would exceed the total wall area (${wallsArea} m²)`
+        };
+        return left(new CommandValidationError([error]));
+      }
+    }
+
+    const newList = [...list];
+    newList[index] = patched;
+    return right({ patch: { [listKey]: newList } as unknown as Partial<BuildingInput>, changes });
+  }
+
+  /**
+   * Builds a derived aggregate (private constructor path) with a new version.
+   * The source document and import metadata are carried over unchanged.
+   */
+  private static derive(prev: Building, patch: Partial<BuildingInput>, version: number): Building {
+    const input: BuildingInput = {
+      id: prev.id,
+      version,
+      dpeNumber: prev.dpeNumber,
+      status: prev.status,
+      address: prev.address,
+      banId: prev.banId,
+      banCoordinates: prev.banCoordinates,
+      constructionYear: prev.constructionYear,
+      constructionPeriod: prev.constructionPeriod,
+      livingAreaM2: prev.livingAreaM2,
+      buildingLivingAreaM2: prev.buildingLivingAreaM2,
+      ceilingHeightM: prev.ceilingHeightM,
+      levelCount: prev.levelCount,
+      apartmentCount: prev.apartmentCount,
+      climateZone: prev.climateZone,
+      altitudeClass: prev.altitudeClass,
+      altitudeM: prev.altitudeM,
+      thermalInertiaClass: prev.thermalInertiaClass,
+      zones: prev.zones,
+      rooms: prev.rooms,
+      walls: prev.walls,
+      roofs: prev.roofs,
+      floors: prev.floors,
+      windows: prev.windows,
+      doors: prev.doors,
+      thermalZones: prev.thermalZones,
+      heatingSystems: prev.heatingSystems,
+      ventilationSystems: prev.ventilationSystems,
+      photovoltaicSystems: prev.photovoltaicSystems,
+      importedAt: prev.importedAt,
+      sourceDpeXml: prev.sourceDpeXml,
+      ...patch
+    };
+    return new Building(input);
   }
 
   /**

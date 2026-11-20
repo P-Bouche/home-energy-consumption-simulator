@@ -2,20 +2,26 @@ import { Catch, HttpException, Logger, type ArgumentsHost, type ExceptionFilter 
 import { MulterError } from 'multer';
 import type { Request, Response } from 'express';
 import {
+  CommandValidationError,
   DpeFileTooLargeError,
   DpeSchemaValidationError,
+  ElementNotFoundError,
   EmptyDpeInputError,
   EngineExecutionError,
+  InvalidCommandError,
   InvalidDpeError,
   InvalidDpeXmlError,
   SimulationMappingError,
-  UnsupportedDpeModelError
+  UnsupportedDpeModelError,
+  type FieldError
 } from '@hes/domain';
 import {
   BuildingNotFoundError,
+  NothingToUndoError,
   SimulationAlreadyInFlightError,
   SimulationJobNotFoundError,
-  SimulationNotFoundError
+  SimulationNotFoundError,
+  StaleVersionError
 } from '@hes/application';
 
 interface ErrorBody {
@@ -25,6 +31,12 @@ interface ErrorBody {
   readonly schemaErrors?: readonly string[];
   readonly jobId?: string;
   readonly code?: string;
+  readonly fieldErrors?: readonly FieldError[];
+  readonly issues?: readonly string[];
+  readonly expectedVersion?: number;
+  readonly currentVersion?: number;
+  readonly elementType?: string;
+  readonly elementId?: string;
 }
 
 /**
@@ -71,6 +83,37 @@ export class HttpExceptionFilter implements ExceptionFilter {
       this.send(response, 409, 'Conflict', exception.message, undefined, exception.jobId);
       return;
     }
+    // P4 editing errors: 409 stale version, 400 invalid/validation/nothing-to-undo, 404 unknown element
+    if (exception instanceof StaleVersionError) {
+      this.send(response, 409, 'Conflict', exception.message, undefined, undefined, exception.code, {
+        expectedVersion: exception.expectedVersion,
+        currentVersion: exception.currentVersion
+      });
+      return;
+    }
+    if (exception instanceof InvalidCommandError) {
+      this.send(response, 400, 'Bad Request', exception.message, undefined, undefined, exception.code, {
+        issues: exception.issues
+      });
+      return;
+    }
+    if (exception instanceof CommandValidationError) {
+      this.send(response, 400, 'Bad Request', exception.message, undefined, undefined, exception.code, {
+        fieldErrors: exception.fieldErrors
+      });
+      return;
+    }
+    if (exception instanceof NothingToUndoError) {
+      this.send(response, 400, 'Bad Request', exception.message, undefined, undefined, exception.code);
+      return;
+    }
+    if (exception instanceof ElementNotFoundError) {
+      this.send(response, 404, 'Not Found', exception.message, undefined, undefined, exception.code, {
+        elementType: exception.elementType,
+        elementId: exception.elementId
+      });
+      return;
+    }
     // P2 simulation failures (FR-P2-05): mapping errors → 422, engine errors → 500
     if (exception instanceof SimulationMappingError || exception instanceof InvalidDpeError || exception instanceof InvalidDpeXmlError) {
       this.send(response, 422, 'Unprocessable Entity', exception.message, [], undefined, exception.code);
@@ -106,7 +149,15 @@ export class HttpExceptionFilter implements ExceptionFilter {
     message: string,
     schemaErrors?: readonly string[],
     jobId?: string,
-    code?: string
+    code?: string,
+    extra?: {
+      readonly fieldErrors?: readonly FieldError[];
+      readonly issues?: readonly string[];
+      readonly expectedVersion?: number;
+      readonly currentVersion?: number;
+      readonly elementType?: string;
+      readonly elementId?: string;
+    }
   ): void {
     const body: ErrorBody = {
       statusCode: status,
@@ -114,7 +165,13 @@ export class HttpExceptionFilter implements ExceptionFilter {
       message,
       ...(schemaErrors !== undefined ? { schemaErrors } : {}),
       ...(jobId !== undefined ? { jobId } : {}),
-      ...(code !== undefined ? { code } : {})
+      ...(code !== undefined ? { code } : {}),
+      ...(extra?.fieldErrors !== undefined ? { fieldErrors: extra.fieldErrors } : {}),
+      ...(extra?.issues !== undefined ? { issues: extra.issues } : {}),
+      ...(extra?.expectedVersion !== undefined ? { expectedVersion: extra.expectedVersion } : {}),
+      ...(extra?.currentVersion !== undefined ? { currentVersion: extra.currentVersion } : {}),
+      ...(extra?.elementType !== undefined ? { elementType: extra.elementType } : {}),
+      ...(extra?.elementId !== undefined ? { elementId: extra.elementId } : {})
     };
     response.status(status).json(body);
   }

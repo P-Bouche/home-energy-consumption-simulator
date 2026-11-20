@@ -3,7 +3,7 @@
 | Field | Value |
 | --- | --- |
 | Phase | P4 — Building Editor |
-| Status | Planned |
+| Status | Implemented (2D-first; 3D picking is a follow-up PR after P3 merges) |
 | Team | 2 full-stack engineers, 1 domain expert |
 | Depends on | P1 (buildings), P2 (re-simulation), P3 (selectable 3D elements) |
 | Blocks | P5 (scenarios are sets of edits) |
@@ -118,6 +118,32 @@ flowchart TB
 # Acceptance Criteria
 
 AC-P4-01…04 green on `main`; command/invariant catalog documented.
+
+## Implementation notes (as merged)
+
+- Command vocabulary v1 is frozen in `packages/domain/src/commands.ts`
+  (`COMMAND_VOCABULARY_VERSION = 1`, tags `building.<element>.update.v1`) and is
+  the shared contract with P5 scenarios. `Building.apply(command)` is pure and
+  returns `Either<CommandError, Building>`; `Building.fork(commands)` is the pure
+  copy P5 builds on. User-edited fields are stored as
+  `Confidence { source: "user", confidence: 1.0 }`.
+- `Building.version` is aggregate state + the `buildings.version` column
+  (schema v3, `infrastructure/postgres/migrations/0003_audit.sql`); it is
+  deliberately NOT part of `BuildingJson`, so the P2 simulation input hash
+  reflects content only. Optimistic locking: `PATCH /buildings/:id` requires
+  `If-Match: <version>`; the Postgres adapter does `SELECT … FOR UPDATE` +
+  conditional `UPDATE` in one transaction and throws `StaleVersionError` (409).
+- Audit: append-only `audit_entries` table (DB triggers reject UPDATE/DELETE/
+  TRUNCATE), written after the locked state update; `GET /buildings/:id/audit`
+  reads it; `POST /buildings/:id/undo` applies the inverse of the latest entry
+  through the same validated path (the undo is itself audited).
+- Re-simulation goes through P2 only: an edit changes the input hash → cache
+  miss → new engine run → new `SimulationResult` (integration- and e2e-tested).
+  Known limitation: the adapter feeds the engine the verbatim `sourceDpeXml`
+  when present, so consumption *values* do not yet reflect edits numerically;
+  completing the adapter's field-wise reconstruction path (P2 follow-up) is
+  required for AC-P4-01's "consumption decreases" direction. P4 keeps the
+  source document intact (AC-P2-02 byte-for-byte reproducibility).
 
 # Exit Criteria
 
