@@ -3,17 +3,33 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@hes/domain": ["packages/domain/src/index.ts"],
-      "@hes/application": ["packages/application/src/index.ts"],
-      "@hes/open3cl-adapter": ["packages/open3cl-adapter/src/index.ts"]
-    }
+      "@hes/domain": [
+        "packages/domain/src/index.ts"
+      ],
+      "@hes/application": [
+        "packages/application/src/index.ts"
+      ],
+      "@hes/open3cl-adapter": [
+        "packages/open3cl-adapter/src/index.ts"
+      ],
+      "@hes/dpe-xml-importer": [
+        "packages/dpe-xml-importer/src/index.ts"
+      ],
+      "@hes/postgres-repository": [
+        "packages/postgres-repository/src/index.ts"
+      ]
+    },
+    "experimentalDecorators": true
   },
   "include": [
     "packages/*/src/**/*.ts",
     "packages/*/test/**/*.ts",
     "packages/*/benchmark/**/*.ts",
     "apps/*/src/**/*.ts",
+    "apps/*/src/**/*.tsx",
     "apps/*/test/**/*.ts",
-    "vitest.config.ts"
+    "apps/*/vite.config.ts",
+    "vitest.config.ts",
+    "playwright.config.ts"
   ]
 }

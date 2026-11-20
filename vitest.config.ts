@@ -8,7 +8,9 @@ export default defineConfig({
     alias: {
       '@hes/domain': resolve('./packages/domain/src/index.ts'),
       '@hes/application': resolve('./packages/application/src/index.ts'),
-      '@hes/open3cl-adapter': resolve('./packages/open3cl-adapter/src/index.ts')
+      '@hes/open3cl-adapter': resolve('./packages/open3cl-adapter/src/index.ts'),
+      '@hes/dpe-xml-importer': resolve('./packages/dpe-xml-importer/src/index.ts'),
+      '@hes/postgres-repository': resolve('./packages/postgres-repository/src/index.ts')
     }
   },
   test: {
@@ -21,6 +23,7 @@ export default defineConfig({
       exclude: [
         '**/*.d.ts',
         'apps/cli-spike/src/cli.ts',
+        'apps/api/src/main.ts',
         'packages/application/src/**'
       ],
       thresholds: {
