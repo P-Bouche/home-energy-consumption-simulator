@@ -8,6 +8,10 @@ export interface ApiConfig {
   readonly corsOrigin: string;
   readonly maxUploadBytes: number;
   readonly migrationsDir: string;
+  /** simulations expected to finish within this budget run inline (default 3000 ms, AC-P2-01) */
+  readonly simulationSyncBudgetMs: number;
+  /** SIMULATION_FORCE_ASYNC=true routes every simulation through the job queue (ops/tests) */
+  readonly simulationForceAsync: boolean;
 }
 
 /**
@@ -30,11 +34,19 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ApiConfig {
   if (!Number.isInteger(maxUploadBytes) || maxUploadBytes <= 0) {
     throw new Error(`MAX_UPLOAD_BYTES must be a positive integer, got ${String(env['MAX_UPLOAD_BYTES'])}`);
   }
+  const simulationSyncBudgetMs = Number(env['SIMULATION_SYNC_BUDGET_MS'] ?? 3000);
+  if (!Number.isInteger(simulationSyncBudgetMs) || simulationSyncBudgetMs <= 0) {
+    throw new Error(
+      `SIMULATION_SYNC_BUDGET_MS must be a positive integer, got ${String(env['SIMULATION_SYNC_BUDGET_MS'])}`
+    );
+  }
   return {
     port,
     databaseUrl: env['DATABASE_URL'] ?? 'postgres://postgres:postgres@localhost:5432/hecs',
     corsOrigin: env['CORS_ORIGIN'] ?? 'http://localhost:5173',
     maxUploadBytes,
-    migrationsDir: env['MIGRATIONS_DIR'] ?? 'infrastructure/postgres/migrations'
+    migrationsDir: env['MIGRATIONS_DIR'] ?? 'infrastructure/postgres/migrations',
+    simulationSyncBudgetMs,
+    simulationForceAsync: (env['SIMULATION_FORCE_ASYNC'] ?? 'false').toLowerCase() === 'true'
   };
 }

@@ -5,15 +5,26 @@ import {
   DpeFileTooLargeError,
   DpeSchemaValidationError,
   EmptyDpeInputError,
-  InvalidDpeXmlError
+  EngineExecutionError,
+  InvalidDpeError,
+  InvalidDpeXmlError,
+  SimulationMappingError,
+  UnsupportedDpeModelError
 } from '@hes/domain';
-import { BuildingNotFoundError } from '@hes/application';
+import {
+  BuildingNotFoundError,
+  SimulationAlreadyInFlightError,
+  SimulationJobNotFoundError,
+  SimulationNotFoundError
+} from '@hes/application';
 
 interface ErrorBody {
   readonly statusCode: number;
   readonly error: string;
   readonly message: string;
   readonly schemaErrors?: readonly string[];
+  readonly jobId?: string;
+  readonly code?: string;
 }
 
 /**
@@ -48,8 +59,26 @@ export class HttpExceptionFilter implements ExceptionFilter {
       );
       return;
     }
-    if (exception instanceof BuildingNotFoundError) {
+    if (
+      exception instanceof BuildingNotFoundError ||
+      exception instanceof SimulationNotFoundError ||
+      exception instanceof SimulationJobNotFoundError
+    ) {
       this.send(response, 404, 'Not Found', exception.message);
+      return;
+    }
+    if (exception instanceof SimulationAlreadyInFlightError) {
+      this.send(response, 409, 'Conflict', exception.message, undefined, exception.jobId);
+      return;
+    }
+    // P2 simulation failures (FR-P2-05): mapping errors → 422, engine errors → 500
+    if (exception instanceof SimulationMappingError || exception instanceof InvalidDpeError || exception instanceof InvalidDpeXmlError) {
+      this.send(response, 422, 'Unprocessable Entity', exception.message, [], undefined, exception.code);
+      return;
+    }
+    if (exception instanceof EngineExecutionError || exception instanceof UnsupportedDpeModelError) {
+      this.logger.error(`engine error on ${request.method} ${request.url}`, exception.stack);
+      this.send(response, 500, 'Internal Server Error', exception.message, undefined, undefined, exception.code);
       return;
     }
     if (exception instanceof MulterError) {
@@ -75,13 +104,17 @@ export class HttpExceptionFilter implements ExceptionFilter {
     status: number,
     error: string,
     message: string,
-    schemaErrors?: readonly string[]
+    schemaErrors?: readonly string[],
+    jobId?: string,
+    code?: string
   ): void {
     const body: ErrorBody = {
       statusCode: status,
       error,
       message,
-      ...(schemaErrors !== undefined ? { schemaErrors } : {})
+      ...(schemaErrors !== undefined ? { schemaErrors } : {}),
+      ...(jobId !== undefined ? { jobId } : {}),
+      ...(code !== undefined ? { code } : {})
     };
     response.status(status).json(body);
   }
