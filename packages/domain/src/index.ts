@@ -80,6 +80,40 @@ export type {
 } from './entities.ts';
 export { Building, type BanCoordinates, type BuildingInput, type BuildingJson } from './building.ts';
 export {
+  COORDINATE_SYSTEM,
+  computeMeshHash,
+  faceArea,
+  geometryFromJson,
+  geometryToJson,
+  hashString,
+  makeFace,
+  meshArea,
+  ORIENTATIONS,
+  parseOrientation,
+  round6,
+  v3,
+  type CoordinateSystem,
+  type Dimensions,
+  type Face,
+  type FaceJson,
+  type Geometry,
+  type GeometryElement,
+  type GeometryElementJson,
+  type GeometryElementKind,
+  type GeometryJson,
+  type Mesh,
+  type MeshJson,
+  type Orientation,
+  type Placement,
+  type Vector3
+} from './geometry.ts';
+export {
+  projectHeatLoss,
+  HeatLossProjectionError,
+  type HeatLossOverlay,
+  type HeatLossShare
+} from './heat-loss.ts';
+export {
   BuildingImported,
   SimulationCompleted,
   SimulationFailed,
@@ -98,3 +132,16 @@ export {
   type ParsedField,
   type UnrecognizedField
 } from './import-report.ts';
+export {
+  DEFAULT_CEILING_HEIGHT_M,
+  DEFAULT_LEVEL_COUNT,
+  DEFAULT_LIVING_AREA_M2,
+  DOOR_HEIGHT_M,
+  FOOTPRINT_ASPECT_RATIO,
+  INFERENCE_RULES_VERSION,
+  OPENING_OFFSET_M,
+  ReconstructionService,
+  WALL_THICKNESS_M,
+  WINDOW_HEIGHT_M,
+  WINDOW_SILL_M
+} from './reconstruction.ts';
