@@ -103,5 +103,6 @@ P0 Open3CL feasibility → P1 DPE XML import → P2 energy simulation → P3 3D 
 - [AGENTS.md](AGENTS.md) — project context, architecture rules, coding standards, workflow, testing, expected response format
 - [docs/architecture.md](docs/architecture.md) — principles, system context, bounded contexts, Open3CL integration strategy
 - [docs/deployment.md](docs/deployment.md) — local and dedicated-server deployment with Docker Compose
+- [docs/ci.md](docs/ci.md) — CI workflows, required checks, branch protection, coverage policy
 - [docs/roadmap.md](docs/roadmap.md) — phases P0–P10 with deliverables, risks, and success criteria
 - [docs/decisions/ADR-0001-open3cl-as-core-engine.md](docs/decisions/ADR-0001-open3cl-as-core-engine.md) — Open3CL as the core engine
