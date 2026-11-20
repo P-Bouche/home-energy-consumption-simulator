@@ -52,6 +52,11 @@ flow `Building → Open3CL Adapter → Open3CL → SimulationResult` (ADR-0001) 
   changes (detected immediately by typecheck + contract tests).
 - Engine is synchronous: long simulations block the event loop; if that ever matters, move to
   option 4 behind the same port (worker_threads or service) without touching callers.
+- P0 packages export `src/index.ts` directly (no build step; Node >= 24 native type stripping
+  runs the CLI spike, and `tsconfig` paths + Vitest aliases duplicate the package mapping).
+  That is fine for the spike, but **before the NestJS API (P1/P2) a build strategy must be
+  chosen**: `tsc` project references emitting `dist/`, or relying on Node 24 type stripping
+  in production. Decision deferred to P1/P2, recorded here so it is not forgotten.
 
 ## Reassessment Conditions
 
