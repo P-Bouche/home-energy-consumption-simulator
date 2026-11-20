@@ -13,7 +13,12 @@ import { childRecord, str } from './xml-utils.ts';
  * @param schemaVariant - detected variant string (e.g. "modele=1/version=2.3")
  * @param importDate - date stamped on every Confidence value
  */
-export function mapToBuilding(doc: unknown, schemaVariant: string, importDate: Date): DpeImportResult {
+export function mapToBuilding(
+  doc: unknown,
+  schemaVariant: string,
+  importDate: Date,
+  sourceDpeXml?: string
+): DpeImportResult {
   const ctx = new ImportContext(importDate);
   const dpe = childRecord(doc, 'dpe');
   if (dpe === undefined) {
@@ -82,7 +87,8 @@ export function mapToBuilding(doc: unknown, schemaVariant: string, importDate: D
     heatingSystems: systems.heatingSystems,
     ventilationSystems: systems.ventilationSystems,
     photovoltaicSystems: systems.photovoltaicSystems,
-    importedAt: importDate
+    importedAt: importDate,
+    sourceDpeXml: typeof sourceDpeXml === 'string' ? sourceDpeXml : null
   };
   const building = Building.createForImport(input);
   const report = ctx.buildReport({

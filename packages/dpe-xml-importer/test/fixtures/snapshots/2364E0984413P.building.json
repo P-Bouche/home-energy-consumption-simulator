@@ -1,0 +1,1644 @@
+{
+  "id": "00000000-0000-4000-8000-000000000000",
+  "dpeNumber": {
+    "value": "2364E0984413P",
+    "source": "dpe-xml:dpe/numero_dpe",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "status": {
+    "value": "ACTIF",
+    "source": "dpe-xml:dpe/statut",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "address": {
+    "value": "3 impasse castagnalde\nQuartier Orio",
+    "source": "dpe-xml:dpe/administratif/geolocalisation/adresses/adresse_bien/adresse_brut",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "banId": {
+    "value": "64260_1651_00003",
+    "source": "dpe-xml:dpe/administratif/geolocalisation/adresses/adresse_bien/ban_id",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "banCoordinates": {
+    "x": {
+      "value": 314080.76,
+      "source": "dpe-xml:dpe/administratif/geolocalisation/adresses/adresse_bien/ban_x",
+      "confidence": 1,
+      "importDate": "2026-11-20T10:00:00.000Z"
+    },
+    "y": {
+      "value": 6263138.87,
+      "source": "dpe-xml:dpe/administratif/geolocalisation/adresses/adresse_bien/ban_y",
+      "confidence": 1,
+      "importDate": "2026-11-20T10:00:00.000Z"
+    }
+  },
+  "constructionYear": {
+    "value": 1980,
+    "source": "dpe-xml:dpe/logement/caracteristique_generale/annee_construction",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "constructionPeriod": {
+    "value": "4",
+    "source": "dpe-xml:dpe/logement/caracteristique_generale/enum_periode_construction_id",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "livingAreaM2": {
+    "value": 167.29,
+    "source": "dpe-xml:dpe/logement/caracteristique_generale/surface_habitable_logement",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "buildingLivingAreaM2": null,
+  "ceilingHeightM": {
+    "value": 2.31,
+    "source": "dpe-xml:dpe/logement/caracteristique_generale/hsp",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "levelCount": {
+    "value": 3,
+    "source": "dpe-xml:dpe/logement/caracteristique_generale/nombre_niveau_logement",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "apartmentCount": null,
+  "climateZone": {
+    "value": "6",
+    "source": "dpe-xml:dpe/logement/meteo/enum_zone_climatique_id",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "altitudeClass": {
+    "value": "1",
+    "source": "dpe-xml:dpe/logement/meteo/enum_classe_altitude_id",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "altitudeM": null,
+  "thermalInertiaClass": {
+    "value": "3",
+    "source": "dpe-xml:dpe/logement/enveloppe/inertie/enum_classe_inertie_id",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "zones": [
+    {
+      "id": "00000000-0000-4000-8000-000000000000",
+      "name": {
+        "value": "logement",
+        "source": "inference:single-zone-from-logement",
+        "confidence": 0.9,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 167.29,
+        "source": "dpe-xml:dpe/logement/caracteristique_generale/surface_habitable_logement",
+        "confidence": 1,
+        "importDate": {}
+      }
+    }
+  ],
+  "rooms": [],
+  "walls": [
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Mur  1 Nord - Mur en blocs de béton creux d'épaisseur ≤ 20 cm avec un doublage rapporté donnant sur un espace tampon solarisé (véranda,loggia fermée)",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[1]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 7.62,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[1]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.05,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[1]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[1]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "12",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[1]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "10",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[1]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Mur  2 Nord - Mur en blocs de béton creux d'épaisseur ≤ 20 cm avec un doublage rapporté donnant sur l'extérieur",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[2]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 19.17,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[2]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.05,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[2]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[2]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "12",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[2]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[2]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Mur  3 Est - Mur en blocs de béton creux d'épaisseur ≤ 20 cm avec un doublage rapporté non isolé donnant sur un garage",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[3]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 7.16,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[3]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.1875,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[3]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[3]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "12",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[3]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "8",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[3]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Mur  4 Ouest - Mur en blocs de béton creux d'épaisseur ≤ 20 cm avec un doublage rapporté non isolé donnant sur l'extérieur",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[4]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 13.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[4]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.1875,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[4]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "4",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[4]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "12",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[4]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[4]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Mur  5 Sud - Mur en blocs de béton creux d'épaisseur ≤ 20 cm avec un doublage rapporté non isolé donnant sur un garage",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[5]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 13.17,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[5]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.1875,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[5]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[5]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "12",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[5]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "8",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[5]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Mur  6 Sud - Mur en blocs de béton creux d'épaisseur ≤ 20 cm avec un doublage rapporté non isolé donnant sur un garage",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[6]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 7.39,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[6]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.1875,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[6]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[6]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "12",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[6]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "8",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[6]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Mur  7 Est - Mur en placoplatre avec isolation intérieure donnant sur un garage",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[7]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 6.24,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[7]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 0.32,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[7]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[7]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "23",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[7]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "8",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[7]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Mur  8 Sud - Mur en placoplatre avec isolation intérieure donnant sur un garage",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[8]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 6.24,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[8]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 0.32,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[8]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[8]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "23",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[8]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "8",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[8]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Mur  9 Nord - Mur en blocs de béton creux d'épaisseur ≤ 20 cm avec un doublage rapporté avec isolation intérieure (réalisée entre 1978 et 1982) donnant sur l'extérieur",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[9]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 33.49,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[9]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.05,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[9]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[9]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "12",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[9]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[9]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Mur 10 Sud - Mur en blocs de béton creux d'épaisseur ≤ 20 cm avec un doublage rapporté avec isolation intérieure (réalisée entre 1978 et 1982) donnant sur l'extérieur",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[10]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 33.49,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[10]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.05,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[10]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[10]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "12",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[10]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[10]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Mur 11 Ouest - Mur en blocs de béton creux d'épaisseur ≤ 20 cm avec un doublage rapporté avec isolation intérieure (réalisée entre 1978 et 1982) donnant sur l'extérieur",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[11]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 18.25,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[11]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.05,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[11]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "4",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[11]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "12",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[11]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[11]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Mur 12 Est - Mur en blocs de béton creux d'épaisseur ≤ 20 cm avec un doublage rapporté avec isolation intérieure (réalisée entre 1978 et 1982) donnant sur l'extérieur",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[12]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 5.08,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[12]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.05,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[12]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[12]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "12",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[12]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[12]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Mur 13 Est - Mur en blocs de béton creux d'épaisseur ≤ 20 cm avec un doublage rapporté avec isolation intérieure (réalisée entre 1978 et 1982) donnant sur un garage",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[13]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 10.86,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[13]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.05,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[13]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[13]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "12",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[13]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "8",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[13]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Mur 14 Nord - Mur en blocs de béton creux d'épaisseur ≤ 20 cm avec un doublage rapporté avec isolation intérieure (réalisée entre 1978 et 1982) donnant sur l'extérieur",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[14]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 23.79,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[14]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.05,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[14]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[14]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "12",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[14]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[14]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Mur 15 Sud - Mur en blocs de béton creux d'épaisseur ≤ 20 cm avec un doublage rapporté avec isolation intérieure (réalisée entre 1978 et 1982) donnant sur l'extérieur",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[15]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 23.79,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[15]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.05,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[15]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[15]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "12",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[15]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[15]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Mur 16 Ouest - Mur en briques creuses d'épaisseur ≤ 15 cm non isolé donnant sur un comble très faiblement ventilé",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[16]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 15.02,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[16]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.15,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[16]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "4",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[16]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "10",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[16]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[16]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Mur 17 Est - Mur en briques creuses d'épaisseur ≤ 15 cm non isolé donnant sur un comble très faiblement ventilé",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[17]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 15.02,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[17]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.15,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[17]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[17]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "10",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[17]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[17]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    }
+  ],
+  "roofs": [
+    {
+      "kind": "roof",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Plafond - Combles aménagés sous rampants donnant sur l'extérieur (combles aménagés) avec isolation intérieure (10 cm)",
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_haut_collection/plancher_haut[1]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 66.95,
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_haut_collection/plancher_haut[1]/donnee_entree/surface_paroi_opaque",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 0.3448275862068966,
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_haut_collection/plancher_haut[1]/donnee_intermediaire/uph",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "roofType": {
+        "value": "12",
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_haut_collection/plancher_haut[1]/donnee_entree/enum_type_plancher_haut_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_haut_collection/plancher_haut[1]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    }
+  ],
+  "floors": [
+    {
+      "kind": "floor",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Plancher  1 - Dalle béton non isolée donnant sur un terre-plein",
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_bas_collection/plancher_bas[1]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 57.23,
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_bas_collection/plancher_bas[1]/donnee_entree/surface_paroi_opaque",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2,
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_bas_collection/plancher_bas[1]/donnee_intermediaire/upb",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "floorType": {
+        "value": "9",
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_bas_collection/plancher_bas[1]/donnee_entree/enum_type_plancher_bas_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "5",
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_bas_collection/plancher_bas[1]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "floor",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Plancher  2 - Plancher lourd type entrevous terre-cuite, poutrelles béton non isolé donnant sur un sous-sol non chauffé",
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_bas_collection/plancher_bas[2]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 20.35,
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_bas_collection/plancher_bas[2]/donnee_entree/surface_paroi_opaque",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2,
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_bas_collection/plancher_bas[2]/donnee_intermediaire/upb",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "floorType": {
+        "value": "11",
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_bas_collection/plancher_bas[2]/donnee_entree/enum_type_plancher_bas_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "6",
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_bas_collection/plancher_bas[2]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    }
+  ],
+  "windows": [
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre  1 Nord - Fenêtres battantes bois, orientées Nord, double vitrage",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 0.26,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 3.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 1,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.47,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre  2 Nord - Fenêtres oscillo-battantes pvc, orientées Nord, double vitrage",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 0.9099999999999999,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 3,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 1,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.44,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "5",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Porte-fenêtre  1 Nord - Portes-fenêtres coulissantes métal sans rupture de ponts thermiques, orientées Nord, double vitrage",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[3]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 4.37,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[3]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 3.7,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[3]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[3]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 1,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[3]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.57,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[3]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[3]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "7",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[3]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Porte-fenêtre  2 Nord - Portes-fenêtres oscillo-battantes pvc, orientées Nord, double vitrage",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[4]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 3.01,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[4]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.3,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[4]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[4]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 1,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[4]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[4]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[4]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "5",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[4]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Porte-fenêtre  3 Nord - Portes-fenêtres oscillo-battantes pvc, orientées Nord, double vitrage",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[5]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 2.58,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[5]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.3,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[5]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[5]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 1,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[5]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[5]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[5]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "5",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[5]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre  3 Nord - Fenêtres oscillo-battantes pvc, orientées Nord, double vitrage",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[6]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 1.8599999999999999,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[6]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.3,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[6]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[6]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 1,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[6]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[6]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[6]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "5",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[6]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre  4 Sud - Fenêtres oscillo-battantes pvc, orientées Sud, double vitrage",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[7]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 1.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[7]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.3,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[7]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[7]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 1,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[7]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[7]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[7]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "5",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[7]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre  5 Sud - Fenêtres battantes pvc, orientées Sud, double vitrage",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[8]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 1.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[8]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.3,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[8]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[8]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 1,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[8]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[8]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[8]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "5",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[8]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre  6 Sud - Fenêtres battantes pvc, orientées Sud, double vitrage",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[9]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 1.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[9]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.3,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[9]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[9]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 1,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[9]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[9]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[9]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "5",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[9]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre  7 Sud - Fenêtres oscillo-battantes pvc, orientées Sud, double vitrage",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[10]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 0.45,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[10]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.3,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[10]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[10]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 1,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[10]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[10]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[10]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "5",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[10]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre  8 Sud - Fenêtres oscillo-battantes pvc, orientées Sud, double vitrage",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[11]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 0.9,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[11]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.3,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[11]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[11]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 1,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[11]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[11]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[11]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "5",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[11]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    }
+  ],
+  "doors": [
+    {
+      "kind": "door",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Porte - Porte(s) métal avec 30-60% de double vitrage",
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[1]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 1.75,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[1]/donnee_entree/surface_porte",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 4.8,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[1]/donnee_intermediaire/uporte",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "doorType": {
+        "value": "12",
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[1]/donnee_entree/enum_type_porte_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 1,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[1]/donnee_entree/nb_porte",
+        "confidence": 1,
+        "importDate": {}
+      }
+    }
+  ],
+  "thermalZones": [
+    {
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "name": {
+        "value": "zone thermique du logement",
+        "source": "inference:single-zone-from-logement",
+        "confidence": 0.9,
+        "importDate": {}
+      },
+      "heatedAreaM2": {
+        "value": 167.29,
+        "source": "dpe-xml:dpe/logement/installation_chauffage_collection/installation_chauffage[1]/donnee_entree/surface_chauffee",
+        "confidence": 1,
+        "importDate": {}
+      }
+    }
+  ],
+  "heatingSystems": [
+    {
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Chaudière individuelle gaz standard installée à partir de 2016 avec en appoint un insert installé avant 1990 régulée, avec programmateur sans réduit. Emetteur(s): radiateur monotube sans robinet thermostatique",
+        "source": "dpe-xml:dpe/logement/installation_chauffage_collection/installation_chauffage[1]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "installationType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/installation_chauffage_collection/installation_chauffage[1]/donnee_entree/enum_type_installation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "heatedAreaM2": {
+        "value": 167.29,
+        "source": "dpe-xml:dpe/logement/installation_chauffage_collection/installation_chauffage[1]/donnee_entree/surface_chauffee",
+        "confidence": 1,
+        "importDate": {}
+      }
+    }
+  ],
+  "ventilationSystems": [
+    {
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Ventilation par ouverture des fenêtres",
+        "source": "dpe-xml:dpe/logement/ventilation_collection/ventilation[1]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "ventilationType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/ventilation_collection/ventilation[1]/donnee_entree/enum_type_ventilation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "ventilatedAreaM2": {
+        "value": 167.29,
+        "source": "dpe-xml:dpe/logement/ventilation_collection/ventilation[1]/donnee_entree/surface_ventile",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "q4paConv": {
+        "value": 1.9,
+        "source": "dpe-xml:dpe/logement/ventilation_collection/ventilation[1]/donnee_intermediaire/q4pa_conv",
+        "confidence": 1,
+        "importDate": {}
+      }
+    }
+  ],
+  "photovoltaicSystems": [
+    {
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "sensorAreaM2": {
+        "value": 15.6,
+        "source": "dpe-xml:dpe/logement/production_elec_enr/panneaux_pv_collection/panneaux_pv[1]/surface_totale_capteurs",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "moduleCount": {
+        "value": 13,
+        "source": "dpe-xml:dpe/logement/production_elec_enr/panneaux_pv_collection/panneaux_pv[1]/nombre_module",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "4",
+        "source": "dpe-xml:dpe/logement/production_elec_enr/panneaux_pv_collection/panneaux_pv[1]/enum_orientation_pv_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "inclination": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/production_elec_enr/panneaux_pv_collection/panneaux_pv[1]/enum_inclinaison_pv_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    }
+  ],
+  "importedAt": "2026-11-20T10:00:00.000Z",
+  "sourceDpeXml": null
+}

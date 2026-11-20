@@ -1,0 +1,3892 @@
+{
+  "id": "00000000-0000-4000-8000-000000000000",
+  "dpeNumber": {
+    "value": "2321E3872263C",
+    "source": "dpe-xml:dpe/numero_dpe",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "status": {
+    "value": "ACTIF",
+    "source": "dpe-xml:dpe/statut",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "address": {
+    "value": "4 à 6 rue du jeu de l'arc",
+    "source": "dpe-xml:dpe/administratif/geolocalisation/adresses/adresse_bien/adresse_brut",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "banId": {
+    "value": "21038_1530_00006",
+    "source": "dpe-xml:dpe/administratif/geolocalisation/adresses/adresse_bien/ban_id",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "banCoordinates": {
+    "x": {
+      "value": 880549,
+      "source": "dpe-xml:dpe/administratif/geolocalisation/adresses/adresse_bien/ban_x",
+      "confidence": 1,
+      "importDate": "2026-11-20T10:00:00.000Z"
+    },
+    "y": {
+      "value": 6679952,
+      "source": "dpe-xml:dpe/administratif/geolocalisation/adresses/adresse_bien/ban_y",
+      "confidence": 1,
+      "importDate": "2026-11-20T10:00:00.000Z"
+    }
+  },
+  "constructionYear": null,
+  "constructionPeriod": {
+    "value": "2",
+    "source": "dpe-xml:dpe/logement/caracteristique_generale/enum_periode_construction_id",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "livingAreaM2": {
+    "value": 1908,
+    "source": "inference:living-area-from-building-area",
+    "confidence": 0.8,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "buildingLivingAreaM2": {
+    "value": 1908,
+    "source": "dpe-xml:dpe/logement/caracteristique_generale/surface_habitable_immeuble",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "ceilingHeightM": {
+    "value": 2.5,
+    "source": "dpe-xml:dpe/logement/caracteristique_generale/hsp",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "levelCount": {
+    "value": 1,
+    "source": "inference:default-level-count-1",
+    "confidence": 0.5,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "apartmentCount": {
+    "value": 24,
+    "source": "dpe-xml:dpe/logement/caracteristique_generale/nombre_appartement",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "climateZone": {
+    "value": "3",
+    "source": "dpe-xml:dpe/logement/meteo/enum_zone_climatique_id",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "altitudeClass": {
+    "value": "1",
+    "source": "dpe-xml:dpe/logement/meteo/enum_classe_altitude_id",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "altitudeM": {
+    "value": 185,
+    "source": "dpe-xml:dpe/logement/meteo/altitude",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "thermalInertiaClass": {
+    "value": "2",
+    "source": "dpe-xml:dpe/logement/enveloppe/inertie/enum_classe_inertie_id",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "zones": [
+    {
+      "id": "00000000-0000-4000-8000-000000000000",
+      "name": {
+        "value": "logement",
+        "source": "inference:single-zone-from-logement",
+        "confidence": 0.9,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 1908,
+        "source": "inference:living-area-from-building-area",
+        "confidence": 0.8,
+        "importDate": {}
+      }
+    }
+  ],
+  "rooms": [],
+  "walls": [
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Façade  Rch Est",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[1]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 90.02499999999999,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[1]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 0.52632,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[1]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[1]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[1]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[1]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Retour sur entrée façade  Rch Est",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[2]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 2.625,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[2]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 0.52632,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[2]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[2]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[2]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[2]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Retour sur entrée façade  Rch Est",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[3]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 2.625,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[3]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 0.52632,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[3]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[3]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[3]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[3]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Mur Rch sur hall d'entrée",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[4]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 38.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[4]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[4]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[4]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[4]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "17",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[4]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Mur Rch sur hall d'entrée",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[5]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 38.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[5]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[5]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[5]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[5]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "17",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[5]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Mur Rch sur hall d'entrée",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[6]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 20.474999999999998,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[6]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[6]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[6]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[6]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "17",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[6]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Façade  Rch Ouest",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[7]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 137.65,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[7]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 0.52632,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[7]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "4",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[7]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[7]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[7]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Retour sur balcon façade  Rch Ouest",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[8]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 13.049999999999999,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[8]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 0.52632,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[8]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[8]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[8]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[8]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Retour sur balcon façade  Rch Ouest1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[9]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 13.049999999999999,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[9]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 0.52632,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[9]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[9]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[9]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[9]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Mur pignon Sud",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[10]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 100.1,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[10]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 0.52632,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[10]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[10]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[10]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[10]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Mur pignon Nord",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[11]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 100.1,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[11]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 0.52632,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[11]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[11]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[11]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[11]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Façade  1er Est",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[12]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 90.02499999999999,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[12]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 0.52632,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[12]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[12]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[12]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[12]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Retour sur entrée façade  1er Est",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[13]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 2.625,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[13]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 0.52632,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[13]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[13]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[13]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[13]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Retour sur entrée façade  1er Est",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[14]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 2.625,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[14]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 0.52632,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[14]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[14]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[14]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[14]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Mur 1er sur cage d'escalier",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[15]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 38.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[15]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[15]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[15]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[15]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "17",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[15]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Mur 1er sur cage d'escalier",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[16]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 38.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[16]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[16]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[16]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[16]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "17",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[16]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Mur 1er sur cage d'escalier",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[17]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 20.474999999999998,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[17]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[17]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[17]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[17]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "17",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[17]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Façade  1er  Ouest",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[18]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 137.65,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[18]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 0.52632,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[18]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "4",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[18]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[18]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[18]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Retour sur balcon façade  1er  Ouest",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[19]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 13.049999999999999,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[19]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 0.52632,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[19]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[19]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[19]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[19]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Retour sur balcon façade  1er Ouest1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[20]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 13.049999999999999,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[20]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 0.52632,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[20]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[20]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[20]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[20]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Façade  2ème Est",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[21]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 90.02499999999999,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[21]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 0.52632,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[21]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[21]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[21]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[21]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Retour sur entrée façade  2ème Est",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[22]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 2.625,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[22]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 0.52632,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[22]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[22]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[22]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[22]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Retour sur entrée façade  2ème Est",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[23]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 2.625,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[23]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 0.52632,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[23]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[23]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[23]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[23]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Mur 2ème sur cage d'escalier",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[24]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 38.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[24]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[24]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[24]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[24]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "17",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[24]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Mur 2ème sur cage d'escalier",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[25]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 38.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[25]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[25]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[25]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[25]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "17",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[25]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Mur 2ème sur cage d'escalier",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[26]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 20.474999999999998,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[26]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[26]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[26]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[26]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "17",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[26]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Façade  2ème  Ouest",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[27]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 137.65,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[27]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 0.52632,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[27]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "4",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[27]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[27]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[27]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Retour sur balcon façade  2ème  Ouest",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[28]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 13.049999999999999,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[28]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 0.52632,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[28]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[28]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[28]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[28]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Retour sur balcon façade  2ème Ouest1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[29]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 13.049999999999999,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[29]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 0.52632,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[29]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[29]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[29]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[29]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Façade  3ème Est",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[30]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 90.02499999999999,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[30]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 0.52632,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[30]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[30]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[30]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[30]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Retour sur entrée façade  3ème Est",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[31]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 2.625,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[31]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 0.52632,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[31]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[31]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[31]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[31]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Retour sur entrée façade  3ème Est",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[32]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 2.625,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[32]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 0.52632,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[32]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[32]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[32]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[32]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Mur 3ème sur cage d'escalier",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[33]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 38.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[33]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[33]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[33]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[33]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "17",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[33]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Mur 3ème sur cage d'escalier",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[34]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 38.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[34]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[34]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[34]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[34]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "17",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[34]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Mur 3ème sur cage d'escalier",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[35]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 20.474999999999998,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[35]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[35]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[35]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[35]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "17",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[35]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Façade  3ème  Ouest",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[36]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 137.65,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[36]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 0.52632,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[36]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "4",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[36]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[36]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[36]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Retour sur balcon façade  3ème  Ouest",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[37]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 13.049999999999999,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[37]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 0.52632,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[37]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[37]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[37]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[37]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Retour sur balcon façade  3ème Ouest1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[38]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 13.049999999999999,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[38]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 0.52632,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[38]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[38]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[38]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[38]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Séchoir Rch Sud",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[39]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 18,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[39]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[39]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[39]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[39]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "21",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[39]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Séchoir Rch Nord",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[40]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 18,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[40]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[40]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[40]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[40]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "21",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[40]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Séchoir Rch Est",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[41]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 25.35,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[41]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[41]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[41]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[41]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "21",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[41]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Séchoir 1er Sud",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[42]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 18,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[42]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[42]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[42]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[42]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "21",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[42]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Séchoir 1er Nord",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[43]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 18,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[43]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[43]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[43]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[43]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "21",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[43]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Séchoir 1er Est",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[44]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 25.35,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[44]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[44]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[44]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[44]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "21",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[44]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Séchoir 2ème Sud",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[45]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 18,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[45]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[45]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[45]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[45]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "21",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[45]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Séchoir 2ème Nord",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[46]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 18,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[46]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[46]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[46]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[46]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "21",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[46]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Séchoir 2ème Est",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[47]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 25.35,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[47]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[47]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[47]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[47]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "21",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[47]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Séchoir 3ème Sud",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[48]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 18,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[48]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[48]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[48]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[48]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "21",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[48]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Séchoir 3ème Nord",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[49]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 18,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[49]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[49]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[49]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[49]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "21",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[49]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Séchoir 3ème Est",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[50]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 25.35,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[50]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[50]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[50]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[50]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "21",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[50]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    }
+  ],
+  "roofs": [
+    {
+      "kind": "roof",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Tioture terrasse",
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_haut_collection/plancher_haut[1]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 477,
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_haut_collection/plancher_haut[1]/donnee_entree/surface_paroi_opaque",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 0.52632,
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_haut_collection/plancher_haut[1]/donnee_intermediaire/uph",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "roofType": {
+        "value": "8",
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_haut_collection/plancher_haut[1]/donnee_entree/enum_type_plancher_haut_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_haut_collection/plancher_haut[1]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    }
+  ],
+  "floors": [
+    {
+      "kind": "floor",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Plancher",
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_bas_collection/plancher_bas[1]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 477,
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_bas_collection/plancher_bas[1]/donnee_entree/surface_paroi_opaque",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 0.34710743801652894,
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_bas_collection/plancher_bas[1]/donnee_intermediaire/upb",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "floorType": {
+        "value": "9",
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_bas_collection/plancher_bas[1]/donnee_entree/enum_type_plancher_bas_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "6",
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_bas_collection/plancher_bas[1]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    }
+  ],
+  "windows": [
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenetre Pvc Est",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 23.7372,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 12,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.44,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "5",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenetre Pvc Ouest",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 17.8029,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "4",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 9,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.44,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "5",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenetre Pignon Sud",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[3]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 15.824800000000002,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[3]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[3]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[3]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 8,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[3]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.44,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[3]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[3]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "5",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[3]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenetre Wc Pignon Sud",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[4]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 0.81,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[4]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[4]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[4]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[4]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.44,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[4]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[4]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "5",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[4]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenetre Wc Pignon Nord",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[5]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 0.81,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[5]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[5]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[5]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[5]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.44,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[5]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[5]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "5",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[5]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenetre Salle de bains",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[6]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 4.0824,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[6]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 5.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[6]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[6]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[6]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.52,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[6]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[6]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[6]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Porte fenêtre Ouest",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[7]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 30.974400000000003,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[7]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[7]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "4",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[7]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[7]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.46,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[7]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[7]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "5",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[7]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenetre Pvc Est 1er",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[8]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 23.7372,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[8]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[8]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[8]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 12,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[8]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.44,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[8]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[8]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "5",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[8]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenetre Pvc Ouest 1er",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[9]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 17.8029,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[9]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[9]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "4",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[9]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 9,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[9]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.44,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[9]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[9]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "5",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[9]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenetre Salle de bains 1er",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[10]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 4.0824,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[10]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 5.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[10]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[10]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[10]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.52,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[10]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[10]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[10]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Porte fenêtre Ouest 1er",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[11]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 30.974400000000003,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[11]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[11]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "4",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[11]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[11]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.46,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[11]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[11]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "5",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[11]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenetre Pvc Est 2ème",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[12]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 23.7372,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[12]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[12]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[12]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 12,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[12]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.44,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[12]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[12]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "5",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[12]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenetre Pvc Ouest 2ème",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[13]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 17.8029,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[13]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[13]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "4",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[13]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 9,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[13]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.44,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[13]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[13]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "5",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[13]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenetre Salle de bains 2ème",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[14]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 4.0824,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[14]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 5.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[14]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[14]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[14]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.52,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[14]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[14]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[14]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Porte fenêtre Ouest 2ème",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[15]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 30.974400000000003,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[15]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[15]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "4",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[15]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[15]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.46,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[15]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[15]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "5",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[15]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenetre Pvc Est 3ème",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[16]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 23.7372,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[16]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[16]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[16]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 12,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[16]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.44,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[16]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[16]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "5",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[16]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenetre Pvc Ouest 3ème",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[17]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 17.8029,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[17]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[17]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "4",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[17]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 9,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[17]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.44,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[17]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[17]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "5",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[17]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenetre Salle de bains 3ème",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[18]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 4.0824,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[18]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 5.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[18]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[18]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[18]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.52,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[18]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[18]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[18]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Porte fenêtre Ouest 3ème",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[19]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 30.974400000000003,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[19]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[19]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "4",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[19]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[19]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.46,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[19]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[19]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "5",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[19]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    }
+  ],
+  "doors": [
+    {
+      "kind": "door",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Porte d'entrée",
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[1]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 4.776,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[1]/donnee_entree/surface_porte",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[1]/donnee_intermediaire/uporte",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "doorType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[1]/donnee_entree/enum_type_porte_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 3,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[1]/donnee_entree/nb_porte",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "door",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Porte d'entrée",
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[2]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 4.776,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[2]/donnee_entree/surface_porte",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[2]/donnee_intermediaire/uporte",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "doorType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[2]/donnee_entree/enum_type_porte_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 3,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[2]/donnee_entree/nb_porte",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "door",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Porte d'entrée",
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[3]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 4.776,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[3]/donnee_entree/surface_porte",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[3]/donnee_intermediaire/uporte",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "doorType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[3]/donnee_entree/enum_type_porte_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 3,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[3]/donnee_entree/nb_porte",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "door",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Porte d'entrée",
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[4]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 4.776,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[4]/donnee_entree/surface_porte",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[4]/donnee_intermediaire/uporte",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "doorType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[4]/donnee_entree/enum_type_porte_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 3,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[4]/donnee_entree/nb_porte",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "door",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Porte d'entrée",
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[5]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 4.776,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[5]/donnee_entree/surface_porte",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[5]/donnee_intermediaire/uporte",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "doorType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[5]/donnee_entree/enum_type_porte_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 3,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[5]/donnee_entree/nb_porte",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "door",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Porte d'entrée",
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[6]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 4.776,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[6]/donnee_entree/surface_porte",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[6]/donnee_intermediaire/uporte",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "doorType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[6]/donnee_entree/enum_type_porte_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 3,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[6]/donnee_entree/nb_porte",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "door",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Porte d'entrée",
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[7]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 4.776,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[7]/donnee_entree/surface_porte",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[7]/donnee_intermediaire/uporte",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "doorType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[7]/donnee_entree/enum_type_porte_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 3,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[7]/donnee_entree/nb_porte",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "door",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Porte d'entrée",
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[8]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 4.776,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[8]/donnee_entree/surface_porte",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[8]/donnee_intermediaire/uporte",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "doorType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[8]/donnee_entree/enum_type_porte_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 3,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[8]/donnee_entree/nb_porte",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "door",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Porte d'accès séchoir",
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[9]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 3.8016000000000005,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[9]/donnee_entree/surface_porte",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 3.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[9]/donnee_intermediaire/uporte",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "doorType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[9]/donnee_entree/enum_type_porte_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 3,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[9]/donnee_entree/nb_porte",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "door",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Porte d'accès séchoir",
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[10]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 3.8016000000000005,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[10]/donnee_entree/surface_porte",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 3.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[10]/donnee_intermediaire/uporte",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "doorType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[10]/donnee_entree/enum_type_porte_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 3,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[10]/donnee_entree/nb_porte",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "door",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Porte d'accès séchoir",
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[11]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 3.8016000000000005,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[11]/donnee_entree/surface_porte",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 3.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[11]/donnee_intermediaire/uporte",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "doorType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[11]/donnee_entree/enum_type_porte_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 3,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[11]/donnee_entree/nb_porte",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "door",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Porte d'accès séchoir",
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[12]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 3.8016000000000005,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[12]/donnee_entree/surface_porte",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 3.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[12]/donnee_intermediaire/uporte",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "doorType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[12]/donnee_entree/enum_type_porte_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 3,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[12]/donnee_entree/nb_porte",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "door",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Porte d'accès séchoir",
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[13]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 3.8016000000000005,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[13]/donnee_entree/surface_porte",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 3.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[13]/donnee_intermediaire/uporte",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "doorType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[13]/donnee_entree/enum_type_porte_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 3,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[13]/donnee_entree/nb_porte",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "door",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Porte d'accès séchoir",
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[14]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 3.8016000000000005,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[14]/donnee_entree/surface_porte",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 3.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[14]/donnee_intermediaire/uporte",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "doorType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[14]/donnee_entree/enum_type_porte_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 3,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[14]/donnee_entree/nb_porte",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "door",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Porte d'accès séchoir",
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[15]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 3.8016000000000005,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[15]/donnee_entree/surface_porte",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 3.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[15]/donnee_intermediaire/uporte",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "doorType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[15]/donnee_entree/enum_type_porte_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 3,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[15]/donnee_entree/nb_porte",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "door",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Porte d'accès séchoir",
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[16]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 3.8016000000000005,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[16]/donnee_entree/surface_porte",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 3.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[16]/donnee_intermediaire/uporte",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "doorType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[16]/donnee_entree/enum_type_porte_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 3,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[16]/donnee_entree/nb_porte",
+        "confidence": 1,
+        "importDate": {}
+      }
+    }
+  ],
+  "thermalZones": [
+    {
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "name": {
+        "value": "zone thermique du logement",
+        "source": "inference:single-zone-from-logement",
+        "confidence": 0.9,
+        "importDate": {}
+      },
+      "heatedAreaM2": {
+        "value": 1908,
+        "source": "dpe-xml:dpe/logement/installation_chauffage_collection/installation_chauffage[1]/donnee_entree/surface_chauffee",
+        "confidence": 1,
+        "importDate": {}
+      }
+    }
+  ],
+  "heatingSystems": [
+    {
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Installation de chauffage sans solaire (Réseau de chaleur)",
+        "source": "dpe-xml:dpe/logement/installation_chauffage_collection/installation_chauffage[1]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "installationType": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/installation_chauffage_collection/installation_chauffage[1]/donnee_entree/enum_type_installation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "heatedAreaM2": {
+        "value": 1908,
+        "source": "dpe-xml:dpe/logement/installation_chauffage_collection/installation_chauffage[1]/donnee_entree/surface_chauffee",
+        "confidence": 1,
+        "importDate": {}
+      }
+    }
+  ],
+  "ventilationSystems": [
+    {
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "ventilation 1",
+        "source": "inference:default-element-label",
+        "confidence": 0.3,
+        "importDate": {}
+      },
+      "ventilationType": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/ventilation_collection/ventilation[1]/donnee_entree/enum_type_ventilation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "ventilatedAreaM2": {
+        "value": 1908,
+        "source": "dpe-xml:dpe/logement/ventilation_collection/ventilation[1]/donnee_entree/surface_ventile",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "q4paConv": {
+        "value": 1.9,
+        "source": "dpe-xml:dpe/logement/ventilation_collection/ventilation[1]/donnee_intermediaire/q4pa_conv",
+        "confidence": 1,
+        "importDate": {}
+      }
+    }
+  ],
+  "photovoltaicSystems": [],
+  "importedAt": "2026-11-20T10:00:00.000Z",
+  "sourceDpeXml": null
+}
