@@ -1,4 +1,5 @@
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -136,5 +137,15 @@ describe('runMigrations', () => {
     } as unknown as Pool;
     await expect(runMigrations(pool, d)).rejects.toThrow('syntax error');
     expect(calls.map((c) => c.text)).toContain('ROLLBACK');
+  });
+
+  it('the checked-in migration set is schema v1 + v2 (P2 simulations)', () => {
+    const realDir = fileURLToPath(new URL('../../../infrastructure/postgres/migrations', import.meta.url));
+    const files = readdirSync(realDir).filter((f) => f.endsWith('.sql')).sort();
+    expect(files).toEqual(['0001_init.sql', '0002_simulations.sql']);
+    const v2 = readFileSync(path.join(realDir, '0002_simulations.sql'), 'utf8');
+    expect(v2).toContain('CREATE TABLE IF NOT EXISTS simulations');
+    expect(v2).toContain('CREATE TABLE IF NOT EXISTS simulation_jobs');
+    expect(v2).toContain("WHERE status IN ('queued', 'running')");
   });
 });
