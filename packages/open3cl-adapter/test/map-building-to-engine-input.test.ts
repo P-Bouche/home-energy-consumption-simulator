@@ -89,7 +89,7 @@ describe('buildEngineInput', () => {
     expect(cg['surface_habitable_logement']).toBe(80.84);
     expect(cg['hsp']).toBe(2.5);
     const meteo = logement['meteo'] as Record<string, unknown>;
-    expect(meteo['enum_zone_climatique_id']).toBe('H1');
+    expect(meteo['enum_zone_climatique_id']).toBe('1');
     const enveloppe = logement['enveloppe'] as Record<string, unknown>;
     const murs = (enveloppe['mur_collection'] as Record<string, unknown>)['mur'] as Record<string, unknown>[];
     expect(murs[0]?.['donnee_entree']).toMatchObject({ description: 'Mur nord', surface_paroi_totale: 54.25 });

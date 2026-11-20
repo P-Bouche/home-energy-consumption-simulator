@@ -46,7 +46,7 @@ Domain (`BuildingSimulationView`) → DPE JSON path:
 | `constructionYear` | `…/annee_construction` |
 | `constructionPeriod` | `…/enum_periode_construction_id` |
 | `apartmentCount` | `…/nombre_appartement` |
-| `climateZone` | `dpe/logement/meteo/enum_zone_climatique_id` (default `H1`) |
+| `climateZone` | `dpe/logement/meteo/enum_zone_climatique_id` (default `'1'` = zone H1a; the engine enum keys are numeric ids) |
 | `altitudeClass` | `…/enum_classe_altitude_id` (default `1`) |
 | `altitudeM` | `…/altitude` |
 | `thermalInertiaClass` | `dpe/logement/enveloppe/inertie/enum_classe_inertie_id` |
@@ -70,7 +70,7 @@ confidence) and returned in `EngineInputMapping.defaults`:
 | `hsp` when absent | 2.5 m | `default:engine-input-ceiling-height-2.5m` (mirrors importer rule `default-ceiling-height-2.5m`) | 0.4 |
 | `nombre_niveau_logement` when absent | 1 | `default:engine-input-level-count-1` | 0.5 |
 | `enum_modele_dpe_id` when absent | `1` (logement 2021) | `default:engine-input-modele-dpe-logement-2021` | 0.5 |
-| `enum_zone_climatique_id` when absent | `H1` | `default:engine-input-zone-climatique-h1` | 0.3 |
+| `enum_zone_climatique_id` when absent | `'1'` (zone H1a) | `default:engine-input-zone-climatique-h1` | 0.3 |
 | `enum_classe_altitude_id` when absent | `1` | `default:engine-input-classe-altitude-1` | 0.3 |
 
 Additionally, any domain field whose `Confidence.confidence < 1` (inferred at

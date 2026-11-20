@@ -1,8 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
   Building,
-  canonicalJson,
-  computeBuildingInputHash,
   createSimulationJob,
   createSimulationResultRecord,
   DomainInvariantError,
@@ -165,7 +163,7 @@ describe('SimulationJob state machine', () => {
   });
 });
 
-describe('BuildingSimulationView + input hash', () => {
+describe('BuildingSimulationView', () => {
   it('projects the aggregate read-only, confidence metadata flowing through', () => {
     const building = Building.createForImport(baseInput({ sourceDpeXml: '<dpe/>' }));
     const view = toSimulationView(building);
@@ -175,20 +173,6 @@ describe('BuildingSimulationView + input hash', () => {
     expect(view.ceilingHeightM?.source).toBe('inference:default-ceiling-height-2.5m');
     expect(view.livingAreaM2?.confidence).toBe(1);
     expect(Object.isFrozen(view)).toBe(true);
-  });
-
-  it('hash is stable for an unchanged building and changes when the building changes', () => {
-    const building = Building.createForImport(baseInput());
-    const h1 = computeBuildingInputHash(building);
-    const h2 = computeBuildingInputHash(Building.fromJson(JSON.parse(JSON.stringify(building.toJson())) as ReturnType<Building['toJson']>));
-    expect(h1).toBe(h2);
-    expect(h1).toMatch(/^[0-9a-f]{64}$/);
-    const edited = Building.createForImport(baseInput({ livingAreaM2: measured(81, 'dpe-xml:x', date) }));
-    expect(computeBuildingInputHash(edited)).not.toBe(h1);
-  });
-
-  it('canonicalJson sorts keys recursively regardless of insertion order', () => {
-    expect(canonicalJson({ b: 1, a: { d: 2, c: 3 } })).toBe(canonicalJson({ a: { c: 3, d: 2 }, b: 1 }));
   });
 
   it('sourceDpeXml survives the JSON round-trip and defaults to null', () => {

@@ -106,10 +106,10 @@ export class SimulationJobRunner {
         engineVersion: this.simulation.getEngineVersion(),
         createdAt: this.now()
       });
-      await this.simulationRepository.saveResult(record);
-      job.markDone(record.id, this.now());
+      const persisted = await this.simulationRepository.saveResult(record);
+      job.markDone(persisted.id, this.now());
       await this.simulationRepository.updateJob(job);
-      this.logger.log(`simulation job ${jobId} done: result ${record.id}`);
+      this.logger.log(`simulation job ${jobId} done: result ${persisted.id}`);
     } catch (error) {
       const code = error instanceof SimulationError ? error.code : 'UNEXPECTED';
       const message = error instanceof Error ? error.message : String(error);

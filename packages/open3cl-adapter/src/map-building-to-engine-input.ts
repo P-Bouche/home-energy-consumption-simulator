@@ -151,7 +151,8 @@ export function buildEngineInput(view: BuildingSimulationView): EngineInputMappi
 
   const meteo = 'dpe/logement/meteo';
   put(ctx, [...meteo.split('/'), 'enum_zone_climatique_id'], view.climateZone, {
-    value: 'H1',
+    // The engine enum keys are numeric ids (fixtures: '1'..'8'; '1' = zone H1a).
+    value: '1',
     source: d.ZONE_CLIMATIQUE_H1.source,
     confidence: d.ZONE_CLIMATIQUE_H1.confidence
   });

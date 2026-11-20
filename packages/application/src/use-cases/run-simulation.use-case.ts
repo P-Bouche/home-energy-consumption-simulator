@@ -1,6 +1,5 @@
 import { randomUUID } from 'node:crypto';
 import {
-  computeBuildingInputHash,
   createSimulationJob,
   createSimulationResultRecord,
   SimulationCompleted,
@@ -13,6 +12,7 @@ import {
   type SimulationJob,
   type SimulationResultRecord
 } from '@hes/domain';
+import { computeBuildingInputHash } from '../building-input-hash.ts';
 import { BuildingNotFoundError, SimulationAlreadyInFlightError } from '../errors.ts';
 import type { Logger } from '../logger.ts';
 import { consoleLogger } from '../logger.ts';
@@ -181,12 +181,20 @@ export class RunSimulationUseCase {
       engineVersion: this.simulation.getEngineVersion(),
       createdAt: this.now()
     });
-    await this.simulationRepository.saveResult(record);
-    const events: DomainEvent[] = [new SimulationCompleted(buildingId, record.id, inputHash, this.now())];
+    const persisted = await this.simulationRepository.saveResult(record);
+    if (persisted.id !== record.id) {
+      // A concurrent identical run won the (buildingId, inputHash) uniqueness
+      // race: serve the persisted winner instead of an unpersisted record.
+      this.logger.log(
+        `simulation of building ${buildingId} lost the persistence race: serving cached result ${persisted.id} (hash ${inputHash})`
+      );
+      return { kind: 'cached', record: persisted, events: [] };
+    }
+    const events: DomainEvent[] = [new SimulationCompleted(buildingId, persisted.id, inputHash, this.now())];
     for (const event of events) {
       this.eventSink?.(event);
     }
-    this.logger.log(`simulation of building ${buildingId} completed: result ${record.id} (hash ${inputHash})`);
-    return { kind: 'completed', record, events };
+    this.logger.log(`simulation of building ${buildingId} completed: result ${persisted.id} (hash ${inputHash})`);
+    return { kind: 'completed', record: persisted, events };
   }
 }

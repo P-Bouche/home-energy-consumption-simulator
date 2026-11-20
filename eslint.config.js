@@ -60,6 +60,7 @@ export default tseslint.config(
           ],
           patterns: [
             ...ENGINE_RESTRICTION.patterns,
+            { group: ['node:*'], message: 'packages/domain must stay platform-free: no Node built-ins (hashing lives in packages/application).' },
             { group: ['@nestjs/*'], message: 'packages/domain must stay framework-free: no NestJS imports.' },
             { group: ['react', 'react-dom'], message: 'packages/domain must stay framework-free: no React imports.' },
             { group: ['@mui/*', '@emotion/*'], message: 'packages/domain must stay framework-free: no UI imports.' }

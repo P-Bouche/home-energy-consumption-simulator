@@ -18,8 +18,12 @@ export interface SimulationRepository {
    * Persists a simulation result. Implementations enforce uniqueness of
    * (buildingId, inputHash): saving the same input twice is the cache path,
    * not a duplicate row.
+   *
+   * @returns the persisted winning record — on a conflict (identical input
+   * hash persisted concurrently) the already-stored row, so callers never
+   * hold a record that was not persisted (which would 404 on later reads).
    */
-  saveResult(record: SimulationResultRecord): Promise<void>;
+  saveResult(record: SimulationResultRecord): Promise<SimulationResultRecord>;
 
   /**
    * @returns the persisted result by id, or null when unknown

@@ -25,12 +25,7 @@ export {
   type SimulationJobJson,
   type SimulationJobStatus
 } from './simulation-job.ts';
-export {
-  canonicalJson,
-  computeBuildingInputHash,
-  toSimulationView,
-  type BuildingSimulationView
-} from './building-simulation-view.ts';
+export { toSimulationView, type BuildingSimulationView } from './building-simulation-view.ts';
 export {
   EngineExecutionError,
   InvalidDpeError,

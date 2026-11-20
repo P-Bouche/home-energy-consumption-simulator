@@ -11,7 +11,7 @@ import {
   type SimulationResultRecord,
   type SimulationResultRecordJson
 } from '@hes/domain';
-import type { SimulationRepository } from '@hes/application';
+import { SimulationAlreadyInFlightError, type SimulationRepository } from '@hes/application';
 import type { Pool } from 'pg';
 
 /**
@@ -35,12 +35,13 @@ export class PostgresSimulationRepository implements SimulationRepository {
    * (building_id, input_hash): a concurrent identical computation is the
    * cache path, not an error.
    */
-  async saveResult(record: SimulationResultRecord): Promise<void> {
+  async saveResult(record: SimulationResultRecord): Promise<SimulationResultRecord> {
     const json = simulationResultRecordToJson(record);
-    await this.pool.query(
+    const inserted = await this.pool.query(
       `INSERT INTO simulations (id, building_id, input_hash, engine_version, status, result, created_at)
        VALUES ($1, $2, $3, $4, 'done', $5, $6)
-       ON CONFLICT (building_id, input_hash) DO NOTHING`,
+       ON CONFLICT (building_id, input_hash) DO NOTHING
+       RETURNING result`,
       [
         record.id,
         record.buildingId,
@@ -50,6 +51,17 @@ export class PostgresSimulationRepository implements SimulationRepository {
         record.createdAt
       ]
     );
+    if ((inserted.rowCount ?? 0) > 0) {
+      return record;
+    }
+    // Lost the race: a concurrent request persisted the identical input
+    // first. Re-read and return the winning row so the caller never holds an
+    // unpersisted record (which would 404 on a later GET /simulations/:id).
+    const winner = await this.findResultByInputHash(record.buildingId, record.inputHash);
+    if (winner === null) {
+      throw new Error(`simulation result conflict without a winning row for hash ${record.inputHash}`);
+    }
+    return winner;
   }
 
   async findResultById(id: SimulationResultId): Promise<SimulationResultRecord | null> {
@@ -86,11 +98,22 @@ export class PostgresSimulationRepository implements SimulationRepository {
    * duplicate in-flight job with a unique violation (SQLSTATE 23505).
    */
   async saveJob(job: SimulationJob): Promise<void> {
-    await this.pool.query(
-      `INSERT INTO simulation_jobs (id, building_id, input_hash, status, result_id, error, created_at, started_at, finished_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-      jobRowParams(job)
-    );
+    try {
+      await this.pool.query(
+        `INSERT INTO simulation_jobs (id, building_id, input_hash, status, result_id, error, created_at, started_at, finished_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+        jobRowParams(job)
+      );
+    } catch (error) {
+      // The partial unique index rejects a duplicate in-flight job with
+      // SQLSTATE 23505: convert it to the typed 409 error instead of an
+      // unhandled 500 (check-then-act race between findActiveJobByInputHash
+      // and saveJob).
+      if (isUniqueViolation(error)) {
+        throw new SimulationAlreadyInFlightError(job.id, job.inputHash);
+      }
+      throw error;
+    }
   }
 
   async updateJob(job: SimulationJob): Promise<void> {
@@ -151,4 +174,8 @@ function rowToJobJson(row: Record<string, unknown>): Parameters<typeof simulatio
     startedAt: toIso(row['started_at']),
     finishedAt: toIso(row['finished_at'])
   };
+}
+
+function isUniqueViolation(error: unknown): boolean {
+  return typeof error === 'object' && error !== null && (error as { code?: unknown }).code === '23505';
 }
