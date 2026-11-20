@@ -64,6 +64,18 @@ export interface BuildingInput {
   readonly ventilationSystems: readonly VentilationSystem[];
   readonly photovoltaicSystems: readonly PhotovoltaicSystem[];
   readonly importedAt: Date;
+  /**
+   * The verbatim source DPE XML document this aggregate was imported from
+   * (P2), or null when the building was not built from a DPE XML file.
+   *
+   * This is provenance, not an inferred value: it is the source document
+   * itself, retained so the Open3CL adapter can feed the engine an input
+   * identical to the diagnostic (ADR-0001 auditability; the domain aggregate
+   * is intentionally a lossy projection of the DPE). Confidence metadata
+   * therefore does not apply to it; every modeled field keeps its own
+   * Confidence wrapper.
+   */
+  readonly sourceDpeXml?: string | null;
 }
 
 /**
@@ -102,6 +114,7 @@ export interface BuildingJson {
   readonly ventilationSystems: readonly VentilationSystem[];
   readonly photovoltaicSystems: readonly PhotovoltaicSystem[];
   readonly importedAt: string;
+  readonly sourceDpeXml: string | null;
 }
 
 function cToJ<T>(c: Confidence<T> | null): ConfidenceJson<T> | null {
@@ -151,6 +164,7 @@ export class Building {
   readonly ventilationSystems: readonly VentilationSystem[];
   readonly photovoltaicSystems: readonly PhotovoltaicSystem[];
   readonly importedAt: Date;
+  readonly sourceDpeXml: string | null;
   private readonly events: DomainEvent[] = [];
 
   private constructor(input: BuildingInput) {
@@ -183,6 +197,7 @@ export class Building {
     this.ventilationSystems = Object.freeze([...input.ventilationSystems]);
     this.photovoltaicSystems = Object.freeze([...input.photovoltaicSystems]);
     this.importedAt = new Date(input.importedAt.getTime());
+    this.sourceDpeXml = typeof input.sourceDpeXml === 'string' ? input.sourceDpeXml : null;
   }
 
   /**
@@ -238,7 +253,8 @@ export class Building {
       heatingSystems: revived.heatingSystems,
       ventilationSystems: revived.ventilationSystems,
       photovoltaicSystems: revived.photovoltaicSystems,
-      importedAt: new Date(revived.importedAt)
+      importedAt: new Date(revived.importedAt),
+      sourceDpeXml: typeof json.sourceDpeXml === 'string' ? json.sourceDpeXml : null
     };
     Building.assertInvariants(input);
     return new Building(input);
@@ -356,7 +372,8 @@ export class Building {
       heatingSystems: this.heatingSystems,
       ventilationSystems: this.ventilationSystems,
       photovoltaicSystems: this.photovoltaicSystems,
-      importedAt: this.importedAt.toISOString()
+      importedAt: this.importedAt.toISOString(),
+      sourceDpeXml: this.sourceDpeXml
     };
   }
 }
