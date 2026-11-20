@@ -91,3 +91,24 @@ jobs:
           name: coverage-report
           path: coverage/
           retention-days: 14
+
+  e2e:
+    name: E2E (Playwright, AC-P1-05)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        if: hashFiles('package.json') != ''
+      - uses: actions/setup-node@v4
+        if: hashFiles('package.json') != ''
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Install dependencies
+        if: hashFiles('package.json') != ''
+        run: npm ci
+      - name: Install Playwright browser
+        if: hashFiles('package.json') != ''
+        run: npx playwright install --with-deps chromium
+      - name: Run e2e tests (API with in-memory repository + Vite dev server)
+        if: hashFiles('package.json') != ''
+        run: npm run test:e2e
