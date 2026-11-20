@@ -1,0 +1,4448 @@
+{
+  "id": "00000000-0000-4000-8000-000000000000",
+  "dpeNumber": {
+    "value": "2535E0426429Q",
+    "source": "dpe-xml:dpe/numero_dpe",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "status": {
+    "value": "ACTIF",
+    "source": "dpe-xml:dpe/statut",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "address": {
+    "value": "65 Avenue Aristide Briand",
+    "source": "dpe-xml:dpe/administratif/geolocalisation/adresses/adresse_bien/adresse_brut",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "banId": {
+    "value": "35238_0480_00065",
+    "source": "dpe-xml:dpe/administratif/geolocalisation/adresses/adresse_bien/ban_id",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "banCoordinates": {
+    "x": {
+      "value": 353025.55,
+      "source": "dpe-xml:dpe/administratif/geolocalisation/adresses/adresse_bien/ban_x",
+      "confidence": 1,
+      "importDate": "2026-11-20T10:00:00.000Z"
+    },
+    "y": {
+      "value": 6789138.56,
+      "source": "dpe-xml:dpe/administratif/geolocalisation/adresses/adresse_bien/ban_y",
+      "confidence": 1,
+      "importDate": "2026-11-20T10:00:00.000Z"
+    }
+  },
+  "constructionYear": {
+    "value": 1948,
+    "source": "dpe-xml:dpe/logement/caracteristique_generale/annee_construction",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "constructionPeriod": {
+    "value": "2",
+    "source": "dpe-xml:dpe/logement/caracteristique_generale/enum_periode_construction_id",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "livingAreaM2": {
+    "value": 1510.81,
+    "source": "inference:living-area-from-building-area",
+    "confidence": 0.8,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "buildingLivingAreaM2": {
+    "value": 1510.81,
+    "source": "dpe-xml:dpe/logement/caracteristique_generale/surface_habitable_immeuble",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "ceilingHeightM": {
+    "value": 2.7,
+    "source": "dpe-xml:dpe/logement/caracteristique_generale/hsp",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "levelCount": {
+    "value": 1,
+    "source": "inference:default-level-count-1",
+    "confidence": 0.5,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "apartmentCount": {
+    "value": 28,
+    "source": "dpe-xml:dpe/logement/caracteristique_generale/nombre_appartement",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "climateZone": {
+    "value": "4",
+    "source": "dpe-xml:dpe/logement/meteo/enum_zone_climatique_id",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "altitudeClass": {
+    "value": "1",
+    "source": "dpe-xml:dpe/logement/meteo/enum_classe_altitude_id",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "altitudeM": {
+    "value": 20,
+    "source": "dpe-xml:dpe/logement/meteo/altitude",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "thermalInertiaClass": {
+    "value": "3",
+    "source": "dpe-xml:dpe/logement/enveloppe/inertie/enum_classe_inertie_id",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "zones": [
+    {
+      "id": "00000000-0000-4000-8000-000000000000",
+      "name": {
+        "value": "logement",
+        "source": "inference:single-zone-from-logement",
+        "confidence": 0.9,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 1510.81,
+        "source": "inference:living-area-from-building-area",
+        "confidence": 0.8,
+        "importDate": {}
+      }
+    }
+  ],
+  "rooms": [],
+  "walls": [
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Cloison de plâtre  non isolé\n Mur donnant sur un local non chauffé et non solarisé",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[1]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 395.47,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[1]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[1]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[1]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "20",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[1]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "15",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[1]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Cloison de plâtre  avec isolation par l'intérieur Ep=6 cm\n Sans retour d'isolant au niveau des menuiseries\n Mur donnant sur un local non chauffé et non solarisé",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[2]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 39.39,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[2]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 0.5263,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[2]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[2]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "20",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[2]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "15",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[2]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Mur en briques pleines simples Ep 23cm non isolé\n Mur donnant sur l'extérieur",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[3]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 418.12,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[3]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[3]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[3]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "8",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[3]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[3]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Mur en briques pleines simples Ep 23cm non isolé\n Mur donnant sur l'extérieur",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[4]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 94.62,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[4]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[4]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "4",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[4]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "8",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[4]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[4]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Mur en briques pleines simples Ep 23cm non isolé\n Mur donnant sur l'extérieur",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[5]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 103.86,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[5]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[5]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[5]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "8",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[5]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[5]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Mur en briques pleines simples Ep 23cm non isolé\n Mur donnant sur l'extérieur",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[6]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 12,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[6]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[6]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[6]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "8",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[6]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[6]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Mur en briques pleines simples Ep 23cm avec isolation par l'intérieur Ep=6 cm\n Sans retour d'isolant au niveau des menuiseries\n Mur donnant sur l'extérieur",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[7]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 16.18,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[7]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 0.5263,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[7]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[7]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "8",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[7]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[7]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Mur en briques pleines simples Ep 23cm avec isolation par l'intérieur Ep=6 cm\n Sans retour d'isolant au niveau des menuiseries\n Mur donnant sur l'extérieur",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[8]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 12.26,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[8]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 0.5263,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[8]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "4",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[8]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "8",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[8]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[8]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Mur en briques pleines simples Ep 23cm avec isolation par l'intérieur Ep=6 cm\n Sans retour d'isolant au niveau des menuiseries\n Mur donnant sur l'extérieur",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[9]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 1.22,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[9]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 0.5263,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[9]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[9]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "8",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[9]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[9]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Mur en pierre de taille/moellons Ep 50cm avec doublage connu (plâtre, brique, bois...)  non isolé\n Mur donnant sur l'extérieur",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[10]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 69.12,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[10]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.4331,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[10]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "4",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[10]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[10]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[10]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Mur en pierre de taille/moellons Ep 50cm avec doublage connu (plâtre, brique, bois...)  non isolé\n Mur donnant sur l'extérieur",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[11]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 109.43,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[11]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.4331,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[11]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[11]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[11]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[11]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Mur en pierre de taille/moellons Ep 50cm avec isolation par l'intérieur Ep=6 cm\n Sans retour d'isolant au niveau des menuiseries\n Mur donnant sur l'extérieur",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[12]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 21.75,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[12]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 0.5031,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[12]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "4",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[12]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[12]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[12]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Mur en briques pleines simples Ep 23cm non isolé\n Mur donnant sur l'extérieur",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[13]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 12.56,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[13]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[13]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "4",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[13]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "8",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[13]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[13]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Mur en briques pleines simples Ep 23cm non isolé\n Mur donnant sur l'extérieur",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[14]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 12.64,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[14]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[14]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[14]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "8",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[14]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[14]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Mur en briques pleines simples Ep 23cm non isolé\n Mur donnant sur l'extérieur",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[15]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 363.91,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[15]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[15]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[15]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "8",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[15]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[15]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    }
+  ],
+  "roofs": [
+    {
+      "kind": "roof",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Dalle de béton  non isolé\n Plafond donnant sur un local non chauffé et non accessible",
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_haut_collection/plancher_haut[1]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 207.29,
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_haut_collection/plancher_haut[1]/donnee_entree/surface_paroi_opaque",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_haut_collection/plancher_haut[1]/donnee_intermediaire/uph",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "roofType": {
+        "value": "8",
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_haut_collection/plancher_haut[1]/donnee_entree/enum_type_plancher_haut_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "7",
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_haut_collection/plancher_haut[1]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "roof",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Dalle de béton  non isolé\n Plafond donnant sur l'extérieur",
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_haut_collection/plancher_haut[2]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 8.2,
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_haut_collection/plancher_haut[2]/donnee_entree/surface_paroi_opaque",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_haut_collection/plancher_haut[2]/donnee_intermediaire/uph",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "roofType": {
+        "value": "8",
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_haut_collection/plancher_haut[2]/donnee_entree/enum_type_plancher_haut_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_haut_collection/plancher_haut[2]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    }
+  ],
+  "floors": [
+    {
+      "kind": "floor",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Dalle de béton  non isolé\n Plancher donnant sur un local autre que habitation",
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_bas_collection/plancher_bas[1]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 117.18,
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_bas_collection/plancher_bas[1]/donnee_entree/surface_paroi_opaque",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2,
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_bas_collection/plancher_bas[1]/donnee_intermediaire/upb",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "floorType": {
+        "value": "9",
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_bas_collection/plancher_bas[1]/donnee_entree/enum_type_plancher_bas_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "4",
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_bas_collection/plancher_bas[1]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "floor",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Dalle de béton  non isolé\n Plancher donnant sur l'extérieur",
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_bas_collection/plancher_bas[2]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 55.39,
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_bas_collection/plancher_bas[2]/donnee_entree/surface_paroi_opaque",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2,
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_bas_collection/plancher_bas[2]/donnee_intermediaire/upb",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "floorType": {
+        "value": "9",
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_bas_collection/plancher_bas[2]/donnee_entree/enum_type_plancher_bas_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_bas_collection/plancher_bas[2]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "floor",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Dalle de béton  non isolé\n Plancher donnant sur sous-sol",
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_bas_collection/plancher_bas[3]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 37.54,
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_bas_collection/plancher_bas[3]/donnee_entree/surface_paroi_opaque",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2,
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_bas_collection/plancher_bas[3]/donnee_intermediaire/upb",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "floorType": {
+        "value": "9",
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_bas_collection/plancher_bas[3]/donnee_entree/enum_type_plancher_bas_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "6",
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_bas_collection/plancher_bas[3]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "floor",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Dalle de béton  non isolé\n Plancher donnant sur un local non chauffé et non solarisé",
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_bas_collection/plancher_bas[4]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 6.78,
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_bas_collection/plancher_bas[4]/donnee_entree/surface_paroi_opaque",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2,
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_bas_collection/plancher_bas[4]/donnee_intermediaire/upb",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "floorType": {
+        "value": "9",
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_bas_collection/plancher_bas[4]/donnee_entree/enum_type_plancher_bas_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "15",
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_bas_collection/plancher_bas[4]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    }
+  ],
+  "windows": [
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Volet battant PVC (e>22mm)\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 30.45,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 7,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Volet battant PVC (e>22mm)\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 9.9,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Volet battant PVC (e>22mm)\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[3]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 18.24,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[3]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[3]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[3]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 8,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[3]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[3]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[3]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[3]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Volet roulant PVC (e<=12mm)\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[4]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 9.12,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[4]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[4]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[4]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[4]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[4]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[4]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[4]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Volet battant PVC (e>22mm)\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[5]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 25.2,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[5]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[5]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[5]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 8,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[5]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[5]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[5]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[5]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Volet roulant PVC (e<=12mm)\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[6]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 6.3,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[6]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[6]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[6]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 2,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[6]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[6]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[6]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[6]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Sans volet\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[7]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 1,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[7]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[7]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[7]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 1,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[7]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[7]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[7]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[7]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Volet roulant PVC (e<=12mm)\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[8]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 17.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[8]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[8]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[8]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[8]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[8]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[8]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[8]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Volet roulant PVC (e<=12mm)\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[9]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 4.12,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[9]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[9]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[9]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 1,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[9]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[9]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[9]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[9]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Volet roulant PVC (e<=12mm)\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[10]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 6.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[10]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[10]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[10]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[10]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[10]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[10]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[10]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Volet roulant PVC (e<=12mm)\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[11]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 1.65,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[11]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[11]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[11]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 1,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[11]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[11]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[11]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[11]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Volet battant PVC (e>22mm)\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[12]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 2.15,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[12]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[12]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[12]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 1,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[12]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[12]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[12]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[12]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Volet roulant PVC (e<=12mm)\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[13]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 6.3,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[13]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[13]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[13]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 2,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[13]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[13]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[13]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[13]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Volet roulant PVC (e<=12mm)\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[14]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 7.56,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[14]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[14]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[14]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 2,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[14]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[14]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[14]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[14]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Volet roulant PVC (e<=12mm)\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[15]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 2.15,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[15]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[15]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[15]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 1,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[15]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[15]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[15]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[15]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Volet battant PVC (e>22mm)\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[16]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 1.51,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[16]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[16]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[16]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 1,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[16]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[16]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[16]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[16]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Volet battant PVC (e>22mm)\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[17]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 4.05,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[17]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[17]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[17]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 1,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[17]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[17]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[17]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[17]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Volet roulant PVC (e<=12mm)\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[18]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 4.35,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[18]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[18]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[18]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 1,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[18]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[18]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[18]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[18]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Volet roulant PVC (e<=12mm)\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[19]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 1.65,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[19]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[19]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[19]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 1,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[19]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[19]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[19]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[19]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Volet battant PVC (e>22mm)\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[20]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 6.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[20]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[20]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[20]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[20]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[20]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[20]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[20]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Volet roulant PVC (e<=12mm)\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[21]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 9.9,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[21]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[21]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[21]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[21]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[21]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[21]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[21]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Volet roulant PVC (e<=12mm)\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[22]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 3.3,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[22]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[22]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[22]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 2,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[22]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[22]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[22]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[22]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Volet roulant PVC (e<=12mm)\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[23]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 3.3,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[23]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[23]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[23]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 2,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[23]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[23]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[23]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[23]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Volet battant PVC (e>22mm)\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[24]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 4.02,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[24]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[24]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "4",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[24]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 2,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[24]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[24]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[24]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[24]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Volet battant PVC (e>22mm)\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[25]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 4.7,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[25]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[25]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "4",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[25]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 2,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[25]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[25]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[25]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[25]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Volet roulant PVC (e<=12mm)\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[26]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 6.03,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[26]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[26]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "4",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[26]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 3,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[26]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[26]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[26]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[26]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Volet roulant PVC (e<=12mm)\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[27]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 1.32,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[27]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[27]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "4",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[27]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 1,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[27]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[27]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[27]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[27]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Volet roulant PVC (e<=12mm)\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[28]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 7.05,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[28]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[28]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "4",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[28]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 3,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[28]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[28]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[28]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[28]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Volet roulant PVC (e<=12mm)\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[29]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 2.25,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[29]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[29]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "4",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[29]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 1,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[29]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[29]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[29]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[29]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal simple vitrage(VNT) \n Sans volet\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[30]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 1.8,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[30]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 5.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[30]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "4",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[30]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[30]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.52,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[30]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[30]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[30]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Sans volet\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[31]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 4.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[31]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[31]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "4",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[31]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 10,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[31]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[31]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[31]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[31]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Persienne avec ajours\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[32]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 6.3,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[32]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[32]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "4",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[32]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 3,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[32]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[32]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[32]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[32]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Volet roulant PVC (e<=12mm)\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[33]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 2.01,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[33]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[33]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "4",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[33]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 1,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[33]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[33]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[33]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[33]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Volet roulant PVC (e<=12mm)\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[34]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 2.35,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[34]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[34]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "4",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[34]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 1,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[34]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[34]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[34]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[34]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Volet roulant PVC (e<=12mm)\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[35]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 2.59,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[35]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[35]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[35]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 1,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[35]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[35]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[35]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[35]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Volet roulant PVC (e<=12mm)\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[36]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 2.92,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[36]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[36]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[36]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 1,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[36]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[36]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[36]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[36]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Persienne avec ajours\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[37]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 20.52,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[37]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[37]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[37]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 12,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[37]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[37]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[37]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[37]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Persienne avec ajours\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[38]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 22.05,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[38]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[38]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[38]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 9,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[38]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[38]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[38]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[38]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Volet roulant PVC (e<=12mm)\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[39]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 5.13,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[39]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[39]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[39]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 3,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[39]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[39]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[39]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[39]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Volet battant PVC (e>22mm)\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[40]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 2.45,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[40]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[40]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[40]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 1,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[40]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[40]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[40]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[40]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Persienne avec ajours\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[41]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 17.34,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[41]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[41]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[41]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[41]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[41]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[41]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[41]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Persienne avec ajours\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[42]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[42]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[42]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[42]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 1,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[42]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[42]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[42]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[42]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Persienne avec ajours\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[43]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 2.31,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[43]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[43]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[43]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 1,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[43]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[43]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[43]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[43]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Persienne avec ajours\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[44]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 9.87,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[44]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[44]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[44]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 3,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[44]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[44]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[44]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[44]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Volet roulant PVC (e<=12mm)\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[45]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 4.62,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[45]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[45]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[45]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 2,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[45]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[45]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[45]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[45]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Volet roulant PVC (e<=12mm)\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[46]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 2.94,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[46]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[46]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[46]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 1,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[46]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[46]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[46]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[46]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Volet roulant PVC (e<=12mm)\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[47]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 4.9,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[47]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[47]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[47]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 2,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[47]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[47]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[47]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[47]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Volet roulant PVC (e<=12mm)\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[48]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[48]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[48]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[48]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 1,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[48]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[48]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[48]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[48]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal simple vitrage(VNT) \n Sans volet\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[49]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 0.9,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[49]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 5.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[49]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[49]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 2,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[49]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.52,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[49]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[49]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[49]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Sans volet\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[50]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 4.95,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[50]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[50]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[50]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 11,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[50]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[50]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[50]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[50]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Persienne avec ajours\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[51]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 0.45,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[51]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[51]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[51]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 1,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[51]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[51]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[51]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[51]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Volet battant PVC (e>22mm)\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[52]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 11.75,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[52]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[52]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[52]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 5,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[52]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[52]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[52]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[52]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Volet battant PVC (e>22mm)\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[53]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 10.05,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[53]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[53]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[53]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 5,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[53]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[53]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[53]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[53]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Volet roulant PVC (e<=12mm)\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[54]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 2.35,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[54]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[54]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[54]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 1,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[54]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[54]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[54]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[54]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Volet battant PVC (e>22mm)\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[55]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 2.25,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[55]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[55]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[55]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 1,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[55]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[55]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[55]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[55]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Volet roulant PVC (e<=12mm)\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[56]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 2.01,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[56]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[56]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[56]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 1,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[56]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[56]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[56]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[56]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Volet battant PVC (e>22mm)\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[57]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 1.32,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[57]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[57]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[57]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 1,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[57]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[57]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[57]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[57]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Persienne avec ajours\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[58]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 6.3,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[58]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[58]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[58]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 3,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[58]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[58]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[58]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[58]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Volet battant PVC (e>22mm)\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[59]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 13.2,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[59]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[59]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[59]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 8,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[59]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[59]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[59]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[59]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Sans volet\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[60]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 2,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[60]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[60]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[60]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 2,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[60]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[60]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[60]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[60]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Volet roulant PVC (e<=12mm)\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[61]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 3.3,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[61]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[61]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[61]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 2,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[61]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[61]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[61]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[61]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre battante fixe ou oscillante Bois ou bois métal double vitrage(VIR) argon 16mm \n Volet battant PVC (e>22mm)\n Au nu intérieur\n Largeur dormant 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[62]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 3.02,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[62]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[62]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[62]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 2,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[62]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[62]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[62]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[62]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    }
+  ],
+  "doors": [
+    {
+      "kind": "door",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "porte 1",
+        "source": "inference:default-element-label",
+        "confidence": 0.3,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 39.16,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[1]/donnee_entree/surface_porte",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.8,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[1]/donnee_intermediaire/uporte",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "doorType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[1]/donnee_entree/enum_type_porte_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 22,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[1]/donnee_entree/nb_porte",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "door",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Porte opaque pleine simple en bois\n Au nu intérieur\n Largeur dormant env. 5 cm",
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[2]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 10.68,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[2]/donnee_entree/surface_porte",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 3.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[2]/donnee_intermediaire/uporte",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "doorType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[2]/donnee_entree/enum_type_porte_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 6,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[2]/donnee_entree/nb_porte",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "door",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "porte 3",
+        "source": "inference:default-element-label",
+        "confidence": 0.3,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 1.78,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[3]/donnee_entree/surface_porte",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.8,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[3]/donnee_intermediaire/uporte",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "doorType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[3]/donnee_entree/enum_type_porte_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 1,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[3]/donnee_entree/nb_porte",
+        "confidence": 1,
+        "importDate": {}
+      }
+    }
+  ],
+  "thermalZones": [
+    {
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "name": {
+        "value": "zone thermique du logement",
+        "source": "inference:single-zone-from-logement",
+        "confidence": 0.9,
+        "importDate": {}
+      },
+      "heatedAreaM2": {
+        "value": 755.87,
+        "source": "dpe-xml:dpe/logement/installation_chauffage_collection/installation_chauffage[1]/donnee_entree/surface_chauffee",
+        "confidence": 1,
+        "importDate": {}
+      }
+    }
+  ],
+  "heatingSystems": [
+    {
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Radiateurs gaz sans thermo",
+        "source": "dpe-xml:dpe/logement/installation_chauffage_collection/installation_chauffage[1]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "installationType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/installation_chauffage_collection/installation_chauffage[1]/donnee_entree/enum_type_installation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "heatedAreaM2": {
+        "value": 755.87,
+        "source": "dpe-xml:dpe/logement/installation_chauffage_collection/installation_chauffage[1]/donnee_entree/surface_chauffee",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Radiateurs gaz thermo",
+        "source": "dpe-xml:dpe/logement/installation_chauffage_collection/installation_chauffage[2]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "installationType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/installation_chauffage_collection/installation_chauffage[2]/donnee_entree/enum_type_installation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "heatedAreaM2": {
+        "value": 754.94,
+        "source": "dpe-xml:dpe/logement/installation_chauffage_collection/installation_chauffage[2]/donnee_entree/surface_chauffee",
+        "confidence": 1,
+        "importDate": {}
+      }
+    }
+  ],
+  "ventilationSystems": [
+    {
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "ventilation 1",
+        "source": "inference:default-element-label",
+        "confidence": 0.3,
+        "importDate": {}
+      },
+      "ventilationType": {
+        "value": "18",
+        "source": "dpe-xml:dpe/logement/ventilation_collection/ventilation[1]/donnee_entree/enum_type_ventilation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "ventilatedAreaM2": {
+        "value": 1510.81,
+        "source": "dpe-xml:dpe/logement/ventilation_collection/ventilation[1]/donnee_entree/surface_ventile",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "q4paConv": {
+        "value": 2,
+        "source": "dpe-xml:dpe/logement/ventilation_collection/ventilation[1]/donnee_intermediaire/q4pa_conv",
+        "confidence": 1,
+        "importDate": {}
+      }
+    }
+  ],
+  "photovoltaicSystems": [],
+  "importedAt": "2026-11-20T10:00:00.000Z",
+  "sourceDpeXml": null
+}

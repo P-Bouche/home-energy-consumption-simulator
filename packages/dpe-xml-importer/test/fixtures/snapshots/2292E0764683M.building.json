@@ -1,0 +1,551 @@
+{
+  "id": "00000000-0000-4000-8000-000000000000",
+  "dpeNumber": {
+    "value": "2292E0764683M",
+    "source": "dpe-xml:dpe/numero_dpe",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "status": {
+    "value": "ACTIF",
+    "source": "dpe-xml:dpe/statut",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "address": {
+    "value": "54-56 AVENUE DE LA DIVISION LECLERC 4av H. Marrou",
+    "source": "dpe-xml:dpe/administratif/geolocalisation/adresses/adresse_bien/adresse_brut",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "banId": {
+    "value": "92019_2510_00056",
+    "source": "dpe-xml:dpe/administratif/geolocalisation/adresses/adresse_bien/ban_id",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "banCoordinates": {
+    "x": {
+      "value": 647540.31,
+      "source": "dpe-xml:dpe/administratif/geolocalisation/adresses/adresse_bien/ban_x",
+      "confidence": 1,
+      "importDate": "2026-11-20T10:00:00.000Z"
+    },
+    "y": {
+      "value": 6851570.65,
+      "source": "dpe-xml:dpe/administratif/geolocalisation/adresses/adresse_bien/ban_y",
+      "confidence": 1,
+      "importDate": "2026-11-20T10:00:00.000Z"
+    }
+  },
+  "constructionYear": {
+    "value": 2006,
+    "source": "dpe-xml:dpe/logement/caracteristique_generale/annee_construction",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "constructionPeriod": {
+    "value": "8",
+    "source": "dpe-xml:dpe/logement/caracteristique_generale/enum_periode_construction_id",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "livingAreaM2": {
+    "value": 37.87,
+    "source": "dpe-xml:dpe/logement/caracteristique_generale/surface_habitable_logement",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "buildingLivingAreaM2": {
+    "value": 500,
+    "source": "dpe-xml:dpe/logement/caracteristique_generale/surface_habitable_immeuble",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "ceilingHeightM": {
+    "value": 2.5,
+    "source": "dpe-xml:dpe/logement/caracteristique_generale/hsp",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "levelCount": {
+    "value": 1,
+    "source": "dpe-xml:dpe/logement/caracteristique_generale/nombre_niveau_logement",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "apartmentCount": {
+    "value": 1,
+    "source": "dpe-xml:dpe/logement/caracteristique_generale/nombre_appartement",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "climateZone": {
+    "value": "1",
+    "source": "dpe-xml:dpe/logement/meteo/enum_zone_climatique_id",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "altitudeClass": {
+    "value": "1",
+    "source": "dpe-xml:dpe/logement/meteo/enum_classe_altitude_id",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "altitudeM": null,
+  "thermalInertiaClass": {
+    "value": "4",
+    "source": "dpe-xml:dpe/logement/enveloppe/inertie/enum_classe_inertie_id",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "zones": [
+    {
+      "id": "00000000-0000-4000-8000-000000000000",
+      "name": {
+        "value": "logement",
+        "source": "inference:single-zone-from-logement",
+        "confidence": 0.9,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 37.87,
+        "source": "dpe-xml:dpe/logement/caracteristique_generale/surface_habitable_logement",
+        "confidence": 1,
+        "importDate": {}
+      }
+    }
+  ],
+  "rooms": [],
+  "walls": [
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Mur  1 Nord - Mur en béton banché d'épaisseur 28 cm avec un doublage rapporté avec isolation intérieure (réalisée entre 2006 et 2012) donnant sur des circulations sans ouverture directe sur l'extérieur",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[1]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 8.9,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[1]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 0.36,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[1]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[1]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[1]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "14",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[1]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Mur  2 Sud - Mur en béton banché d'épaisseur 28 cm avec un doublage rapporté avec isolation intérieure (réalisée entre 2006 et 2012) donnant sur l'extérieur",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[2]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 9.09,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[2]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 0.36,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[2]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[2]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[2]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[2]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    }
+  ],
+  "roofs": [
+    {
+      "kind": "roof",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Plafond - Dalle béton donnant sur un local chauffé avec isolation intérieure",
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_haut_collection/plancher_haut[1]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 37.83,
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_haut_collection/plancher_haut[1]/donnee_entree/surface_paroi_opaque",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 0.27,
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_haut_collection/plancher_haut[1]/donnee_intermediaire/uph",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "roofType": {
+        "value": "8",
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_haut_collection/plancher_haut[1]/donnee_entree/enum_type_plancher_haut_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "22",
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_haut_collection/plancher_haut[1]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    }
+  ],
+  "floors": [
+    {
+      "kind": "floor",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Plancher - Dalle béton donnant sur un local chauffé avec isolation sous chape flottante",
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_bas_collection/plancher_bas[1]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 37.83,
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_bas_collection/plancher_bas[1]/donnee_entree/surface_paroi_opaque",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 0.27,
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_bas_collection/plancher_bas[1]/donnee_intermediaire/upb",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "floorType": {
+        "value": "9",
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_bas_collection/plancher_bas[1]/donnee_entree/enum_type_plancher_bas_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "22",
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_bas_collection/plancher_bas[1]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    }
+  ],
+  "windows": [
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre Sud - Fenêtres battantes pvc, orientées Sud, double vitrage",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 2.24,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 1,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.44,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "5",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Porte-fenêtre  1 Sud - Portes-fenêtres battantes pvc, orientées Sud, double vitrage",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 3.28,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 1,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.46,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "5",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Porte-fenêtre  2 Sud - Portes-fenêtres fixes pvc, orientées Sud, double vitrage",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[3]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 1.6400000000000001,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[3]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2.6,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[3]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[3]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 1,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[3]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.46,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[3]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[3]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "5",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[3]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    }
+  ],
+  "doors": [
+    {
+      "kind": "door",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Porte - Porte(s) bois opaque pleine",
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[1]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 1.85,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[1]/donnee_entree/surface_porte",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 3.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[1]/donnee_intermediaire/uporte",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "doorType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[1]/donnee_entree/enum_type_porte_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 1,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[1]/donnee_entree/nb_porte",
+        "confidence": 1,
+        "importDate": {}
+      }
+    }
+  ],
+  "thermalZones": [
+    {
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "name": {
+        "value": "zone thermique du logement",
+        "source": "inference:single-zone-from-logement",
+        "confidence": 0.9,
+        "importDate": {}
+      },
+      "heatedAreaM2": {
+        "value": 37.87,
+        "source": "dpe-xml:dpe/logement/installation_chauffage_collection/installation_chauffage[1]/donnee_entree/surface_chauffee",
+        "confidence": 1,
+        "importDate": {}
+      }
+    }
+  ],
+  "heatingSystems": [
+    {
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Chaudière collective gaz basse température installée entre 2001 et 2015 avec en appoint une chaudière électrique avec équipement d'intermittence central collectif, réseau isolé. Emetteur(s): radiateur bitube avec robinet thermostatique",
+        "source": "dpe-xml:dpe/logement/installation_chauffage_collection/installation_chauffage[1]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "installationType": {
+        "value": "4",
+        "source": "dpe-xml:dpe/logement/installation_chauffage_collection/installation_chauffage[1]/donnee_entree/enum_type_installation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "heatedAreaM2": {
+        "value": 37.87,
+        "source": "dpe-xml:dpe/logement/installation_chauffage_collection/installation_chauffage[1]/donnee_entree/surface_chauffee",
+        "confidence": 1,
+        "importDate": {}
+      }
+    }
+  ],
+  "ventilationSystems": [
+    {
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "VMC SF Hygro B de 2001 à 2012",
+        "source": "dpe-xml:dpe/logement/ventilation_collection/ventilation[1]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "ventilationType": {
+        "value": "14",
+        "source": "dpe-xml:dpe/logement/ventilation_collection/ventilation[1]/donnee_entree/enum_type_ventilation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "ventilatedAreaM2": {
+        "value": 37.87,
+        "source": "dpe-xml:dpe/logement/ventilation_collection/ventilation[1]/donnee_entree/surface_ventile",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "q4paConv": {
+        "value": 1.5,
+        "source": "dpe-xml:dpe/logement/ventilation_collection/ventilation[1]/donnee_intermediaire/q4pa_conv",
+        "confidence": 1,
+        "importDate": {}
+      }
+    }
+  ],
+  "photovoltaicSystems": [],
+  "importedAt": "2026-11-20T10:00:00.000Z",
+  "sourceDpeXml": null
+}

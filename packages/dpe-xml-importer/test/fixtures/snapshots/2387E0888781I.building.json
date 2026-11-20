@@ -1,0 +1,839 @@
+{
+  "id": "00000000-0000-4000-8000-000000000000",
+  "dpeNumber": {
+    "value": "2387E0888781I",
+    "source": "dpe-xml:dpe/numero_dpe",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "status": {
+    "value": "ACTIF",
+    "source": "dpe-xml:dpe/statut",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "address": {
+    "value": "Le Grand Boucher",
+    "source": "dpe-xml:dpe/administratif/geolocalisation/adresses/adresse_bien/adresse_brut",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "banId": {
+    "value": "87058_B037",
+    "source": "dpe-xml:dpe/administratif/geolocalisation/adresses/adresse_bien/ban_id",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "banCoordinates": {
+    "x": {
+      "value": 601105.33,
+      "source": "dpe-xml:dpe/administratif/geolocalisation/adresses/adresse_bien/ban_x",
+      "confidence": 1,
+      "importDate": "2026-11-20T10:00:00.000Z"
+    },
+    "y": {
+      "value": 6506894.21,
+      "source": "dpe-xml:dpe/administratif/geolocalisation/adresses/adresse_bien/ban_y",
+      "confidence": 1,
+      "importDate": "2026-11-20T10:00:00.000Z"
+    }
+  },
+  "constructionYear": null,
+  "constructionPeriod": {
+    "value": "1",
+    "source": "dpe-xml:dpe/logement/caracteristique_generale/enum_periode_construction_id",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "livingAreaM2": {
+    "value": 108.66,
+    "source": "dpe-xml:dpe/logement/caracteristique_generale/surface_habitable_logement",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "buildingLivingAreaM2": null,
+  "ceilingHeightM": {
+    "value": 2.56,
+    "source": "dpe-xml:dpe/logement/caracteristique_generale/hsp",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "levelCount": {
+    "value": 2,
+    "source": "dpe-xml:dpe/logement/caracteristique_generale/nombre_niveau_logement",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "apartmentCount": null,
+  "climateZone": {
+    "value": "3",
+    "source": "dpe-xml:dpe/logement/meteo/enum_zone_climatique_id",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "altitudeClass": {
+    "value": "2",
+    "source": "dpe-xml:dpe/logement/meteo/enum_classe_altitude_id",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "altitudeM": null,
+  "thermalInertiaClass": {
+    "value": "2",
+    "source": "dpe-xml:dpe/logement/enveloppe/inertie/enum_classe_inertie_id",
+    "confidence": 1,
+    "importDate": "2026-11-20T10:00:00.000Z"
+  },
+  "zones": [
+    {
+      "id": "00000000-0000-4000-8000-000000000000",
+      "name": {
+        "value": "logement",
+        "source": "inference:single-zone-from-logement",
+        "confidence": 0.9,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 108.66,
+        "source": "dpe-xml:dpe/logement/caracteristique_generale/surface_habitable_logement",
+        "confidence": 1,
+        "importDate": {}
+      }
+    }
+  ],
+  "rooms": [],
+  "walls": [
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Mur  1 Sud, Est, Ouest (p1) - Mur en pierre de taille et moellons avec remplissage tout venant d'épaisseur 50 cm non isolé donnant sur l'extérieur",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[1]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 36.62,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[1]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.9,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[1]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[1]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[1]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[1]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Mur  1 Sud, Est, Ouest (p2) - Mur en pierre de taille et moellons avec remplissage tout venant d'épaisseur 50 cm non isolé donnant sur l'extérieur",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[2]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 36.62,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[2]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.9,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[2]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[2]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[2]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[2]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Mur  1 Sud, Est, Ouest (p3) - Mur en pierre de taille et moellons avec remplissage tout venant d'épaisseur 50 cm non isolé donnant sur l'extérieur",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[3]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 36.62,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[3]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.9,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[3]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "4",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[3]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[3]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[3]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Mur  2 Ouest - Mur en pierre de taille et moellons avec remplissage tout venant d'épaisseur 50 cm avec un doublage rapporté non isolé donnant sur une paroi enterrée",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[4]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 34.82,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[4]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.35811,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[4]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "4",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[4]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[4]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[4]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "wall",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Mur  3 Nord - Mur en pierre de taille et moellons avec remplissage tout venant d'épaisseur 50 cm non isolé donnant sur un garage",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[5]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 28.73,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[5]/donnee_entree/surface_paroi_totale",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 1.9,
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[5]/donnee_intermediaire/umur",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[5]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "wallType": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[5]/donnee_entree/enum_materiaux_structure_mur_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "8",
+        "source": "dpe-xml:dpe/logement/enveloppe/mur_collection/mur[5]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    }
+  ],
+  "roofs": [
+    {
+      "kind": "roof",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Plafond  1 - Plafond avec ou sans remplissage donnant sur un comble faiblement ventilé avec isolation intérieure",
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_haut_collection/plancher_haut[1]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 23.64,
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_haut_collection/plancher_haut[1]/donnee_entree/surface_paroi_opaque",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 0.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_haut_collection/plancher_haut[1]/donnee_intermediaire/uph",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "roofType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_haut_collection/plancher_haut[1]/donnee_entree/enum_type_plancher_haut_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "12",
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_haut_collection/plancher_haut[1]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "roof",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Plafond  2 - Plafond avec ou sans remplissage donnant sur un comble très faiblement ventilé avec isolation intérieure",
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_haut_collection/plancher_haut[2]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 46.62,
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_haut_collection/plancher_haut[2]/donnee_entree/surface_paroi_opaque",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 0.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_haut_collection/plancher_haut[2]/donnee_intermediaire/uph",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "roofType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_haut_collection/plancher_haut[2]/donnee_entree/enum_type_plancher_haut_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "13",
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_haut_collection/plancher_haut[2]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    }
+  ],
+  "floors": [
+    {
+      "kind": "floor",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Plancher hourdis ciment - Plancher lourd type entrevous terre-cuite, poutrelles béton non isolé donnant sur un sous-sol non chauffé",
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_bas_collection/plancher_bas[1]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 14.68,
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_bas_collection/plancher_bas[1]/donnee_entree/surface_paroi_opaque",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2,
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_bas_collection/plancher_bas[1]/donnee_intermediaire/upb",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "floorType": {
+        "value": "11",
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_bas_collection/plancher_bas[1]/donnee_entree/enum_type_plancher_bas_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "6",
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_bas_collection/plancher_bas[1]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "floor",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Plancher  2 - Dalle béton non isolée donnant sur un terre-plein",
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_bas_collection/plancher_bas[2]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 50.21,
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_bas_collection/plancher_bas[2]/donnee_entree/surface_paroi_opaque",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 2,
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_bas_collection/plancher_bas[2]/donnee_intermediaire/upb",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "floorType": {
+        "value": "9",
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_bas_collection/plancher_bas[2]/donnee_entree/enum_type_plancher_bas_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "adjacencyType": {
+        "value": "5",
+        "source": "dpe-xml:dpe/logement/enveloppe/plancher_bas_collection/plancher_bas[2]/donnee_entree/enum_type_adjacence_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    }
+  ],
+  "windows": [
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre  1 Est - Fenêtres battantes bois, orientées Est, en survitrage avec lame d'air 8 mm et volets battants avec ajours fixes",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 4.28,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 3.3,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 1,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.47,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "4",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre  2 Sud - Fenêtres battantes bois, orientées Sud, en survitrage avec lame d'air 8 mm et volets battants avec ajours fixes",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 1.24,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 3.3,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 1,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.47,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "4",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Fenêtre  3 Sud - Fenêtres battantes bois, orientées Sud, en survitrage avec lame d'air 8 mm et persiennes avec ajours fixes",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[3]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 0.8400000000000001,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[3]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 3.3,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[3]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[3]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 1,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[3]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.47,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[3]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "4",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[3]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[3]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "window",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Porte-fenêtre Ouest - Portes-fenêtres coulissantes métal sans rupture de ponts thermiques, orientées Ouest, double vitrage avec lame d'air 6 mm et volets roulants pvc",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[4]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 7.48,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[4]/donnee_entree/surface_totale_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 4,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[4]/donnee_intermediaire/uw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "orientation": {
+        "value": "4",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[4]/donnee_entree/enum_orientation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 1,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[4]/donnee_entree/nb_baie",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "solarFactorSw": {
+        "value": 0.57,
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[4]/donnee_intermediaire/sw",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "glazingType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[4]/donnee_entree/enum_type_vitrage_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "frameMaterial": {
+        "value": "7",
+        "source": "dpe-xml:dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[4]/donnee_entree/enum_type_materiaux_menuiserie_id",
+        "confidence": 1,
+        "importDate": {}
+      }
+    }
+  ],
+  "doors": [
+    {
+      "kind": "door",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Porte  1 - Porte(s) bois avec 30-60% de vitrage simple",
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[1]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 1.58,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[1]/donnee_entree/surface_porte",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 4.5,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[1]/donnee_intermediaire/uporte",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "doorType": {
+        "value": "3",
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[1]/donnee_entree/enum_type_porte_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 1,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[1]/donnee_entree/nb_porte",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "kind": "door",
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Porte  2 - Porte(s) bois avec double vitrage",
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[2]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "areaM2": {
+        "value": 2.13,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[2]/donnee_entree/surface_porte",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "uValueWm2K": {
+        "value": 3.3,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[2]/donnee_intermediaire/uporte",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "doorType": {
+        "value": "4",
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[2]/donnee_entree/enum_type_porte_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "count": {
+        "value": 1,
+        "source": "dpe-xml:dpe/logement/enveloppe/porte_collection/porte[2]/donnee_entree/nb_porte",
+        "confidence": 1,
+        "importDate": {}
+      }
+    }
+  ],
+  "thermalZones": [
+    {
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "name": {
+        "value": "zone thermique du logement",
+        "source": "inference:single-zone-from-logement",
+        "confidence": 0.9,
+        "importDate": {}
+      },
+      "heatedAreaM2": {
+        "value": 54.33,
+        "source": "dpe-xml:dpe/logement/installation_chauffage_collection/installation_chauffage[1]/donnee_entree/surface_chauffee",
+        "confidence": 1,
+        "importDate": {}
+      }
+    }
+  ],
+  "heatingSystems": [
+    {
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Chaudière individuelle GPL/propane/butane à condensation installée à partir de 2016 avec programmateur avec réduit. Emetteur(s): radiateur bitube sans robinet thermostatique",
+        "source": "dpe-xml:dpe/logement/installation_chauffage_collection/installation_chauffage[1]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "installationType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/installation_chauffage_collection/installation_chauffage[1]/donnee_entree/enum_type_installation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "heatedAreaM2": {
+        "value": 54.33,
+        "source": "dpe-xml:dpe/logement/installation_chauffage_collection/installation_chauffage[1]/donnee_entree/surface_chauffee",
+        "confidence": 1,
+        "importDate": {}
+      }
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Chaudière individuelle bois (bûche) installée entre 1978 et 1994. Emetteur(s): radiateur bitube sans robinet thermostatique",
+        "source": "dpe-xml:dpe/logement/installation_chauffage_collection/installation_chauffage[2]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "installationType": {
+        "value": "1",
+        "source": "dpe-xml:dpe/logement/installation_chauffage_collection/installation_chauffage[2]/donnee_entree/enum_type_installation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "heatedAreaM2": {
+        "value": 54.33,
+        "source": "dpe-xml:dpe/logement/installation_chauffage_collection/installation_chauffage[2]/donnee_entree/surface_chauffee",
+        "confidence": 1,
+        "importDate": {}
+      }
+    }
+  ],
+  "ventilationSystems": [
+    {
+      "id": "00000000-0000-4000-8000-000000000000",
+      "buildingId": "00000000-0000-4000-8000-000000000000",
+      "description": {
+        "value": "Ventilation par entrées d'air hautes et basses",
+        "source": "dpe-xml:dpe/logement/ventilation_collection/ventilation[1]/donnee_entree/description",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "ventilationType": {
+        "value": "2",
+        "source": "dpe-xml:dpe/logement/ventilation_collection/ventilation[1]/donnee_entree/enum_type_ventilation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "ventilatedAreaM2": {
+        "value": 108.66,
+        "source": "dpe-xml:dpe/logement/ventilation_collection/ventilation[1]/donnee_entree/surface_ventile",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "q4paConv": {
+        "value": 3.3,
+        "source": "dpe-xml:dpe/logement/ventilation_collection/ventilation[1]/donnee_intermediaire/q4pa_conv",
+        "confidence": 1,
+        "importDate": {}
+      }
+    }
+  ],
+  "photovoltaicSystems": [],
+  "importedAt": "2026-11-20T10:00:00.000Z",
+  "sourceDpeXml": null
+}

@@ -25,6 +25,8 @@ export class DpeXmlImporter implements DpeImporterPort {
     }
     const doc = parseDpeXml(dpeXml);
     const { variant } = assertValidDpeStructure(doc);
-    return mapToBuilding(doc, variant, importDate);
+    // The verbatim source document is retained on the aggregate (P2) so the
+    // Open3CL adapter can feed the engine an input identical to the diagnostic.
+    return mapToBuilding(doc, variant, importDate, dpeXml);
   }
 }
