@@ -171,10 +171,14 @@ describe('ReconstructionService (P3)', () => {
     const g = service.reconstruct(Building.createForImport(completeInput()));
     const expectedWidth = Math.sqrt(96 * (4 / 3));
     const expectedDepth = 96 / expectedWidth;
-    expect(g.bounds.max.x).toBeCloseTo(expectedWidth, 6);
-    expect(g.bounds.max.y).toBeCloseTo(expectedDepth, 6);
+    // AABB: envelope walls sit half a thickness outside the footprint; the S
+    // opening panel is offset outward by thickness/2 + 0.05
+    expect(g.bounds.max.x).toBeCloseTo(expectedWidth + 0.1, 6);
+    expect(g.bounds.max.y).toBeCloseTo(expectedDepth + 0.15, 6); // N wall + door panel offset
     expect(g.bounds.max.z).toBeCloseTo(2.5, 6);
-    expect(g.bounds.min).toEqual({ x: 0, y: 0, z: 0 });
+    expect(g.bounds.min.x).toBeCloseTo(-0.1, 6);
+    expect(g.bounds.min.y).toBeCloseTo(-0.15, 6);
+    expect(g.bounds.min.z).toBe(0);
     const walls = g.elements.filter((e) => e.kind === 'wall');
     expect(walls.map((w) => w.id)).toEqual(['wall-1', 'wall-2', 'wall-3', 'wall-4']);
     // wall length = measured area / measured height
@@ -253,7 +257,7 @@ describe('ReconstructionService (P3)', () => {
     }
     // default living area 80 m², aspect 4:3, default height 2.5 m × 1 level
     const w = Math.sqrt(80 * (4 / 3));
-    expect(g.bounds.max.x).toBeCloseTo(w, 6);
+    expect(g.bounds.max.x).toBeCloseTo(w + 0.1, 6);
     expect(g.bounds.max.z).toBeCloseTo(2.5, 6);
   });
 
@@ -280,6 +284,75 @@ describe('ReconstructionService (P3)', () => {
     const g = service.reconstruct(Building.createForImport(completeInput()));
     const revived = geometryFromJson(JSON.parse(JSON.stringify(geometryToJson(g))) as ReturnType<typeof geometryToJson>);
     expect(computeMeshHash(revived.inferenceRulesVersion, revived.elements)).toBe(g.meshHash);
+  });
+
+  it('roof/floor/room with null area → equal-share fallback recorded as a named inference rule (never silent)', () => {
+    const input = {
+      ...completeInput(),
+      roofs: [{ ...roof('roof-1', 96), areaM2: null }],
+      rooms: [
+        { id: 'room-1', zoneId: 'zone-1', name: measured('Séjour', 'dpe-xml:x', date), areaM2: null },
+        { id: 'room-2', zoneId: 'zone-1', name: measured('Chambre', 'dpe-xml:x', date), areaM2: measured(36, 'dpe-xml:x', date) }
+      ]
+    };
+    const g = service.reconstruct(Building.createForImport(input));
+    const roofEl = g.elements.find((e) => e.id === 'roof-1');
+    expect(roofEl?.inferred).toBe(true);
+    expect(roofEl?.placement.source).toBe('inference:slab-area-equal-share');
+    expect(roofEl?.placement.confidence).toBeLessThan(1);
+    const room1 = g.elements.find((e) => e.id === 'room-1');
+    expect(room1?.inferred).toBe(true);
+    expect(room1?.placement.source).toBe('inference:room-area-equal-share');
+    // equal-share fallback: room-1 gets footprint/2 = 48 m² vs room-2's 36 m²
+    const width = Math.sqrt(96 * (4 / 3));
+    expect(room1?.placement.value.dimensions.width).toBeCloseTo((48 / 84) * width, 6);
+  });
+
+  it('footprint is the per-level area: livingArea / levelCount (2 levels → half footprint, full height)', () => {
+    const input = { ...completeInput(), levelCount: measured(2, 'dpe-xml:x/niveau', date) };
+    const g = service.reconstruct(Building.createForImport(input));
+    const perLevel = 96 / 2;
+    expect(g.bounds.max.x).toBeCloseTo(Math.sqrt(perLevel * (4 / 3)) + 0.1, 6);
+    expect(g.bounds.max.z).toBeCloseTo(5.0, 6); // 2 × 2.5 m
+  });
+
+  it('opening placement origin follows the host wall side (E wall → x = width + thickness/2 + offset)', () => {
+    const input = {
+      ...completeInput(),
+      windows: [window('window-1', '3', 6), window('window-2', '5', 6)]
+    };
+    const g = service.reconstruct(Building.createForImport(input));
+    const width = Math.sqrt(96 * (4 / 3));
+    const onEast = g.elements.find((e) => e.id === 'window-1');
+    expect(onEast?.orientation?.value).toBe('E');
+    expect(onEast?.placement.value.origin.x).toBeCloseTo(width + 0.1 + 0.05, 6);
+    expect(onEast?.placement.value.origin.z).toBeCloseTo(0.9, 6);
+    const onSouth = g.elements.find((e) => e.id === 'window-2');
+    expect(onSouth?.placement.value.origin.y).toBeCloseTo(-(0.1 + 0.05), 6);
+  });
+
+  it('opening cursor is clamped to the host wall (no overflow past the corner)', () => {
+    const manyWindows = Array.from({ length: 12 }, (_, i) => window(`window-${i + 1}`, '5', 6));
+    const input = { ...completeInput(), windows: manyWindows };
+    const g = service.reconstruct(Building.createForImport(input));
+    const host = g.elements.find((e) => e.id === 'wall-3'); // S wall, length 20/2.5 = 8
+    const hostLen = host?.placement.value.dimensions.width ?? 0;
+    for (const el of g.elements.filter((e) => e.kind === 'window')) {
+      const origin = el.placement.value.origin;
+      const w = el.placement.value.dimensions.width;
+      expect(origin.x + w).toBeLessThanOrEqual(hostLen + 1e-6);
+    }
+  });
+
+  it('bounds are the geometry AABB (walls extend outward by half the thickness)', () => {
+    const g = service.reconstruct(Building.createForImport(completeInput()));
+    expect(g.bounds.min.x).toBeCloseTo(-0.1, 6); // W wall outer face
+    expect(g.bounds.min.y).toBeCloseTo(-0.15, 6); // S opening panel (thickness/2 + offset)
+    expect(g.bounds.min.z).toBe(0);
+    const width = Math.sqrt(96 * (4 / 3));
+    const depth = 96 / width;
+    expect(g.bounds.max.x).toBeCloseTo(width + 0.1, 6); // E wall outer face
+    expect(g.bounds.max.y).toBeCloseTo(depth + 0.15, 6); // N wall + door panel offset
   });
 
   it('rooms are floor strips proportional to their measured area', () => {

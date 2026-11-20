@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
 import { create } from 'zustand';
 import type { HeatLossOverlay } from '@hes/domain';
-import { getBuildingGeometry } from '../services/api-client.ts';
-import { overlayFromSimulation } from '../services/heat-loss.ts';
+import { getBuildingGeometry, getSimulationHistory } from '../services/api-client.ts';
+import { tryOverlayFromSimulation } from '../services/heat-loss.ts';
 import type { GeometryJson, SimulationResultJson } from '../types.ts';
 
 export type { HeatLossOverlay };
@@ -42,6 +42,11 @@ export interface ViewerState {
    * Latest SimulationResult (P2). null until P2 is wired → the heat-loss
    * overlay stays hidden (FR-P3-04).
    */
+  /**
+   * Latest persisted SimulationResult (P2, GET /buildings/:id/simulations).
+   * null when the building was never simulated → the heat-loss overlay stays
+   * hidden (FR-P3-04).
+   */
   readonly simulation: SimulationResultJson | null;
   readonly showHeatLoss: boolean;
   readonly screenOverlays: readonly ScreenOverlay[];
@@ -74,6 +79,14 @@ export const useViewerStore = create<ViewerState>((set, get) => ({
     try {
       const response = await getBuildingGeometry(buildingId);
       set({ status: 'ready', geometry: response.geometry });
+      // Best-effort: wire the heat-loss overlay to the latest persisted
+      // SimulationResult (P2). Absence (404/empty history) just hides it.
+      getSimulationHistory(buildingId)
+        .then((history) => {
+          const latest = [...history.results].sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))[0] ?? null;
+          set({ simulation: latest });
+        })
+        .catch(() => set({ simulation: null }));
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       set({ status: 'error', error: message });
@@ -106,14 +119,15 @@ export const useViewerStore = create<ViewerState>((set, get) => ({
 /**
  * Derived read-only projection: the heat-loss overlay for the loaded geometry,
  * or null when hidden (no SimulationResult, or overlay toggled off). Shares
- * sum to 100%.
+ * sum to 100%. Never throws inside render: a SimulationResult without
+ * deperdition data degrades to `{ overlay: null, error }`.
  */
-export function useHeatLossOverlay(): HeatLossOverlay | null {
+export function useHeatLossOverlay(): { overlay: HeatLossOverlay | null; error: string | null } {
   const simulation = useViewerStore((s) => s.simulation);
   const geometry = useViewerStore((s) => s.geometry);
   const showHeatLoss = useViewerStore((s) => s.showHeatLoss);
   return useMemo(() => {
-    if (simulation === null || geometry === null || !showHeatLoss) return null;
-    return overlayFromSimulation(simulation, geometry);
+    if (simulation === null || geometry === null || !showHeatLoss) return { overlay: null, error: null };
+    return tryOverlayFromSimulation(simulation, geometry);
   }, [simulation, geometry, showHeatLoss]);
-}
+} 

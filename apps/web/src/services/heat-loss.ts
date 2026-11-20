@@ -1,4 +1,4 @@
-import { createSimulationResult, geometryFromJson, projectHeatLoss, type HeatLossOverlay } from '@hes/domain';
+import { createSimulationResult, geometryFromJson, projectHeatLoss, type EnergyLabel, type HeatLossOverlay } from '@hes/domain';
 import type { GeometryJson, SimulationResultJson } from '../types.ts';
 
 /**
@@ -9,8 +9,9 @@ import type { GeometryJson, SimulationResultJson } from '../types.ts';
  */
 
 /**
- * Projects a SimulationResult onto a geometry JSON into per-element loss
- * shares (normalized: the shares sum to 1 = 100%).
+ * Projects a persisted SimulationResult (P2 record JSON) onto a geometry JSON
+ * into per-element loss shares (the shares sum to 1 = 100% within
+ * floating-point tolerance).
  *
  * @throws HeatLossProjectionError when the engine output has no deperdition data
  */
@@ -18,11 +19,27 @@ export function overlayFromSimulation(result: SimulationResultJson, geometry: Ge
   const simulation = createSimulationResult({
     consumptionKwh: result.consumptionKwh,
     emissionsKg: result.emissionsKg,
-    energyLabel: result.energyLabel as 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G',
-    climateLabel: result.climateLabel as 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G',
+    energyLabel: result.energyLabel as EnergyLabel,
+    climateLabel: result.climateLabel as EnergyLabel,
     rawEngineOutput: result.rawEngineOutput
   });
   return projectHeatLoss(simulation, geometryFromJson(geometry));
+}
+
+/**
+ * Non-throwing variant for render paths: returns the overlay or an error
+ * message (a SimulationResult without deperdition data must not crash the
+ * viewer).
+ */
+export function tryOverlayFromSimulation(
+  result: SimulationResultJson,
+  geometry: GeometryJson
+): { overlay: HeatLossOverlay | null; error: string | null } {
+  try {
+    return { overlay: overlayFromSimulation(result, geometry), error: null };
+  } catch (error) {
+    return { overlay: null, error: error instanceof Error ? error.message : String(error) };
+  }
 }
 
 function hexToRgb(hex: string): [number, number, number] {

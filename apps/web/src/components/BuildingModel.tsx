@@ -1,6 +1,6 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useFrame, useThree, type ThreeEvent } from '@react-three/fiber';
-import { BufferAttribute, CanvasTexture, DoubleSide, Vector3, type BufferGeometry as ThreeBufferGeometry } from 'three';
+import { BufferAttribute, CanvasTexture, DoubleSide, RepeatWrapping, Vector3, type BufferGeometry as ThreeBufferGeometry } from 'three';
 import { elementAtVertex, filterByKinds, geometryJsonToMeshBuffers, type MeshBuffers, type MeshGroup } from '@hes/geometry';
 import { toThreeBufferGeometry } from '@hes/geometry/three';
 import { elementColor } from '../services/view-colors.ts';
@@ -10,8 +10,11 @@ import { useHeatLossOverlay, useViewerStore, type ScreenOverlay } from '../store
  * R3F model of the reconstructed building (P3). Presentation only: buffers
  * come from the store (fed by the API), colors from services/view-colors,
  * picking maps a raycast vertex to its stable element id via the buffer
- * groups. Geometry is merged by material class (envelope / openings / rooms /
- * inferred-hatch) to limit draw calls (TR-P3-02).
+ * groups **of the mesh that was actually hit** (each material-class mesh has
+ * its own sub-buffers with re-based group starts). Geometry is merged by
+ * material class (envelope / openings / rooms / inferred-hatch) to limit draw
+ * calls (TR-P3-02); only the `color` attribute is rewritten on hover/selection
+ * changes, never the position/normal buffers.
  *
  * DOM overlays (room labels, hover tooltip) are rendered outside the Canvas by
  * ViewerOverlays: this in-canvas projector only writes their screen positions
@@ -19,21 +22,6 @@ import { useHeatLossOverlay, useViewerStore, type ScreenOverlay } from '../store
  */
 
 type ColorFor = (group: MeshGroup) => [number, number, number];
-
-function withColors(buffers: MeshBuffers, colorFor: ColorFor): ThreeBufferGeometry {
-  const geometry = toThreeBufferGeometry(buffers);
-  const colors = new Float32Array(buffers.positions.length);
-  for (const group of buffers.groups) {
-    const [r, g, b] = colorFor(group);
-    for (let v = group.start; v < group.start + group.count; v += 1) {
-      colors[v * 3] = r;
-      colors[v * 3 + 1] = g;
-      colors[v * 3 + 2] = b;
-    }
-  }
-  geometry.setAttribute('color', new BufferAttribute(colors, 3));
-  return geometry;
-}
 
 function makeHatchTexture(): CanvasTexture | null {
   if (typeof document === 'undefined') return null;
@@ -53,25 +41,30 @@ function makeHatchTexture(): CanvasTexture | null {
     ctx.stroke();
   }
   const texture = new CanvasTexture(canvas);
-  texture.wrapS = texture.wrapT = 1000;
+  texture.wrapS = RepeatWrapping;
+  texture.wrapT = RepeatWrapping;
   return texture;
 }
 
 /**
  * Projects room-label positions and the hover point to canvas pixels every
- * frame and stores them as screen overlays.
+ * frame and stores them as screen overlays (diffed: the store is only updated
+ * when a position actually moved).
  */
-function OverlayProjector({ roomLabels }: Readonly<{ roomLabels: readonly { id: string; position: [number, number, number]; label: string }[] }>) {
+function OverlayProjector({
+  roomLabels
+}: Readonly<{ roomLabels: readonly { id: string; position: [number, number, number]; label: string }[] }>) {
   const camera = useThree((s) => s.camera);
   const size = useThree((s) => s.size);
   const hoverPoint = useViewerStore((s) => s.hoverPoint);
   const hoveredElementId = useViewerStore((s) => s.hoveredElementId);
   const setScreenOverlays = useViewerStore((s) => s.setScreenOverlays);
+  const last = useRef<string>('');
   useFrame(() => {
     const project = (p: [number, number, number]): [number, number] | null => {
       const v = new Vector3(p[0], p[1], p[2]).project(camera);
       if (v.z > 1) return null;
-      return [(v.x * 0.5 + 0.5) * size.width, (-v.y * 0.5 + 0.5) * size.height];
+      return [Math.round(((v.x * 0.5 + 0.5) * size.width) * 2) / 2, Math.round(((-v.y * 0.5 + 0.5) * size.height) * 2) / 2];
     };
     const overlays: ScreenOverlay[] = [];
     for (const room of roomLabels) {
@@ -82,7 +75,11 @@ function OverlayProjector({ roomLabels }: Readonly<{ roomLabels: readonly { id: 
       const xy = project(hoverPoint);
       if (xy !== null) overlays.push({ id: hoveredElementId, role: 'hover', x: xy[0], y: xy[1] });
     }
-    setScreenOverlays(overlays);
+    const key = JSON.stringify(overlays);
+    if (key !== last.current) {
+      last.current = key;
+      setScreenOverlays(overlays);
+    }
   });
   return null;
 }
@@ -93,7 +90,7 @@ export function BuildingModel() {
   const hoveredElementId = useViewerStore((s) => s.hoveredElementId);
   const select = useViewerStore((s) => s.select);
   const setHovered = useViewerStore((s) => s.setHovered);
-  const overlay = useHeatLossOverlay();
+  const { overlay } = useHeatLossOverlay();
 
   const buffers = useMemo(() => (geometry === null ? null : geometryJsonToMeshBuffers(geometry)), [geometry]);
   const envelope = useMemo(() => (buffers === null ? null : filterByKinds(buffers, ['wall', 'roof', 'floor'])), [buffers]);
@@ -132,13 +129,35 @@ export function BuildingModel() {
     [selectedElementId, hoveredElementId, lossShareById]
   );
 
-  const envelopeGeometry = useMemo(() => (envelope === null ? null : withColors(envelope, colorFor)), [envelope, colorFor]);
-  const openingGeometry = useMemo(() => (openings === null ? null : withColors(openings, colorFor)), [openings, colorFor]);
-  const roomGeometry = useMemo(() => (rooms === null ? null : withColors(rooms, colorFor)), [rooms, colorFor]);
-  const inferredGeometry = useMemo(
-    () => (inferredEnvelope === null || inferredEnvelope.groups.length === 0 ? null : withColors(inferredEnvelope, colorFor)),
-    [inferredEnvelope, colorFor]
-  );
+  // Stable geometries per material class (positions/normals never rebuilt on
+  // hover/selection); only the color attribute is rewritten in place below.
+  const layers = useMemo(() => {
+    const mk = (sub: MeshBuffers | null): ThreeBufferGeometry | null => (sub === null ? null : toThreeBufferGeometry(sub));
+    return [
+      { sub: envelope, geom: mk(envelope) },
+      { sub: inferredEnvelope, geom: mk(inferredEnvelope) },
+      { sub: openings, geom: mk(openings) },
+      { sub: rooms, geom: mk(rooms) }
+    ];
+  }, [envelope, inferredEnvelope, openings, rooms]);
+
+  useEffect(() => {
+    for (const { sub, geom } of layers) {
+      if (sub === null || geom === null) continue;
+      let attr = geom.getAttribute('color') as BufferAttribute | undefined;
+      if (attr === undefined) {
+        attr = new BufferAttribute(new Float32Array(sub.positions.length), 3);
+        geom.setAttribute('color', attr);
+      }
+      for (const group of sub.groups) {
+        const [r, g, b] = colorFor(group);
+        for (let v = group.start; v < group.start + group.count; v += 1) {
+          attr.setXYZ(v, r, g, b);
+        }
+      }
+      attr.needsUpdate = true;
+    }
+  }, [layers, colorFor]);
 
   const roomLabels = useMemo(
     () =>
@@ -152,44 +171,49 @@ export function BuildingModel() {
     [rooms]
   );
 
-  const pick = (event: ThreeEvent<PointerEvent> | ThreeEvent<MouseEvent>): MeshGroup | null => {
-    if (buffers === null || event.faceIndex === null || event.faceIndex === undefined) return null;
-    return elementAtVertex(buffers, event.faceIndex * 3);
-  };
-
-  const onPointerMove = (event: ThreeEvent<PointerEvent>): void => {
-    event.stopPropagation();
-    const group = pick(event);
-    setHovered(group === null ? null : group.elementId, group === null ? null : [event.point.x, event.point.y, event.point.z]);
-  };
-
-  const onClick = (event: ThreeEvent<MouseEvent>): void => {
-    event.stopPropagation();
-    const group = pick(event);
-    select(group === null ? null : group.elementId);
-  };
+  // Per-mesh picking: the hit faceIndex is relative to the hit mesh's own
+  // sub-buffers (re-based group starts), never the full merged buffers.
+  const handlersFor = (sub: MeshBuffers | null) => ({
+    onPointerMove: (event: ThreeEvent<PointerEvent>): void => {
+      event.stopPropagation();
+      const faceIndex = event.faceIndex;
+      const group = sub !== null && faceIndex !== null && faceIndex !== undefined ? elementAtVertex(sub, faceIndex * 3) : null;
+      setHovered(group === null ? null : group.elementId, group === null ? null : [event.point.x, event.point.y, event.point.z]);
+    },
+    onClick: (event: ThreeEvent<MouseEvent>): void => {
+      event.stopPropagation();
+      const faceIndex = event.faceIndex;
+      const group = sub !== null && faceIndex !== null && faceIndex !== undefined ? elementAtVertex(sub, faceIndex * 3) : null;
+      select(group === null ? null : group.elementId);
+    }
+  });
 
   if (buffers === null || geometry === null) return null;
 
+  const envelopeHandlers = handlersFor(envelope);
+  const inferredHandlers = handlersFor(inferredEnvelope);
+  const openingHandlers = handlersFor(openings);
+  const roomHandlers = handlersFor(rooms);
+
   return (
     <>
-      {envelopeGeometry !== null && (
-        <mesh geometry={envelopeGeometry} onClick={onClick} onPointerMove={onPointerMove}>
+      {layers[0]?.geom != null && (
+        <mesh geometry={layers[0].geom} {...envelopeHandlers}>
           <meshStandardMaterial vertexColors side={DoubleSide} />
         </mesh>
       )}
-      {inferredGeometry !== null && (
-        <mesh geometry={inferredGeometry} onClick={onClick} onPointerMove={onPointerMove}>
+      {layers[1]?.geom != null && layers[1].sub !== null && layers[1].sub.groups.length > 0 && (
+        <mesh geometry={layers[1].geom} {...inferredHandlers}>
           <meshStandardMaterial vertexColors side={DoubleSide} map={hatchTexture ?? undefined} transparent opacity={0.9} />
         </mesh>
       )}
-      {openingGeometry !== null && (
-        <mesh geometry={openingGeometry} onClick={onClick} onPointerMove={onPointerMove}>
+      {layers[2]?.geom != null && (
+        <mesh geometry={layers[2].geom} {...openingHandlers}>
           <meshStandardMaterial vertexColors side={DoubleSide} transparent opacity={0.75} />
         </mesh>
       )}
-      {roomGeometry !== null && (
-        <mesh geometry={roomGeometry} onClick={onClick} onPointerMove={onPointerMove}>
+      {layers[3]?.geom != null && (
+        <mesh geometry={layers[3].geom} {...roomHandlers}>
           <meshStandardMaterial vertexColors side={DoubleSide} transparent opacity={0.3} depthWrite={false} />
         </mesh>
       )}

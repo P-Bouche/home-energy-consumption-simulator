@@ -104,7 +104,10 @@ const RULES = {
   roofFromFootprint: rule('roof-from-footprint', 0.5),
   floorFromFootprint: rule('floor-from-footprint', 0.5),
   wallsFromPerimeter: rule('walls-from-perimeter', 0.3),
-  roomFromFootprint: rule('room-from-footprint', 0.5)
+  roomFromFootprint: rule('room-from-footprint', 0.5),
+  slabAreaEqualShare: rule('slab-area-equal-share', 0.4),
+  roomAreaEqualShare: rule('room-area-equal-share', 0.4),
+  openingCursorClamped: rule('opening-cursor-clamped-to-host-wall', 0.5)
 } as const;
 
 interface Provenance {
@@ -151,6 +154,35 @@ function toCardinal(orientation: Orientation | null): Cardinal | null {
     default:
       return null;
   }
+}
+
+/**
+ * Axis-aligned bounding box of the actual geometry (all face vertices), in the
+ * building coordinate system.
+ */
+function computeAabb(elements: readonly GeometryElement[]): { min: Vector3; max: Vector3 } {
+  let minX = Infinity;
+  let minY = Infinity;
+  let minZ = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+  let maxZ = -Infinity;
+  for (const el of elements) {
+    for (const face of el.mesh.faces) {
+      for (const p of face.vertices) {
+        if (p.x < minX) minX = p.x;
+        if (p.y < minY) minY = p.y;
+        if (p.z < minZ) minZ = p.z;
+        if (p.x > maxX) maxX = p.x;
+        if (p.y > maxY) maxY = p.y;
+        if (p.z > maxZ) maxZ = p.z;
+      }
+    }
+  }
+  if (!Number.isFinite(minX)) {
+    return { min: v3(0, 0, 0), max: v3(0, 0, 0) };
+  }
+  return { min: v3(minX, minY, minZ), max: v3(maxX, maxY, maxZ) };
 }
 
 function sortByNumericSuffix<T extends { id: string }>(items: readonly T[]): T[] {
@@ -247,6 +279,24 @@ function openingFace(
   }
 }
 
+/**
+ * Placement origin of an opening panel on a host wall side: on the wall plane
+ * (offset outward by thickness/2 + opening offset), at the cursor position.
+ */
+function openingOrigin(side: Cardinal, from: number, z0: number, width: number, depth: number): Vector3 {
+  const t = WALL_THICKNESS_M / 2 + OPENING_OFFSET_M;
+  switch (side) {
+    case 'N':
+      return v3(from, depth + t, z0);
+    case 'S':
+      return v3(from, -t, z0);
+    case 'E':
+      return v3(width + t, from, z0);
+    case 'W':
+      return v3(-t, from, z0);
+  }
+}
+
 function horizontalFace(x0: number, x1: number, depth: number, z: number, up: boolean): Face {
   return up
     ? makeFace([v3(x0, 0, z), v3(x1, 0, z), v3(x1, depth, z), v3(x0, depth, z)])
@@ -279,7 +329,6 @@ export class ReconstructionService {
    */
   reconstruct(building: Building): Geometry {
     const footprint = this.computeFootprint(building);
-    const { width, depth, height } = footprint;
 
     const elements: GeometryElement[] = [];
     elements.push(...this.buildWalls(building, footprint));
@@ -294,7 +343,7 @@ export class ReconstructionService {
       buildingId: building.id,
       coordinateSystem: COORDINATE_SYSTEM,
       inferenceRulesVersion: this.inferenceRulesVersion,
-      bounds: { min: v3(0, 0, 0), max: v3(width, depth, height) },
+      bounds: computeAabb(elements),
       elements: Object.freeze(elements),
       meshHash
     };
@@ -322,14 +371,18 @@ export class ReconstructionService {
         }
       }
     }
-    const width = Math.sqrt(area * FOOTPRINT_ASPECT_RATIO);
-    const depth = area / width;
     const ceiling = building.ceilingHeightM !== null && Number.isFinite(building.ceilingHeightM.value) && building.ceilingHeightM.value > 0
       ? building.ceilingHeightM.value
       : DEFAULT_CEILING_HEIGHT_M;
     const levels = building.levelCount !== null && Number.isFinite(building.levelCount.value) && building.levelCount.value >= 1
       ? Math.floor(building.levelCount.value)
       : DEFAULT_LEVEL_COUNT;
+    // The living area is total over all levels: the footprint of ONE level is
+    // area / levels (rule `footprint-area-per-level`, recorded via levelCount
+    // provenance below).
+    const perLevelArea = area / levels;
+    const width = Math.sqrt(perLevelArea * FOOTPRINT_ASPECT_RATIO);
+    const depth = perLevelArea / width;
     return {
       width,
       depth,
@@ -499,7 +552,10 @@ export class ReconstructionService {
         dimensions: { width: w, depth, height: 0 },
         orientation: 'horizontal'
       };
-      const prov = placementConfidence(importDate, placement, [el.areaM2]);
+      // null/zero area → equal-share fallback, recorded as a named rule
+      const areaProvenance: Confidence<unknown> | Rule =
+        el.areaM2 !== null && el.areaM2.value > 0 ? el.areaM2 : RULES.slabAreaEqualShare;
+      const prov = placementConfidence(importDate, placement, [areaProvenance]);
       const out: GeometryElement = {
         id: el.id,
         kind,
@@ -579,13 +635,17 @@ export class ReconstructionService {
       const z0 = isWindow ? WINDOW_SILL_M : 0;
       const w = Math.min(area / h, hostLen);
       const cursorKey = host.id;
-      const from = (openingCursor.get(cursorKey) ?? 0.1 * hostLen);
+      const unclampedFrom = openingCursor.get(cursorKey) ?? 0.1 * hostLen;
+      // clamp the cursor so openings never overflow past the host wall corner
+      const maxFrom = Math.max(0.05, hostLen - w - 0.05);
+      const from = Math.min(unclampedFrom, maxFrom);
+      const clamped = from < unclampedFrom;
       openingCursor.set(cursorKey, from + w + 0.1);
       const face = openingFace(hostSide, from, from + w, z0, z0 + h, width, depth, WALL_THICKNESS_M, OPENING_OFFSET_M);
       const orientation: Orientation = rawOrientation ?? (hostSide as Orientation);
       const orientationConf: Confidence<unknown> | Rule = openingOrientation ?? RULES.openingOrientationFromHostWall;
       const placement: Placement = {
-        origin: v3(from, 0, z0),
+        origin: openingOrigin(hostSide, from, z0, width, depth),
         dimensions: { width: w, depth: 0, height: h },
         orientation
       };
@@ -594,7 +654,8 @@ export class ReconstructionService {
         orientationConf,
         isWindow ? RULES.windowHeight : RULES.doorHeight,
         isWindow ? RULES.windowSill : null,
-        hostRule
+        hostRule,
+        clamped ? RULES.openingCursorClamped : null
       ]);
       out.push({
         id: opening.id,
@@ -636,7 +697,8 @@ export class ReconstructionService {
         }
       ];
     }
-    const areas = rooms.map((r) => (r.areaM2 !== null && r.areaM2.value > 0 ? r.areaM2.value : 1));
+    const roomFallback = (width * depth) / rooms.length;
+    const areas = rooms.map((r) => (r.areaM2 !== null && r.areaM2.value > 0 ? r.areaM2.value : roomFallback));
     const sum = areas.reduce((a, b) => a + b, 0);
     let x = 0;
     return rooms.map((room: Room, i: number) => {
@@ -647,7 +709,10 @@ export class ReconstructionService {
         dimensions: { width: w, depth, height: 0 },
         orientation: null
       };
-      const prov = placementConfidence(importDate, placement, [room.areaM2]);
+      // null/zero area → equal-share fallback, recorded as a named rule
+      const areaProvenance: Confidence<unknown> | Rule =
+        room.areaM2 !== null && room.areaM2.value > 0 ? room.areaM2 : RULES.roomAreaEqualShare;
+      const prov = placementConfidence(importDate, placement, [areaProvenance]);
       const el: GeometryElement = {
         id: room.id,
         kind: 'room',

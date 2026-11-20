@@ -65,6 +65,10 @@ provenance has confidence < 1 or it was synthesized. Bump
 | `wall-orientation-by-capacity` | side with most remaining length | 0.4 | wall orientation missing |
 | `wall-length-from-remaining-side` | remaining side / remaining walls | 0.4 | wall area missing |
 | `wall-length-clamped-to-side` | clamp to side length | 0.5 | area/height exceeds the side |
+| `slab-area-equal-share` | footprint area / slab count | 0.4 | roof/floor with missing area |
+| `room-area-equal-share` | footprint area / room count | 0.4 | room with missing area |
+| `opening-cursor-clamped-to-host-wall` | clamp cursor to host wall | 0.5 | openings would overflow the host wall corner |
+| `footprint-area-per-level` | footprint = living area / levelCount | (via levelCount provenance) | always — the living area is total over levels |
 | `window-height-1-2` / `window-sill-0-9` | 1.2 m / 0.9 m | 0.5 | always (DPE has no opening dims) |
 | `door-height-2-0` | 2.0 m | 0.5 | always |
 | `opening-host-wall-by-orientation` / `-longest` | host wall choice | 0.6 / 0.4 | opening placement |

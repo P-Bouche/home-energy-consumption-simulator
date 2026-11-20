@@ -11,11 +11,11 @@
   "types": "./src/index.ts",
   "dependencies": {
     "@hes/application": "0.1.0",
-    "@hes/domain": "0.1.0",
-    "three": "^0.187.0"
+    "@hes/domain": "0.1.0"
   },
   "devDependencies": {
     "@hes/dpe-xml-importer": "0.1.0",
-    "@types/three": "^0.187.0"
+    "@types/three": "^0.187.0",
+    "three": "^0.187.0"
   }
 }

@@ -9,7 +9,9 @@ import type { SimulationResult } from './simulation-result.ts';
  * never computes a loss. It reads the per-category envelope losses reported
  * by the engine (`logement.sortie.deperdition.*`, W/K) and distributes each
  * category's loss across the geometry elements of that kind proportionally to
- * their area. Shares are normalized so they sum to exactly 1 (100%).
+ * their area. `totalEnvelopeLossWk` sums only the categories that have matching
+ * geometry elements, so `share × total = lossWk` holds for every share and the
+ * shares sum to 1 (100%) within floating-point tolerance.
  */
 
 /**
@@ -85,7 +87,10 @@ export function projectHeatLoss(result: SimulationResult, geometry: Geometry): H
     const field = KIND_TO_ENGINE_FIELD[kind];
     if (field === null) continue;
     const loss = readNumber(deperdition, field);
-    if (loss !== null && loss > 0) categoryLoss.set(kind, loss);
+    // only categories with matching geometry elements contribute to the total
+    if (loss !== null && loss > 0 && geometry.elements.some((el) => el.kind === kind)) {
+      categoryLoss.set(kind, loss);
+    }
   }
   const total = [...categoryLoss.values()].reduce((a, b) => a + b, 0);
   if (total <= 0) {
