@@ -106,7 +106,7 @@ describe('PostgresBuildingRepository', () => {
     const texts = queries.map((q) => q.text);
     expect(texts[0]).toBe('BEGIN');
     expect(texts[1]).toContain('INSERT INTO buildings');
-    expect(texts[1]).toContain('ST_SetSRID(ST_MakePoint($4, $5), 2154)');
+    expect(texts[1]).toContain('ST_SetSRID(ST_MakePoint($4::float8, $5::float8), 2154)');
     expect(texts[2]).toContain('INSERT INTO import_reports');
     expect(texts[3]).toBe('COMMIT');
     const insertValues = queries[1]?.values as unknown[];
