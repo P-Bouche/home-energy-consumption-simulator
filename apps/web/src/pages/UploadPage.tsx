@@ -67,6 +67,17 @@ export function UploadPage() {
           <Alert severity="success" sx={{ mt: 2 }} data-testid="upload-success">
             Bâtiment importé : {buildingId}
           </Alert>
+          <Box sx={{ mt: 2 }}>
+            <Button
+              variant="outlined"
+              data-testid="view-3d"
+              onClick={() => {
+                window.location.hash = `#/building/${buildingId ?? ''}`;
+              }}
+            >
+              Voir le modèle 3D
+            </Button>
+          </Box>
           <ImportReportView report={report} />
           <SimulationPanel buildingId={buildingId} />
         </>

@@ -1,5 +1,6 @@
 import type {
   ErrorBody,
+  GeometryResponse,
   ImportDpeResponse,
   RunSimulationResponse,
   SimulationHistoryResponse,
@@ -43,6 +44,22 @@ export async function uploadDpeXml(fileName: string, content: string): Promise<I
     throw new ApiError(response.status, body, body?.message ?? `upload failed with status ${response.status}`);
   }
   return (await response.json()) as ImportDpeResponse;
+}
+
+/**
+ * Fetches the reconstructed 3D geometry of a building from
+ * GET /api/buildings/:id/geometry (P3, computed server-side).
+ *
+ * @param buildingId - building id (uuid)
+ * @throws ApiError on non-2xx (404 unknown building, ...)
+ */
+export async function getBuildingGeometry(buildingId: string): Promise<GeometryResponse> {
+  const response = await fetch(`/api/buildings/${encodeURIComponent(buildingId)}/geometry`);
+  if (!response.ok) {
+    const body = (await response.json().catch(() => null)) as ErrorBody | null;
+    throw new ApiError(response.status, body, body?.message ?? `geometry fetch failed with status ${response.status}`);
+  }
+  return (await response.json()) as GeometryResponse;
 }
 
 /**

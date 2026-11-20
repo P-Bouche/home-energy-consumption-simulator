@@ -1,3 +1,5 @@
+import type { GeometryJson } from '@hes/domain';
+
 /**
  * API contract types shared with the API (apps/api). The report shape mirrors
  * ImportReportJson in packages/domain.
@@ -90,4 +92,37 @@ export interface RunSimulationResponse {
 export interface SimulationHistoryResponse {
   readonly buildingId: string;
   readonly results: readonly SimulationResultJson[];
+}
+
+/**
+ * P3: geometry API contract types. Re-exported from the domain (type-only —
+ * erased at runtime, so the web bundle never loads domain code for these).
+ */
+export type {
+  CoordinateSystem,
+  FaceJson,
+  GeometryElementJson,
+  GeometryJson,
+  MeshJson,
+  Vector3
+} from '@hes/domain';
+
+/**
+ * Response of GET /buildings/:id/geometry.
+ */
+export interface GeometryResponse {
+  readonly buildingId: string;
+  readonly geometry: GeometryJson;
+}
+
+/**
+ * JSON shape of a SimulationResult (P2). Until P2 lands, the viewer store
+ * keeps `simulation: null` and the heat-loss overlay stays hidden.
+ */
+export interface SimulationResultJson {
+  readonly consumptionKwh: number;
+  readonly emissionsKg: number;
+  readonly energyLabel: string;
+  readonly climateLabel: string;
+  readonly rawEngineOutput: Record<string, unknown>;
 }
