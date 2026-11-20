@@ -45,6 +45,29 @@ export default tseslint.config(
     }
   },
   {
+    // P3: three.js / React Three Fiber are only allowed in the geometry
+    // adapter and the web viewer. The engine restriction is repeated here
+    // because a later config block overrides the same rule for the same files.
+    files: ['**/*.{ts,mts,js,mjs,tsx}'],
+    ignores: ['packages/open3cl-adapter/**', 'packages/geometry/**', 'apps/web/**'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          ...ENGINE_RESTRICTION,
+          patterns: [
+            ...ENGINE_RESTRICTION.patterns,
+            {
+              group: ['three', 'three/**', '@react-three/*'],
+              message:
+                'three.js/@react-three are only allowed in packages/geometry and apps/web (P3 viewer). Domain geometry is plain data.'
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
     // The domain layer is framework-free (AGENTS.md §2): no XML parser, no
     // pg, no NestJS, no React inside packages/domain.
     files: ['packages/domain/**'],
@@ -63,7 +86,8 @@ export default tseslint.config(
             { group: ['node:*'], message: 'packages/domain must stay platform-free: no Node built-ins (hashing lives in packages/application).' },
             { group: ['@nestjs/*'], message: 'packages/domain must stay framework-free: no NestJS imports.' },
             { group: ['react', 'react-dom'], message: 'packages/domain must stay framework-free: no React imports.' },
-            { group: ['@mui/*', '@emotion/*'], message: 'packages/domain must stay framework-free: no UI imports.' }
+            { group: ['@mui/*', '@emotion/*'], message: 'packages/domain must stay framework-free: no UI imports.' },
+            { group: ['three', 'three/**', '@react-three/*'], message: 'packages/domain must stay framework-free: no three.js imports (geometry value objects are plain data; the three.js adapter lives in packages/geometry).' }
           ]
         }
       ]

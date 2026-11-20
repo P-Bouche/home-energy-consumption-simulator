@@ -13,6 +13,7 @@
     "@hes/application": "0.1.0",
     "@hes/domain": "0.1.0",
     "@hes/dpe-xml-importer": "0.1.0",
+    "@hes/geometry": "0.1.0",
     "@hes/open3cl-adapter": "0.1.0",
     "@hes/postgres-repository": "0.1.0",
     "@nestjs/common": "^12.5.1",

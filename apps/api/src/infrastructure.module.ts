@@ -3,6 +3,7 @@ import { Pool } from 'pg';
 import {
   BUILDING_REPOSITORY,
   DPE_IMPORTER_PORT,
+  GEOMETRY_PORT,
   SIMULATION_JOB_RUNNER,
   SIMULATION_PORT,
   SIMULATION_REPOSITORY,
@@ -12,6 +13,7 @@ import {
   type SimulationPort
 } from '@hes/application';
 import { DpeXmlImporter } from '@hes/dpe-xml-importer';
+import { GeometryAdapter } from '@hes/geometry';
 import { createOpen3clAdapter } from '@hes/open3cl-adapter';
 import { PostgresBuildingRepository, PostgresSimulationRepository, runMigrations } from '@hes/postgres-repository';
 import { CONFIG, loadConfig, type ApiConfig } from './config.ts';
@@ -35,6 +37,7 @@ export const PG_CONTEXT = Symbol('PgContext');
  * Module wiring the infrastructure adapters to the application ports (imported
  * by AppModule and by each feature module that needs the ports):
  * - DPE_IMPORTER_PORT → DpeXmlImporter (packages/dpe-xml-importer)
+ * - GEOMETRY_PORT → GeometryAdapter (packages/geometry, P3 reconstruction)
  * - SIMULATION_PORT → Open3clAdapter (packages/open3cl-adapter, the only
  *   engine importer, ADR-0001)
  * - BUILDING_REPOSITORY / SIMULATION_REPOSITORY → Postgres adapters
@@ -46,6 +49,7 @@ export const PG_CONTEXT = Symbol('PgContext');
   providers: [
     { provide: CONFIG, useFactory: () => loadConfig() },
     { provide: DPE_IMPORTER_PORT, useClass: DpeXmlImporter },
+    { provide: GEOMETRY_PORT, useClass: GeometryAdapter },
     { provide: SIMULATION_PORT, useFactory: (): SimulationPort => createOpen3clAdapter() },
     {
       provide: PG_CONTEXT,
@@ -82,6 +86,14 @@ export const PG_CONTEXT = Symbol('PgContext');
       inject: [BUILDING_REPOSITORY, SIMULATION_REPOSITORY, SIMULATION_PORT]
     }
   ],
-  exports: [CONFIG, DPE_IMPORTER_PORT, SIMULATION_PORT, BUILDING_REPOSITORY, SIMULATION_REPOSITORY, SIMULATION_JOB_RUNNER]
+  exports: [
+    CONFIG,
+    DPE_IMPORTER_PORT,
+    GEOMETRY_PORT,
+    SIMULATION_PORT,
+    BUILDING_REPOSITORY,
+    SIMULATION_REPOSITORY,
+    SIMULATION_JOB_RUNNER
+  ]
 })
 export class InfrastructureModule {}
