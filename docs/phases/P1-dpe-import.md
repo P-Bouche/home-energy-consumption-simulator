@@ -10,6 +10,8 @@
 
 P1 builds the platform's front door: importing a French DPE XML file into the canonical `Building` domain model, with full confidence metadata on every inferred value.
 
+Canonical prompt to start a Vibe session for this phase: [P1-vibe-prompt.md](P1-vibe-prompt.md) (requires PR #6 / Phase P0 merged on `main` first).
+
 # Objective
 
 Allow a user to upload a DPE XML file and obtain a persisted, validated `Building` aggregate plus an import report listing every field that was missing and inferred — in under 1 second.
