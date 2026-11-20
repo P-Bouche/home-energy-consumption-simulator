@@ -1,0 +1,100 @@
+name: E2E
+
+on:
+  pull_request:
+    paths:
+      - 'apps/**'
+      - 'packages/**'
+      - 'tests/e2e/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/e2e.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/**'
+      - 'packages/**'
+      - 'tests/e2e/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/e2e.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Runs the Playwright end-to-end suite against the real stack:
+# PostGIS service container + NestJS api (apps/api) + built web app (apps/web).
+# Until the P1 scaffolding lands (tests/e2e/playwright.config.ts), every step
+# below is skipped cleanly. NOTE: the guard must stay at STEP level —
+# hashFiles() in a job-level `if` makes the run fail instantly with zero jobs.
+jobs:
+  e2e:
+    name: "E2E (Playwright: web + api + PostGIS)"
+    runs-on: ubuntu-latest
+    services:
+      postgis:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: hecs_test
+        ports:
+          - "5432:5432"
+        options: >-
+          --health-cmd "pg_isready -U postgres -d hecs_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/hecs_test
+      API_PORT: "3000"
+      WEB_PORT: "4173"
+    steps:
+      - uses: actions/checkout@v4
+        if: hashFiles('tests/e2e/playwright.config.ts') != ''
+      - uses: actions/setup-node@v4
+        if: hashFiles('tests/e2e/playwright.config.ts') != ''
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Install dependencies
+        if: hashFiles('tests/e2e/playwright.config.ts') != ''
+        run: npm ci
+      - name: Run database migrations
+        if: hashFiles('tests/e2e/playwright.config.ts') != ''
+        run: npm run db:migrate --if-present
+      - name: Start API (background)
+        if: hashFiles('tests/e2e/playwright.config.ts') != ''
+        run: |
+          cd apps/api
+          DATABASE_URL="$DATABASE_URL" PORT="$API_PORT" nohup npm run start:dev > /tmp/api.log 2>&1 &
+          cd "$GITHUB_WORKSPACE"
+      - name: Build and start web (background)
+        if: hashFiles('tests/e2e/playwright.config.ts') != ''
+        run: |
+          npm run build -w apps/web
+          cd apps/web
+          nohup npm run preview -- --port "$WEB_PORT" --strictPort > /tmp/web.log 2>&1 &
+          cd "$GITHUB_WORKSPACE"
+      - name: Wait for api and web
+        if: hashFiles('tests/e2e/playwright.config.ts') != ''
+        run: npx --yes wait-on tcp:localhost:"$API_PORT" tcp:localhost:"$WEB_PORT" --timeout 60000
+      - name: Install Playwright browsers
+        if: hashFiles('tests/e2e/playwright.config.ts') != ''
+        run: npx playwright install --with-deps chromium
+      - name: Run Playwright e2e tests
+        if: hashFiles('tests/e2e/playwright.config.ts') != ''
+        env:
+          E2E_BASE_URL: http://localhost:${{ env.WEB_PORT }}
+          E2E_API_URL: http://localhost:${{ env.API_PORT }}
+        run: npm run test:e2e
+      - name: Upload Playwright report
+        if: failure() && hashFiles('tests/e2e/playwright.config.ts') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            tests/e2e/playwright-report/
+            tests/e2e/test-results/
+          retention-days: 14
