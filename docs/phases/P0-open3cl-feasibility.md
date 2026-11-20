@@ -51,7 +51,7 @@ Prove, with executable evidence, that:
 # Technical Requirements
 
 - TR-P0-01: TypeScript strict mode in every package; no `any` without written justification.
-- TR-P0-02: Open3CL engine dependency pinned to an exact version in the workspace root; upgrades are deliberate PRs.
+- TR-P0-02: Open3CL engine dependency pinned to an exact version (`1.11.6` in `packages/open3cl-adapter/package.json`, locked in the root `package-lock.json`); upgrades are deliberate PRs.
 - TR-P0-03: `packages/open3cl-adapter` is the **only** package importing the engine (enforced by ESLint `no-restricted-imports`).
 - TR-P0-04: Dependencies point inward: `domain` ← `application` ← `adapter`; the domain has zero framework imports.
 - TR-P0-05: CI runs on every PR: ESLint, `tsc --noEmit`, Vitest. Minimum 80% coverage on new code.
