@@ -59,7 +59,10 @@ export class PostgresBuildingRepository implements BuildingRepository {
       await client.query('BEGIN');
       await client.query(
         `INSERT INTO buildings (id, dpe_number, schema_variant, location, data)
-         VALUES ($1, $2, $3, CASE WHEN $4 IS NULL THEN NULL ELSE ST_SetSRID(ST_MakePoint($4, $5), 2154) END, $6)`,
+         VALUES ($1, $2, $3,
+                 CASE WHEN $4::float8 IS NULL THEN NULL
+                      ELSE ST_SetSRID(ST_MakePoint($4::float8, $5::float8), 2154) END,
+                 $6)`,
         [building.id, json.dpeNumber?.value ?? null, report.schemaVariant, banX, banY, JSON.stringify(json)]
       );
       await client.query(
