@@ -51,6 +51,62 @@ export function hasUserEdits(view: BuildingSimulationView): boolean {
   return containsUserSource(view);
 }
 
+/**
+ * Element collections whose fields {@link overlayUserEdits} knows how to
+ * patch in the engine input. A user-sourced value anywhere else (a future
+ * building-level command, a zone/room field, …) would take the edited-source
+ * path but be silently dropped by the overlay.
+ */
+const OVERLAY_COVERED_COLLECTIONS = new Set([
+  'walls',
+  'roofs',
+  'floors',
+  'windows',
+  'doors',
+  'heatingSystems',
+  'ventilationSystems'
+]);
+
+function collectUserFieldPaths(value: unknown, path: string, out: string[]): void {
+  if (Array.isArray(value)) {
+    value.forEach((item, i) => collectUserFieldPaths(item, `${path}/${i}`, out));
+    return;
+  }
+  if (typeof value === 'object' && value !== null) {
+    const rec = value as Record<string, unknown>;
+    if (rec['source'] === USER_SOURCE && typeof rec['confidence'] === 'number') {
+      out.push(path);
+      return;
+    }
+    for (const [key, childValue] of Object.entries(rec)) {
+      collectUserFieldPaths(childValue, `${path}/${key}`, out);
+    }
+  }
+}
+
+/**
+ * Fails loudly when the view carries a user-sourced field the overlay does NOT
+ * cover (i.e. not `<covered collection>/<index>/<field>`). Without this check
+ * a future command vocabulary entry (e.g. a building-level edit) would make
+ * the building take the edited-source path while its edit is silently dropped
+ * from the engine input.
+ *
+ * @throws SimulationMappingError listing every uncovered user-sourced path
+ */
+export function assertOverlayCoversUserEdits(view: BuildingSimulationView): void {
+  const paths: string[] = [];
+  collectUserFieldPaths(view, '', paths);
+  const uncovered = paths.filter((p) => {
+    const match = /^\/([^/]+)\/\d+\/[^/]+$/.exec(p);
+    return match === null || !OVERLAY_COVERED_COLLECTIONS.has(match[1] as string);
+  });
+  if (uncovered.length > 0) {
+    throw new SimulationMappingError(
+      `user-sourced field(s) not covered by the engine overlay, refusing to simulate a state whose edits would be silently dropped: ${uncovered.join(', ')}`
+    );
+  }
+}
+
 function containsUserSource(value: unknown): boolean {
   if (Array.isArray(value)) {
     return value.some(containsUserSource);
@@ -129,7 +185,19 @@ function overlayElements<T extends { id: string }>(
   const items = collection(ctx.dpe, collectionPath);
   for (const element of elements) {
     const index = elementIndex(element.id, kind);
-    if (index === null || index >= items.length) continue;
+    if (index === null || index >= items.length) {
+      // Never silent: a user-edited element that cannot be matched to a source
+      // document entry would be silently dropped from the engine input.
+      if (containsUserSource(element)) {
+        ctx.defaults.push({
+          path: `${collectionPath.join('/')}/${element.id}`,
+          value: 'NO MATCHING ENTRY IN THE RETAINED SOURCE DOCUMENT — user edits on this element were NOT overlaid',
+          source: USER_SOURCE,
+          confidence: 1
+        });
+      }
+      continue;
+    }
     apply(items[index] as Record<string, unknown>, element, ctx);
   }
 }
@@ -352,6 +420,8 @@ export function buildEngineInput(view: BuildingSimulationView): EngineInputMappi
     // Path 1b (P4/P5): the retained source document parsed exactly like
     // calcul_3cl_xml does, with the user-supplied fields overlaid onto it.
     // Nothing unmodelled is invented: the rest of the document stays verbatim.
+    // Fail loudly when a user edit targets a field the overlay does not cover.
+    assertOverlayCoversUserEdits(view);
     const parsed = xmlParser.parse(view.sourceDpeXml) as Record<string, unknown>;
     const dpe = parsed['dpe'];
     if (typeof dpe !== 'object' || dpe === null || Array.isArray(dpe)) {
