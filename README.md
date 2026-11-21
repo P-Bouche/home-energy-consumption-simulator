@@ -2,7 +2,7 @@
 
 An open-source **residential Digital Energy Twin** based on the **Open3CL** (3CL-DPE) engine: import a French DPE XML diagnostic, get an editable 3D model of the dwelling, run regulatory energy simulations, and compare renovation scenarios.
 
-**Status:** P0 (engine feasibility), P1 (DPE XML import with confidence metadata) and P3 (3D reconstruction + viewer with confidence marking) are done — see the [roadmap](docs/roadmap.md).
+**Status:** P0 (engine feasibility), P1 (DPE XML import with confidence metadata), P2 (Open3CL energy simulation) and P3 (3D reconstruction + viewer with confidence marking) are done — see the [roadmap](docs/roadmap.md).
 
 ## Quick start
 
@@ -26,8 +26,9 @@ API: http://localhost:3000 (OpenAPI at `/docs`) — Web: http://localhost:5173
 ## What it does
 
 - **DPE XML import** into a Building-centered domain model, under 1 s, with full confidence metadata (`value`, `source`, `confidence`, `importDate`) — inferred data is never presented as certain.
-- **Open3CL energy simulation** (regulatory 3CL-DPE) and, later, renovation **scenario comparison**.
-- Roadmap toward: 3D reconstruction (React Three Fiber), building editor, PDF/IFC import, AI renovation advisor, IoT digital twin.
+- **Open3CL energy simulation** (regulatory 3CL-DPE) from the web UI: after an import, the building page offers **« Lancer la simulation »** → consumption (kWh/m².an), GES emissions (kg CO₂/m².an), A–G energy/climate labels and the engine version; results are persisted and listed in the history, and an identical re-run is served from the input-hash cache with no engine call. Long runs are queued (`202` + job polling).
+- **3D reconstruction + viewer** (React Three Fiber): open `#/building/<id>` after an import — orbit/zoom the model, click an element for its properties (U-value, area, orientation, confidence); inferred elements are visually marked with `{ source, confidence }`, and a heat-loss overlay colors envelope elements once a simulation result exists.
+- Roadmap toward: building editor, renovation **scenario comparison**, PDF/IFC import, AI renovation advisor, IoT digital twin.
 
 ## Architecture
 
@@ -37,9 +38,9 @@ Clean Architecture + Hexagonal + DDD. Dependencies point inward: `domain` ← `a
 
 ```
 apps/                web (React + Vite + R3F) · api (NestJS)
-packages/            domain · application · open3cl-adapter · dpe-xml-importer · postgres-repository
+packages/            domain · application · open3cl-adapter · dpe-xml-importer · postgres-repository · geometry
 infrastructure/      postgres (migrations) · docker (compose)
-docs/                architecture, roadmap, phases, ADRs, local dev, deployment, CI
+docs/                architecture, roadmap, phases, ADRs, geometry, local dev, deployment, CI
 tests/e2e/           Playwright end-to-end
 AGENTS.md            contributor rules (architecture, coding standards, workflow, testing)
 ```
