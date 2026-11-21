@@ -254,3 +254,59 @@ export interface AuditLogResponse {
   readonly buildingId: string;
   readonly entries: readonly AuditEntryJson[];
 }
+
+/**
+ * P5 scenario API contract (mirrors apps/api scenarios DTOs). Commands are the
+ * frozen P4 vocabulary (BuildingCommandJson).
+ */
+export type CommandJson = BuildingCommandJson;
+
+export interface ScenarioJson {
+  readonly id: string;
+  readonly buildingId: string;
+  readonly name: string;
+  readonly description: string;
+  readonly commands: readonly BuildingCommandJson[];
+  readonly baselineVersion: number;
+  readonly createdAt: string;
+}
+
+export interface ScenarioListResponse {
+  readonly buildingId: string;
+  readonly scenarios: readonly ScenarioJson[];
+}
+
+export interface SimulateScenarioResponse {
+  readonly scenarioId: string;
+  readonly mode: 'sync' | 'cached';
+  readonly result: SimulationResultJson;
+}
+
+export interface ApplyScenarioResponse {
+  readonly scenarioId: string;
+  readonly previousVersion: number;
+  readonly newVersion: number;
+  readonly auditEntries: readonly AuditEntryJson[];
+  readonly simulationMode: 'sync' | 'cached';
+  readonly simulation: SimulationResultJson;
+}
+
+export interface ComparisonEntryJson {
+  readonly scenarioId: string;
+  readonly name: string;
+  readonly baselineVersion: number;
+  readonly result: SimulationResultJson;
+  readonly deltaKwh: number;
+  readonly deltaKgCo2: number;
+  readonly energyLabelChange: { readonly from: string; readonly to: string } | null;
+  readonly climateLabelChange: { readonly from: string; readonly to: string } | null;
+  readonly rank: number;
+}
+
+export interface ComparisonResponse {
+  readonly buildingId: string;
+  readonly baseline: SimulationResultJson;
+  readonly entries: readonly ComparisonEntryJson[];
+  readonly simulatedNow: readonly string[];
+  readonly generatedAt: string;
+}
