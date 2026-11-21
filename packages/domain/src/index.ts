@@ -82,6 +82,20 @@ export type {
 } from './entities.ts';
 export { Building, type BanCoordinates, type BuildingInput, type BuildingJson } from './building.ts';
 export {
+  Scenario,
+  type ScenarioId,
+  type ScenarioInput,
+  type ScenarioJson
+} from './scenario.ts';
+export {
+  ComparisonService,
+  energyLabelRank,
+  labelChange,
+  type ComparisonEntryInput,
+  type ScenarioComparison,
+  type ScenarioComparisonEntry
+} from './scenario-comparison.ts';
+export {
   COORDINATE_SYSTEM,
   computeMeshHash,
   faceArea,
@@ -154,6 +168,9 @@ export { type Either, isLeft, isRight, left, right } from './either.ts';
 export {
   BuildingImported,
   BuildingUpdated,
+  ScenarioApplied,
+  ScenarioCreated,
+  ScenarioSimulated,
   SimulationCompleted,
   SimulationFailed,
   type DomainEvent,

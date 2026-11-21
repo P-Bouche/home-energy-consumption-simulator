@@ -2,6 +2,7 @@ import type { BuildingCommand } from './commands.ts';
 import type { ConfidenceJson } from './confidence.ts';
 import type { BuildingId } from './entities.ts';
 import type { SimulationErrorCode } from './errors.ts';
+import type { ScenarioId } from './scenario.ts';
 import type { SimulationInputHash, SimulationJobId, SimulationResultId } from './simulation-record.ts';
 
 /**
@@ -124,5 +125,77 @@ export class SimulationFailed implements DomainEvent {
     this.message = input.message;
     this.jobId = input.jobId ?? null;
     this.occurredAt = input.occurredAt;
+  }
+}
+
+/**
+ * Emitted when a scenario (named change-set) is created on a building (P5,
+ * TR-P5-06).
+ */
+export class ScenarioCreated implements DomainEvent {
+  readonly type = 'ScenarioCreated';
+  readonly scenarioId: ScenarioId;
+  readonly buildingId: BuildingId;
+  readonly occurredAt: Date;
+
+  constructor(scenarioId: ScenarioId, buildingId: BuildingId, occurredAt: Date) {
+    this.scenarioId = scenarioId;
+    this.buildingId = buildingId;
+    this.occurredAt = occurredAt;
+  }
+}
+
+/**
+ * Emitted when a scenario has been simulated through the P2 pipeline and its
+ * result persisted and linked to the scenario (P5, TR-P5-06).
+ */
+export class ScenarioSimulated implements DomainEvent {
+  readonly type = 'ScenarioSimulated';
+  readonly scenarioId: ScenarioId;
+  readonly buildingId: BuildingId;
+  readonly resultId: SimulationResultId;
+  readonly inputHash: SimulationInputHash;
+  readonly occurredAt: Date;
+
+  constructor(
+    scenarioId: ScenarioId,
+    buildingId: BuildingId,
+    resultId: SimulationResultId,
+    inputHash: SimulationInputHash,
+    occurredAt: Date
+  ) {
+    this.scenarioId = scenarioId;
+    this.buildingId = buildingId;
+    this.resultId = resultId;
+    this.inputHash = inputHash;
+    this.occurredAt = occurredAt;
+  }
+}
+
+/**
+ * Emitted when a scenario is applied to its building: the building state is
+ * replaced by the forked state and its version bumped (P5-lite; the full
+ * per-command audit trail lands with P4, TR-P5-06).
+ */
+export class ScenarioApplied implements DomainEvent {
+  readonly type = 'ScenarioApplied';
+  readonly scenarioId: ScenarioId;
+  readonly buildingId: BuildingId;
+  readonly previousVersion: number;
+  readonly newVersion: number;
+  readonly occurredAt: Date;
+
+  constructor(
+    scenarioId: ScenarioId,
+    buildingId: BuildingId,
+    previousVersion: number,
+    newVersion: number,
+    occurredAt: Date
+  ) {
+    this.scenarioId = scenarioId;
+    this.buildingId = buildingId;
+    this.previousVersion = previousVersion;
+    this.newVersion = newVersion;
+    this.occurredAt = occurredAt;
   }
 }
