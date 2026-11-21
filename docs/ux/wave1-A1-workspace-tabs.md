@@ -1,6 +1,6 @@
 # Mission: wave-1 A1 — post-import workspace tabs, primary action, Synthèse tab (UX audit US 2, 3)
 
-Open ONE pull request on branch `feat/web-workspace-shell` targeting `main`. Leave it open for
+Open ONE pull request on branch `feat/web-workspace-shell` targeting `main` — **issue #26 (PR body ends with `Closes #26`)**. Leave it open for
 review; do not merge. Read `AGENTS.md` first, then `docs/audits/2026-11-21-ux-audit.md`: you are
 implementing **US 2 and US 3 only**. This is presentation-only: NO API, domain, engine, or
 geometry changes; element ids (ADR-0003), command payloads `building.*.update.v1`, and cache

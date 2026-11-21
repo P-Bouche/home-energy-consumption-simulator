@@ -4,12 +4,12 @@ Source: UX audit `docs/audits/2026-11-21-ux-audit.md` (11 user stories, backlog 
 
 Wave 1 = 4 parallel missions (prompts in this directory):
 
-| Mission | Prompt file | Branch | Audit items | Owns (files) |
+| Mission | Issue | Prompt file | Branch | Audit items | Owns (files) |
 | --- | --- | --- | --- | --- |
-| A1 — workspace shell (tabs, primary action, Synthèse) | `wave1-A1-workspace-tabs.md` | `feat/web-workspace-shell` | UX US 2, 3 | `apps/web/src/App.tsx`, `apps/web/src/pages/UploadPage.tsx` (layout only — the success-alert line stays byte-identical, A2 owns its text), `apps/web/src/components/SimulationPanel.tsx`, new workspace component, new `apps/web/src/services/confidence-words.ts` |
-| A2 — collapsed report, copy hygiene, theme | `wave1-A2-report-theme.md` | `feat/web-report-and-theme` | UX US 6, 11 + UI F1, F2 | new `apps/web/src/theme.ts`, `apps/web/src/components/ImportReportView.tsx`, the alert line in `UploadPage.tsx`, the « (P5) » title in `ScenarioPanel.tsx`, new `BuildingLabel` component |
-| B — plain-language editor, level S | `wave1-B-editor-plain-language.md` | `feat/web-editor-plain-language` | UX US 1 (level S), 8, 9 | `packages/open3cl-adapter/src/enum-labels.ts` (new, data-only) + additive export + one additive API endpoint, `apps/web` editor/catalog/enum service, e2e `building-editor.spec.ts` |
-| C — 3D visual pass | `wave1-C-3d-visual-pass.md` | `feat/web-3d-visual-pass` | UX US 5 (visual part) + UI F8–F12 | `packages/geometry/src/three-adapter.ts`, `apps/web` viewer files (`ViewerPage`, `BuildingModel`, `ViewerOverlays`, `heat-loss.ts`, `view-colors.ts`, `viewer-store.ts`), e2e `viewer.spec.ts` |
+| A1 — workspace shell (tabs, primary action, Synthèse) | **#26** | `wave1-A1-workspace-tabs.md` | `feat/web-workspace-shell` | UX US 2, 3 | `apps/web/src/App.tsx`, `apps/web/src/pages/UploadPage.tsx` (layout only — the success-alert line stays byte-identical, A2 owns its text), `apps/web/src/components/SimulationPanel.tsx`, new workspace component, new `apps/web/src/services/confidence-words.ts` |
+| A2 — collapsed report, copy hygiene, theme | **#27** | `wave1-A2-report-theme.md` | `feat/web-report-and-theme` | UX US 6, 11 + UI F1, F2 | new `apps/web/src/theme.ts`, `apps/web/src/components/ImportReportView.tsx`, the alert line in `UploadPage.tsx`, the « (P5) » title in `ScenarioPanel.tsx`, new `BuildingLabel` component |
+| B — plain-language editor, level S | **#28** | `wave1-B-editor-plain-language.md` | `feat/web-editor-plain-language` | UX US 1 (level S), 8, 9 | `packages/open3cl-adapter/src/enum-labels.ts` (new, data-only) + additive export + one additive API endpoint, `apps/web` editor/catalog/enum service, e2e `building-editor.spec.ts` |
+| C — 3D visual pass | **#29** | `wave1-C-3d-visual-pass.md` | `feat/web-3d-visual-pass` | UX US 5 (visual part) + UI F8–F12 | `packages/geometry/src/three-adapter.ts`, `apps/web` viewer files (`ViewerPage`, `BuildingModel`, `ViewerOverlays`, `heat-loss.ts`, `view-colors.ts`, `viewer-store.ts`), e2e `viewer.spec.ts` |
 
 **Merge order: A1 → A2 → B → C** (B and C commutable). A2 rebases on A1 (one-line alert conflict expected and accepted). Later missions rebase on `main` after each merge.
 
@@ -23,4 +23,6 @@ Wave 1 = 4 parallel missions (prompts in this directory):
 6. **CI fully green (6 checks)** on the PR head: Lint, Typecheck, Tests + coverage gate, E2E, Open3CL benchmark, Geometry benchmark.
 7. **One PR per mission branch, left open for review — never merge yourself.** PR body lists the audit US/findings closed, evidence (screenshots in `docs/audits/assets/`, referenced), and anything deliberately left out.
 
-Wave 2 (missions D and E) starts only after A1+B are merged: D = "impact en clair" + "confiance en mots" components grafted onto A1's workspace and B's editor (reuses `confidence-words.ts`); E = work-based scenarios reusing B's enum-label service.
+Wave 2 (missions D and E) starts only after A1+B are merged: **D = issue #30** ("impact en clair" + "confiance en mots" components grafted onto A1's workspace and B's editor — reuses `confidence-words.ts`), **E = issue #31** (work-based scenarios reusing B's enum-label service). Wave 3: **#32** (editor level M presets + L decision, blocked by #28) and **#33** (3D geometry Class B — own ADR, blocked by #29).
+
+**Issue linkage rule:** each mission's PR body ends with `Closes #<issue>` (A1 → `Closes #26`, A2 → `Closes #27`, B → `Closes #28`, C → `Closes #29`). Dependency issues #30–#33 are closed by their own future PRs, not by wave-1 PRs.
