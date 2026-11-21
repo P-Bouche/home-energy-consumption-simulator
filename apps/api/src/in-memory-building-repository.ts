@@ -38,7 +38,9 @@ export class InMemoryBuildingRepository implements BuildingRepository {
         new StaleVersionError(input.building.id, input.expectedVersion, current.building.version)
       );
     }
-    this.auditLog?.record(input.auditEntry);
+    for (const entry of input.auditEntries) {
+      this.auditLog?.record(entry);
+    }
     const stored: StoredBuilding = { building: input.building, report: input.report };
     this.store.set(input.building.id, stored);
     return Promise.resolve(stored);
