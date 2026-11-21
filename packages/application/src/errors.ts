@@ -1,4 +1,4 @@
-import type { BuildingId, SimulationInputHash, SimulationJobId, SimulationResultId } from '@hes/domain';
+import type { BuildingId, ScenarioId, SimulationInputHash, SimulationJobId, SimulationResultId } from '@hes/domain';
 
 /**
  * Raised when an edit targets a building version that is no longer current
@@ -77,6 +77,20 @@ export class SimulationJobNotFoundError extends Error {
     super(`no simulation job found with id ${jobId}`);
     this.name = 'SimulationJobNotFoundError';
     this.jobId = jobId;
+  }
+}
+
+/**
+ * Raised when no scenario exists for the requested id (mapped to HTTP 404).
+ */
+export class ScenarioNotFoundError extends Error {
+  readonly code = 'SCENARIO_NOT_FOUND';
+  readonly scenarioId: ScenarioId;
+
+  constructor(scenarioId: ScenarioId) {
+    super(`no scenario found with id ${scenarioId}`);
+    this.name = 'ScenarioNotFoundError';
+    this.scenarioId = scenarioId;
   }
 }
 

@@ -9,7 +9,7 @@ import type { AuditEntry, BuildingId } from '@hes/domain';
  *
  * Writes do NOT go through this port: every audit entry is written atomically
  * with the building update, as one unit of work, through
- * `BuildingRepository.update({ …, auditEntry })` (same transaction on
+ * `BuildingRepository.update({ …, auditEntries })` (same transaction on
  * Postgres). This port is the read side used by the audit view and by undo.
  */
 export interface AuditLog {
