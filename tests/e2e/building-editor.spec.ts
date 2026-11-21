@@ -118,14 +118,19 @@ test('AC-P4-01 + AC-P4-03 + AC-P4-04: edit → save → re-simulate (cache miss)
   expect(audit2.entries.map((e) => e.version)).toEqual([1, 2]);
   await expect(page.getByTestId('audit-list')).toContainText('v2');
 
-  // re-simulation after undo: another cache miss → third distinct input hash
+  // re-simulation after undo: the restored aggregate is byte-identical to the
+  // original (full Confidence restored from the audit entry), so the input
+  // hash equals hash0 → cache HIT on the original result, no new row, no
+  // engine re-run; the panel shows the cached original numbers again
   await expect(page.getByTestId('simulation-result')).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByTestId('cached-badge')).toBeVisible({ timeout: 30_000 });
   const history2 = (await (await page.request.get(`/api/buildings/${buildingId}/simulations`)).json()) as SimulationHistoryPayload;
-  expect(history2.results.length).toBe(3);
-  expect(new Set(history2.results.map((r) => r.inputHash)).size).toBe(3);
-  const afterUndo = history2.results[0]!;
-  expect(afterUndo.consumptionKwh).toBeGreaterThan(newest.consumptionKwh); // undoing the insulation raises consumption again
-  expect(afterUndo.consumptionKwh).toBeCloseTo(consumption0, 0);
+  expect(history2.results.length).toBe(2);
+  expect(new Set(history2.results.map((r) => r.inputHash)).size).toBe(2);
+  const original = history2.results.find((r) => r.inputHash === hash0)!;
+  expect(original.consumptionKwh).toBeCloseTo(consumption0, 0); // back to baseline
+  expect(original.energyLabel).toBe(label0);
+  expect(original.consumptionKwh).toBeGreaterThan(newest.consumptionKwh); // undoing the insulation raises consumption again
 });
 
 test('stale If-Match is rejected with 409 and the UI reloads the current version', async ({ page }) => {
