@@ -18,6 +18,7 @@ import {
 import {
   BuildingNotFoundError,
   NothingToUndoError,
+  ScenarioNotFoundError,
   SimulationAlreadyInFlightError,
   SimulationJobNotFoundError,
   SimulationNotFoundError,
@@ -74,7 +75,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
     if (
       exception instanceof BuildingNotFoundError ||
       exception instanceof SimulationNotFoundError ||
-      exception instanceof SimulationJobNotFoundError
+      exception instanceof SimulationJobNotFoundError ||
+      exception instanceof ScenarioNotFoundError
     ) {
       this.send(response, 404, 'Not Found', exception.message);
       return;

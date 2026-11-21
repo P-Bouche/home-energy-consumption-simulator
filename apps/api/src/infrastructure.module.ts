@@ -5,22 +5,31 @@ import {
   BUILDING_REPOSITORY,
   DPE_IMPORTER_PORT,
   GEOMETRY_PORT,
+  SCENARIO_REPOSITORY,
   SIMULATION_JOB_RUNNER,
   SIMULATION_PORT,
   SIMULATION_REPOSITORY,
   SimulationJobRunner,
   type AuditLog,
   type BuildingRepository,
+  type ScenarioRepository,
   type SimulationRepository,
   type SimulationPort
 } from '@hes/application';
 import { DpeXmlImporter } from '@hes/dpe-xml-importer';
 import { GeometryAdapter } from '@hes/geometry';
 import { createOpen3clAdapter } from '@hes/open3cl-adapter';
-import { PostgresAuditLog, PostgresBuildingRepository, PostgresSimulationRepository, runMigrations } from '@hes/postgres-repository';
+import {
+  PostgresAuditLog,
+  PostgresBuildingRepository,
+  PostgresScenarioRepository,
+  PostgresSimulationRepository,
+  runMigrations
+} from '@hes/postgres-repository';
 import { CONFIG, loadConfig, type ApiConfig } from './config.ts';
 import { InMemoryAuditLog } from './in-memory-audit-log.ts';
 import { InMemoryBuildingRepository } from './in-memory-building-repository.ts';
+import { InMemoryScenarioRepository } from './in-memory-scenario-repository.ts';
 import { InMemorySimulationRepository } from './in-memory-simulation-repository.ts';
 
 /**
@@ -81,6 +90,12 @@ export const PG_CONTEXT = Symbol('PgContext');
       inject: [PG_CONTEXT]
     },
     {
+      provide: SCENARIO_REPOSITORY,
+      useFactory: (pg: PgContext | null): ScenarioRepository =>
+        pg === null ? new InMemoryScenarioRepository() : new PostgresScenarioRepository(pg.pool),
+      inject: [PG_CONTEXT]
+    },
+    {
       provide: AUDIT_LOG,
       useFactory: (pg: PgContext | null): AuditLog =>
         pg === null ? new InMemoryAuditLog() : new PostgresAuditLog(pg.pool),
@@ -104,6 +119,7 @@ export const PG_CONTEXT = Symbol('PgContext');
     SIMULATION_PORT,
     BUILDING_REPOSITORY,
     SIMULATION_REPOSITORY,
+    SCENARIO_REPOSITORY,
     AUDIT_LOG,
     SIMULATION_JOB_RUNNER
   ]
