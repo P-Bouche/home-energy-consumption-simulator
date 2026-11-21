@@ -1,4 +1,4 @@
-import { createSimulationResult, geometryFromJson, projectHeatLoss, type EnergyLabel, type HeatLossOverlay } from '@hes/domain';
+import { createSimulationResult, geometryFromJson, projectHeatLoss, type EnergyLabel, type HeatLossOverlay, type HeatLossShare } from '@hes/domain';
 import type { GeometryJson, SimulationResultJson } from '../types.ts';
 
 /**
@@ -57,6 +57,11 @@ function lerp(a: number, b: number, t: number): number {
 /**
  * Maps a loss share in [0, 1] to a color on a green → amber → red scale
  * (low share = green, high share = red). share is clamped to [0, 1].
+ *
+ * The input is expected to be a NORMALIZED share (see
+ * {@link normalizedLossShares}): raw shares are fractions of the total spread
+ * over every envelope element (max ≈ 0.2), so mapping them directly would
+ * leave the red end of the ramp unreachable (UI audit F10).
  */
 export function colorForShare(share: number): [number, number, number] {
   const t = Math.max(0, Math.min(1, share));
@@ -65,4 +70,37 @@ export function colorForShare(share: number): [number, number, number] {
   const high = hexToRgb('#c62828');
   const [from, to, u] = t < 0.5 ? [low, mid, t * 2] : [mid, high, (t - 0.5) * 2];
   return [lerp(from[0], to[0], u), lerp(from[1], to[1], u), lerp(from[2], to[2], u)];
+}
+
+/**
+ * Largest raw loss share of an overlay (0 when the overlay has no shares).
+ */
+export function maxLossShare(shares: readonly HeatLossShare[]): number {
+  return shares.reduce((max, s) => Math.max(max, s.share), 0);
+}
+
+/**
+ * Normalizes the raw loss shares of one building run (UI audit F10): the raw
+ * shares are fractions of the total deperditions spread over all envelope
+ * elements, so the largest is ≈ 1/n and the legend's red is unreachable. This
+ * presentation-layer mapping divides every share by the run's `maxShare`, so
+ * the worst element maps to 1 (red) and the scale spans the full ramp.
+ * Guarded against `maxShare = 0` (every element then maps to 0). The raw
+ * shares coming from the Open3CL projection are never modified.
+ */
+export function normalizedLossShares(shares: readonly HeatLossShare[]): Map<string, number> {
+  const max = maxLossShare(shares);
+  const map = new Map<string, number>();
+  for (const s of shares) {
+    map.set(s.elementId, max > 0 ? s.share / max : 0);
+  }
+  return map;
+}
+
+/**
+ * Formats a raw loss share as a French percentage for the hover tooltip
+ * (e.g. `0.184` → `18,4 %`).
+ */
+export function formatSharePercent(share: number): string {
+  return `${(share * 100).toFixed(1).replace('.', ',')} %`;
 }

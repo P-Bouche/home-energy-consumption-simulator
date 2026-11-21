@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { useFrame, useThree, type ThreeEvent } from '@react-three/fiber';
+import { Edges } from '@react-three/drei';
 import { BufferAttribute, CanvasTexture, DoubleSide, RepeatWrapping, Vector3, type BufferGeometry as ThreeBufferGeometry } from 'three';
 import { elementAtVertex, filterByKinds, geometryJsonToMeshBuffers, type MeshBuffers, type MeshGroup } from '@hes/geometry';
-import { toThreeBufferGeometry } from '@hes/geometry/three';
-import { elementColor } from '../services/view-colors.ts';
+import { domainToThree, toThreeBufferGeometry } from '@hes/geometry/three';
+import { normalizedLossShares } from '../services/heat-loss.ts';
+import { elementColor, SELECTION_OUTLINE_COLOR } from '../services/view-colors.ts';
 import { useHeatLossOverlay, useViewerStore, type ScreenOverlay } from '../store/viewer-store.ts';
 
 /**
@@ -16,6 +18,11 @@ import { useHeatLossOverlay, useViewerStore, type ScreenOverlay } from '../store
  * calls (TR-P3-02); only the `color` attribute is rewritten on hover/selection
  * changes, never the position/normal buffers.
  *
+ * Axes: `toThreeBufferGeometry` converts the Z-up domain geometry to the Y-up
+ * three.js space ONCE at the rendering boundary, so every mesh, the selection
+ * outline and the projected room labels below are directly in three.js space
+ * (UI audit F8); domain objects and the mesh hash are untouched.
+ *
  * DOM overlays (room labels, hover tooltip) are rendered outside the Canvas by
  * ViewerOverlays: this in-canvas projector only writes their screen positions
  * to the store (R3F cannot render raw DOM elements inside <Canvas>).
@@ -23,6 +30,11 @@ import { useHeatLossOverlay, useViewerStore, type ScreenOverlay } from '../store
 
 type ColorFor = (group: MeshGroup) => [number, number, number];
 
+/**
+ * Soft diagonal hatch for inferred elements (UI audit F11): thin,
+ * low-contrast lines on a transparent background instead of the former loud
+ * opaque orange stripes.
+ */
 function makeHatchTexture(): CanvasTexture | null {
   if (typeof document === 'undefined') return null;
   const canvas = document.createElement('canvas');
@@ -30,10 +42,9 @@ function makeHatchTexture(): CanvasTexture | null {
   canvas.height = 16;
   const ctx = canvas.getContext('2d');
   if (ctx === null) return null;
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, 16, 16);
-  ctx.strokeStyle = 'rgba(120, 60, 0, 0.85)';
-  ctx.lineWidth = 3;
+  ctx.clearRect(0, 0, 16, 16);
+  ctx.strokeStyle = 'rgba(140, 84, 20, 0.4)';
+  ctx.lineWidth = 1;
   for (let i = -16; i < 32; i += 8) {
     ctx.beginPath();
     ctx.moveTo(i, 0);
@@ -49,7 +60,8 @@ function makeHatchTexture(): CanvasTexture | null {
 /**
  * Projects room-label positions and the hover point to canvas pixels every
  * frame and stores them as screen overlays (diffed: the store is only updated
- * when a position actually moved).
+ * when a position actually moved). Room labels are skipped when the
+ * « Étiquettes des pièces » toggle is off (UI audit F12).
  */
 function OverlayProjector({
   roomLabels
@@ -58,6 +70,7 @@ function OverlayProjector({
   const size = useThree((s) => s.size);
   const hoverPoint = useViewerStore((s) => s.hoverPoint);
   const hoveredElementId = useViewerStore((s) => s.hoveredElementId);
+  const showRoomLabels = useViewerStore((s) => s.showRoomLabels);
   const setScreenOverlays = useViewerStore((s) => s.setScreenOverlays);
   const last = useRef<string>('');
   useFrame(() => {
@@ -67,9 +80,11 @@ function OverlayProjector({
       return [Math.round(((v.x * 0.5 + 0.5) * size.width) * 2) / 2, Math.round(((-v.y * 0.5 + 0.5) * size.height) * 2) / 2];
     };
     const overlays: ScreenOverlay[] = [];
-    for (const room of roomLabels) {
-      const xy = project(room.position);
-      if (xy !== null) overlays.push({ id: room.id, role: 'room', x: xy[0], y: xy[1] });
+    if (showRoomLabels) {
+      for (const room of roomLabels) {
+        const xy = project(room.position);
+        if (xy !== null) overlays.push({ id: room.id, role: 'room', x: xy[0], y: xy[1] });
+      }
     }
     if (hoveredElementId !== null && hoverPoint !== null) {
       const xy = project(hoverPoint);
@@ -111,10 +126,12 @@ export function BuildingModel() {
   );
   const hatchTexture = useMemo(() => makeHatchTexture(), []);
 
+  // Heat-loss shares normalized per building run (UI audit F10): the raw
+  // shares (max ≈ 0.2) are divided by the run's maxShare at this presentation
+  // layer so the green→red ramp is fully used; the raw shares stay untouched.
   const lossShareById = useMemo(() => {
-    const map = new Map<string, number>();
-    if (overlay !== null) for (const share of overlay.shares) map.set(share.elementId, share.share);
-    return map;
+    if (overlay === null) return new Map<string, number>();
+    return normalizedLossShares(overlay.shares);
   }, [overlay]);
 
   const colorFor: ColorFor = useMemo(
@@ -159,17 +176,41 @@ export function BuildingModel() {
     }
   }, [layers, colorFor]);
 
+  // Room-label anchors live in domain (Z-up) coordinates in the buffers: they
+  // are converted to three.js space with the same boundary conversion as the
+  // meshes before being projected to screen pixels.
   const roomLabels = useMemo(
     () =>
       (rooms?.groups ?? [])
         .filter((g) => g.labelPosition !== null)
-        .map((g) => ({
-          id: g.elementId,
-          label: g.label,
-          position: [g.labelPosition?.x ?? 0, g.labelPosition?.y ?? 0, g.labelPosition?.z ?? 0] as [number, number, number]
-        })),
+        .map((g) => {
+          const lp = g.labelPosition;
+          return {
+            id: g.elementId,
+            label: g.label,
+            position: lp === null ? ([0, 0, 0] as [number, number, number]) : domainToThree(lp)
+          };
+        }),
     [rooms]
   );
+
+  // Selection outline (UI audit F11): drei <Edges> around the selected element,
+  // built from its own vertex range (converted to three.js space) — kept in
+  // addition to the 50/50 color mix so the selection stays visible under the
+  // heat-loss overlay.
+  const selectedGeometry = useMemo(() => {
+    if (buffers === null || selectedElementId === null) return null;
+    const group = buffers.groups.find((g) => g.elementId === selectedElementId);
+    if (group === undefined) return null;
+    const from = group.start * 3;
+    const to = (group.start + group.count) * 3;
+    const sub: MeshBuffers = {
+      positions: buffers.positions.slice(from, to),
+      normals: buffers.normals.slice(from, to),
+      groups: [{ ...group, start: 0 }]
+    };
+    return toThreeBufferGeometry(sub);
+  }, [buffers, selectedElementId]);
 
   // Per-mesh picking: the hit faceIndex is relative to the hit mesh's own
   // sub-buffers (re-based group starts), never the full merged buffers.
@@ -198,24 +239,27 @@ export function BuildingModel() {
   return (
     <>
       {layers[0]?.geom != null && (
-        <mesh geometry={layers[0].geom} {...envelopeHandlers}>
-          <meshStandardMaterial vertexColors side={DoubleSide} />
+        <mesh geometry={layers[0].geom} castShadow receiveShadow {...envelopeHandlers}>
+          <meshStandardMaterial vertexColors side={DoubleSide} roughness={0.95} metalness={0} />
         </mesh>
       )}
       {layers[1]?.geom != null && layers[1].sub !== null && layers[1].sub.groups.length > 0 && (
-        <mesh geometry={layers[1].geom} {...inferredHandlers}>
-          <meshStandardMaterial vertexColors side={DoubleSide} map={hatchTexture ?? undefined} transparent opacity={0.9} />
+        <mesh geometry={layers[1].geom} castShadow {...inferredHandlers}>
+          <meshStandardMaterial vertexColors side={DoubleSide} map={hatchTexture ?? undefined} transparent opacity={0.9} roughness={0.95} metalness={0} />
         </mesh>
       )}
       {layers[2]?.geom != null && (
-        <mesh geometry={layers[2].geom} {...openingHandlers}>
-          <meshStandardMaterial vertexColors side={DoubleSide} transparent opacity={0.75} />
+        <mesh geometry={layers[2].geom} castShadow {...openingHandlers}>
+          <meshStandardMaterial vertexColors side={DoubleSide} transparent opacity={0.75} roughness={0.35} metalness={0.1} />
         </mesh>
       )}
       {layers[3]?.geom != null && (
         <mesh geometry={layers[3].geom} {...roomHandlers}>
-          <meshStandardMaterial vertexColors side={DoubleSide} transparent opacity={0.3} depthWrite={false} />
+          <meshStandardMaterial vertexColors side={DoubleSide} transparent opacity={0.3} depthWrite={false} roughness={1} metalness={0} />
         </mesh>
+      )}
+      {selectedGeometry !== null && (
+        <Edges geometry={selectedGeometry} color={SELECTION_OUTLINE_COLOR} lineWidth={2.5} threshold={15} />
       )}
       <OverlayProjector roomLabels={roomLabels} />
     </>

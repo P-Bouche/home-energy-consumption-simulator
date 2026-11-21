@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { create } from 'zustand';
 import type { HeatLossOverlay } from '@hes/domain';
-import { getBuildingGeometry, getSimulationHistory } from '../services/api-client.ts';
+import { getBuilding, getBuildingGeometry, getSimulationHistory } from '../services/api-client.ts';
 import { tryOverlayFromSimulation } from '../services/heat-loss.ts';
 import type { GeometryJson, SimulationResultJson } from '../types.ts';
 
@@ -49,6 +49,14 @@ export interface ViewerState {
    */
   readonly simulation: SimulationResultJson | null;
   readonly showHeatLoss: boolean;
+  /**
+   * DPE number of the building (from the import report via
+   * GET /buildings/:id), shown in the viewer header instead of the UUID.
+   * null when unavailable — the header then falls back to the raw id.
+   */
+  readonly dpeNumber: string | null;
+  /** Whether the room-name DOM labels are projected over the 3D view (F12). */
+  readonly showRoomLabels: boolean;
   readonly screenOverlays: readonly ScreenOverlay[];
   readonly loadGeometry: (buildingId: string) => Promise<void>;
   readonly setScreenOverlays: (overlays: readonly ScreenOverlay[]) => void;
@@ -56,6 +64,7 @@ export interface ViewerState {
   readonly setHovered: (elementId: string | null, point: [number, number, number] | null) => void;
   readonly setSimulation: (result: SimulationResultJson | null) => void;
   readonly toggleHeatLoss: () => void;
+  readonly toggleRoomLabels: () => void;
   readonly reset: () => void;
 }
 
@@ -72,10 +81,12 @@ export const useViewerStore = create<ViewerState>((set, get) => ({
   hoverPoint: null,
   simulation: null,
   showHeatLoss: false,
+  dpeNumber: null,
+  showRoomLabels: true,
   screenOverlays: [],
   loadGeometry: async (buildingId) => {
     if (get().buildingId === buildingId && get().status === 'ready') return;
-    set({ status: 'loading', buildingId, error: null, geometry: null, selectedElementId: null, hoveredElementId: null, hoverPoint: null });
+    set({ status: 'loading', buildingId, error: null, geometry: null, selectedElementId: null, hoveredElementId: null, hoverPoint: null, dpeNumber: null });
     try {
       const response = await getBuildingGeometry(buildingId);
       set({ status: 'ready', geometry: response.geometry });
@@ -87,6 +98,11 @@ export const useViewerStore = create<ViewerState>((set, get) => ({
           set({ simulation: latest });
         })
         .catch(() => set({ simulation: null }));
+      // Best-effort: DPE number for the viewer header (F12). 404 just leaves
+      // the header on the raw building id.
+      getBuilding(buildingId)
+        .then((building) => set({ dpeNumber: building.report.dpeNumber }))
+        .catch(() => set({ dpeNumber: null }));
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       set({ status: 'error', error: message });
@@ -101,6 +117,7 @@ export const useViewerStore = create<ViewerState>((set, get) => ({
     if (simulation === null) return;
     set({ showHeatLoss: !showHeatLoss });
   },
+  toggleRoomLabels: () => set({ showRoomLabels: !get().showRoomLabels }),
   reset: () =>
     set({
       status: 'idle',
@@ -112,6 +129,8 @@ export const useViewerStore = create<ViewerState>((set, get) => ({
       hoverPoint: null,
       simulation: null,
       showHeatLoss: false,
+      dpeNumber: null,
+      showRoomLabels: true,
       screenOverlays: []
     })
 }));
