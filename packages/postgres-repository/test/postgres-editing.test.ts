@@ -152,7 +152,7 @@ describe('PostgresBuildingRepository.update (optimistic locking, schema v3)', ()
     );
     expect(edited.ok).toBe(true);
     if (!edited.ok) return;
-    const stored = await repo.update({ building: edited.value, report: makeReport(), expectedVersion: 0, auditEntry: makeAuditEntry() });
+    const stored = await repo.update({ building: edited.value, report: makeReport(), expectedVersion: 0, auditEntries: [makeAuditEntry()] });
     expect(stored.building.version).toBe(1);
     const texts = queries.map((q) => q.text);
     expect(texts[0]).toBe('BEGIN');
@@ -181,7 +181,7 @@ describe('PostgresBuildingRepository.update (optimistic locking, schema v3)', ()
     const repo = new PostgresBuildingRepository(pool);
     const building = makeBuilding(BUILDING_ID);
     const error = await repo
-      .update({ building, report: makeReport(), expectedVersion: 0, auditEntry: makeAuditEntry() })
+      .update({ building, report: makeReport(), expectedVersion: 0, auditEntries: [makeAuditEntry()] })
       .catch((e: unknown) => e);
     expect(error).toBeInstanceOf(StaleVersionError);
     expect((error as StaleVersionError).currentVersion).toBe(3);
@@ -192,7 +192,7 @@ describe('PostgresBuildingRepository.update (optimistic locking, schema v3)', ()
   it('throws BuildingNotFoundError when the building row is missing', async () => {
     const { pool } = scriptedPool(() => emptyResult);
     const repo = new PostgresBuildingRepository(pool);
-    await expect(repo.update({ building: makeBuilding(BUILDING_ID), report: makeReport(), expectedVersion: 0, auditEntry: makeAuditEntry() })).rejects.toBeInstanceOf(
+    await expect(repo.update({ building: makeBuilding(BUILDING_ID), report: makeReport(), expectedVersion: 0, auditEntries: [makeAuditEntry()] })).rejects.toBeInstanceOf(
       BuildingNotFoundError
     );
   });
@@ -205,7 +205,7 @@ describe('PostgresBuildingRepository.update (optimistic locking, schema v3)', ()
     });
     const repo = new PostgresBuildingRepository(pool);
     await expect(
-      repo.update({ building: makeBuilding(BUILDING_ID), report: makeReport(), expectedVersion: 0, auditEntry: makeAuditEntry() })
+      repo.update({ building: makeBuilding(BUILDING_ID), report: makeReport(), expectedVersion: 0, auditEntries: [makeAuditEntry()] })
     ).rejects.toBeInstanceOf(StaleVersionError);
   });
 

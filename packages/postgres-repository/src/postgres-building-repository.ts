@@ -92,7 +92,7 @@ export class PostgresBuildingRepository implements BuildingRepository {
    * expectedVersion (another edit won the race → HTTP 409; nothing is written)
    */
   async update(input: UpdateBuildingInput): Promise<StoredBuilding> {
-    const { building, report, expectedVersion, auditEntry } = input;
+    const { building, report, expectedVersion, auditEntries } = input;
     const client = await this.pool.connect();
     try {
       await client.query('BEGIN');
@@ -111,20 +111,22 @@ export class PostgresBuildingRepository implements BuildingRepository {
       if (updated.rowCount !== 1) {
         throw new StaleVersionError(building.id, expectedVersion, lockedRow.version);
       }
-      await client.query(
-        `INSERT INTO audit_entries (id, building_id, user_id, command_type, command, changes, version, created_at)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-        [
-          auditEntry.id,
-          auditEntry.buildingId,
-          auditEntry.userId,
-          auditEntry.commandType,
-          JSON.stringify(auditEntry.command),
-          JSON.stringify(auditEntry.changes),
-          auditEntry.version,
-          auditEntry.timestamp
-        ]
-      );
+      for (const auditEntry of auditEntries) {
+        await client.query(
+          `INSERT INTO audit_entries (id, building_id, user_id, command_type, command, changes, version, created_at)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+          [
+            auditEntry.id,
+            auditEntry.buildingId,
+            auditEntry.userId,
+            auditEntry.commandType,
+            JSON.stringify(auditEntry.command),
+            JSON.stringify(auditEntry.changes),
+            auditEntry.version,
+            auditEntry.timestamp
+          ]
+        );
+      }
       await client.query('COMMIT');
       return { building, report };
     } catch (error) {
