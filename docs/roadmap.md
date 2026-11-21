@@ -46,9 +46,11 @@ Detailed phase documentation (requirements, architecture, test plans, risks, exi
 
 ## P5 — Scenario Management
 
+**Status:** Implemented on top of P4's frozen command vocabulary: `Scenario` aggregate + declarative change-sets (`Building.fork(commands)`), CRUD + simulate + compare + apply endpoints, comparison table in the web app, schema v4 (`scenarios` + `scenario_results`). Stale results are hash-verified and re-simulated inline, never served. Benchmark: [P5 comparison report](phases/P5-comparison-benchmark-report.md) (p95 ≈ 3 ms cached, budget < 1 s).
+
 - **Objective:** model renovation scenarios and compare them.
-- **Deliverables:** `Scenario` entity, scenario CRUD, comparison use case, comparison UI (consumption, emissions, cost, DPE label per scenario).
-- **Dependencies:** P2, P4.
+- **Deliverables:** `Scenario` entity, scenario CRUD, comparison use case, comparison UI (consumption, emissions, DPE label per scenario, deltas + rank vs baseline; cost estimate deferred).
+- **Dependencies:** P2 (P4 lands the editor UI + full audit trail on top of the same commands).
 - **Risks:** combinatorial explosion of scenarios; misleading comparisons.
 - **Success criteria:** scenario comparison < 1 s; side-by-side results with clear deltas vs baseline.
 

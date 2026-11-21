@@ -34,6 +34,8 @@ jobs:
         run: npm run benchmark
       - name: Run building→simulation benchmark (fails when p95 >= 3000 ms, AC-P2-01)
         run: npm run benchmark:simulation
+      - name: Run scenario-comparison benchmark (fails when p95 >= 1000 ms, AC-P5-01)
+        run: npm run benchmark:compare
       - name: Upload benchmark reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -42,6 +44,7 @@ jobs:
           path: |
             docs/phases/P0-benchmark-report.md
             docs/phases/P2-simulation-benchmark-report.md
+            docs/phases/P5-comparison-benchmark-report.md
           retention-days: 14
 
   geometry-benchmark:

@@ -18,6 +18,7 @@
     "test:coverage": "vitest run --coverage",
     "benchmark": "node packages/open3cl-adapter/benchmark/run-benchmark.ts",
     "benchmark:simulation": "node packages/open3cl-adapter/benchmark/run-simulation-benchmark.ts",
+    "benchmark:compare": "node packages/application/benchmark/run-compare-benchmark.ts",
     "benchmark:import": "node packages/dpe-xml-importer/benchmark/run-import-benchmark.ts",
     "benchmark:geometry": "node packages/geometry/benchmark/run-geometry-benchmark.ts",
     "test:e2e": "playwright test",
