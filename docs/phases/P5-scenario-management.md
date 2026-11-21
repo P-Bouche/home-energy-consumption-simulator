@@ -3,7 +3,7 @@
 | Field | Value |
 | --- | --- |
 | Phase | P5 — Scenario Management |
-| Status | Planned |
+| Status | Implemented on top of the merged P4 command vocabulary (round 2: rebased on P3+P4) — see the [comparison benchmark](P5-comparison-benchmark-report.md) |
 | Team | 2 full-stack engineers, 1 product owner |
 | Depends on | P2 exit (SimulationResult v1), P4 exit (editable, versioned Building) |
 | Blocks | P8 (AI advisor ranks scenarios) |
@@ -11,6 +11,14 @@
 P5 introduces renovation scenarios: named sets of modifications applied to a building, each simulated through Open3CL, and compared side by side in under 1 second.
 
 Canonical prompt to start a Vibe session for this phase: [P5-vibe-prompt.md](P5-vibe-prompt.md).
+
+## Round-2 notes (after the P3+P4 rebase)
+
+- **Command vocabulary:** a scenario is a named change-set of P4 `BuildingCommand`s (frozen tags `building.<element>.update.v1`, `COMMAND_VOCABULARY_VERSION = 1` in `packages/domain/src/commands.ts`) applied to a copy of the building via `Building.fork(commands)` — the single shared contract with the P4 editor. `buildingId` is stamped server-side from the URL; the change-set is validated by forking before anything is persisted.
+- **Single simulation kernel:** `runInlineSimulation` (cache → 409 in-flight → engine → persist) is the ONE shared inline path for the P2 baseline sync flow and all P5 scenario simulations — no parallel calculation path (ADR-0001). Scenario simulations are deliberately **never queued**: a scenario input is at most baseline-sized, and `POST /buildings/:id/compare` must answer synchronously. Trade-off, accepted and documented: a ~5 MB source DPE would make a scenario simulate an ~12 s inline HTTP request instead of returning 202 (the baseline endpoint keeps the queued path for such inputs).
+- **Stale results are never served — by hash verification, not link bookkeeping:** before a linked `scenario_results` record is used, its `inputHash` is compared against `computeBuildingInputHash(building.fork(scenario.commands))`; on mismatch (PATCHed commands, or an apply that moved the baseline) the scenario is re-simulated inline through the shared pipeline and the fresh result is linked and served. `baseline_version` is stored but only surfaced as informational context in the comparison payload; it is never used as a staleness oracle.
+- **Apply = the P4 path:** applying a scenario applies its commands one by one through `Building.apply` in a SINGLE optimistic-locked `BuildingRepository.update` transaction — +1 version per command, one append-only `audit_entries` row per command (schema v3, DB-enforced), `ScenarioApplied` event on top — then re-simulates the baseline through the shared pipeline (cache hit when the applied state equals a previously simulated scenario state).
+- **Single overlay kernel:** the user-edit overlay in `packages/open3cl-adapter/src/map-building-to-engine-input.ts` is P4's (one implementation). It logs (never silently skips) a user-edited element id that matches no source-document entry, fails loudly (`SimulationMappingError`) on a user-sourced field the overlay does not cover, and a corpus-wide contract test pins the positional `wall-N → index N-1` mapping for every fixture. Windows need no saisie-method enum: the engine honors `uw_saisi` directly (`3.3_baie_vitree.js`), verified across the corpus.
 
 # Objective
 
