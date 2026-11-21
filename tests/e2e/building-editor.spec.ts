@@ -71,7 +71,18 @@ test('AC-P4-01 + AC-P4-03 + AC-P4-04: edit → save → re-simulate (cache miss)
   await page.getByTestId('save-edit').click();
 
   await expect(page.getByTestId('building-version')).toContainText('version 1');
-  // the editor store automatically re-ran the simulation through P2
+  // the editor store automatically re-ran the simulation through P2 — wait
+  // until the new result row actually exists (the result panel was already
+  // visible from the baseline run, so toBeVisible alone would not wait)
+  await expect
+    .poll(
+      async () => {
+        const h = (await (await page.request.get(`/api/buildings/${buildingId}/simulations`)).json()) as SimulationHistoryPayload;
+        return h.results.length;
+      },
+      { timeout: 30_000 }
+    )
+    .toBe(2);
   await expect(page.getByTestId('simulation-result')).toBeVisible({ timeout: 30_000 });
 
   // cache-miss proof: a NEW simulation result exists with a different input hash
@@ -122,7 +133,6 @@ test('AC-P4-01 + AC-P4-03 + AC-P4-04: edit → save → re-simulate (cache miss)
   // original (full Confidence restored from the audit entry), so the input
   // hash equals hash0 → cache HIT on the original result, no new row, no
   // engine re-run; the panel shows the cached original numbers again
-  await expect(page.getByTestId('simulation-result')).toBeVisible({ timeout: 30_000 });
   await expect(page.getByTestId('cached-badge')).toBeVisible({ timeout: 30_000 });
   const history2 = (await (await page.request.get(`/api/buildings/${buildingId}/simulations`)).json()) as SimulationHistoryPayload;
   expect(history2.results.length).toBe(2);
