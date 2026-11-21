@@ -8,11 +8,13 @@ param(
 )
 
 $repo = $PSScriptRoot
-Set-Location $repo
+# Ne JAMAIS utiliser Set-Location ici : un script PowerShell s'execute dans la
+# session de l'appelant, et Set-Location deplacerait son shell. Tous les
+# chemins sont donc absolus (bases sur $PSScriptRoot) pour rester cwd-neutral.
 
 if ($Mode -eq 'postgres') {
     Write-Host "Docker: verification de la base PostgreSQL/PostGIS..." -ForegroundColor Cyan
-    docker compose -f infrastructure/docker/docker-compose.yml up -d --wait
+    docker compose -f "$repo\infrastructure\docker\docker-compose.yml" up -d --wait
     if ($LASTEXITCODE -ne 0) {
         Write-Host "Docker indisponible ou echec. Lance Docker Desktop, ou utilise: .\start-dev.ps1 -Mode memory" -ForegroundColor Yellow
         exit 1
@@ -24,7 +26,7 @@ if ($Mode -eq 'postgres') {
 
 if (-not (Test-Path "$repo\node_modules")) {
     Write-Host "node_modules absent: npm ci (peut prendre plusieurs minutes)..." -ForegroundColor Cyan
-    npm ci --no-audit --no-fund
+    npm ci --prefix "$repo" --no-audit --no-fund
     if ($LASTEXITCODE -ne 0) { Write-Host "npm ci a echoue" -ForegroundColor Red; exit 1 }
 }
 
