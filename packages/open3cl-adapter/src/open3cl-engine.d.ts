@@ -58,3 +58,20 @@ declare module '@open3cl/engine' {
    */
   export function getVersion(): string;
 }
+
+/**
+ * Internal engine utilities (no `exports` map in the engine package.json, so
+ * subpath imports resolve; the version is pinned and the contract suite fails
+ * immediately if a future engine moves them). Only used by the adapter to
+ * parse the retained source DPE XML exactly the way `calcul_3cl_xml` does,
+ * so user edits (P4/P5) can be overlaid onto the parsed source document.
+ */
+declare module '@open3cl/engine/utils.js' {
+  /**
+   * The engine's own XML→JS parser (same configuration used by
+   * `calcul_3cl_xml`): collections are always arrays, attributes prefixed.
+   */
+  export const xmlParser: {
+    parse(xmlContent: string): Record<string, unknown>;
+  };
+}

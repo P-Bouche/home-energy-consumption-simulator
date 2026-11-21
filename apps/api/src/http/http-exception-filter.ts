@@ -115,7 +115,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
       return;
     }
     // P2 simulation failures (FR-P2-05): mapping errors → 422, engine errors → 500
-    if (exception instanceof SimulationMappingError || exception instanceof InvalidDpeError || exception instanceof InvalidDpeXmlError) {
+    // (InvalidDpeXmlError is already handled above and never reaches this point)
+    if (exception instanceof SimulationMappingError || exception instanceof InvalidDpeError) {
       this.send(response, 422, 'Unprocessable Entity', exception.message, [], undefined, exception.code);
       return;
     }

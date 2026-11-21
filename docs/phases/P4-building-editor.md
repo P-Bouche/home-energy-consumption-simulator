@@ -137,13 +137,32 @@ AC-P4-01…04 green on `main`; command/invariant catalog documented.
   TRUNCATE), written after the locked state update; `GET /buildings/:id/audit`
   reads it; `POST /buildings/:id/undo` applies the inverse of the latest entry
   through the same validated path (the undo is itself audited).
-- Re-simulation goes through P2 only: an edit changes the input hash → cache
-  miss → new engine run → new `SimulationResult` (integration- and e2e-tested).
-  Known limitation: the adapter feeds the engine the verbatim `sourceDpeXml`
-  when present, so consumption *values* do not yet reflect edits numerically;
-  completing the adapter's field-wise reconstruction path (P2 follow-up) is
-  required for AC-P4-01's "consumption decreases" direction. P4 keeps the
-  source document intact (AC-P2-02 byte-for-byte reproducibility).
+- Re-simulation goes through P2 only, and edits now reach the engine: the
+  adapter parses the retained `sourceDpeXml` with the engine's own
+  `xmlParser` and overlays ONLY the fields whose `Confidence.source ===
+  "user"` at the engine patch points (`umur_saisi` + `enum_methode_saisie_u_id
+  = '9'`, `uph_saisi`, `upb_saisi`, `uw_saisi`, `uporte_saisi` + method enum,
+  areas, counts, enums, `sw`, `q4pa_conv`), logging every overlay with
+  source/confidence (ported from PR #17 commit c9ad34cb, vocabulary-agnostic:
+  it keys off `source === "user"`, not the command tags). Unedited buildings
+  keep the byte-for-byte verbatim path (AC-P2-02 contract suite still 15/15);
+  the field-wise reconstruction stays as fallback for buildings without a
+  retained source. Engine-level proof (`edited-building-overlay.test.ts`):
+  wall U 1.6393 → 0.2 on fixture 2238E0097309E lowers consumption
+  16 400 → 11 334 kWh and moves the label D → C, aggregate unmutated.
+- Undo (`Building.applyRestoration`) restores the FULL original Confidence
+  (source/confidence/importDate, e.g. `dpe-xml:…`) from the audit entry's
+  `oldValue` instead of re-stamping `source: "user"` — the restored aggregate
+  is byte-identical to the original, so the post-undo re-simulation is a cache
+  hit on the original input hash and the overlay does not treat restored
+  values as user-entered.
+- State + audit are one atomic unit of work: `BuildingRepository.update({
+  building, report, expectedVersion, auditEntry })` writes the versioned
+  building row and the `audit_entries` row in a SINGLE Postgres transaction
+  (`SELECT … FOR UPDATE` + conditional `UPDATE` + `INSERT`); a 409 race
+  writes nothing at all. The `AuditLog` port is the read side (audit view,
+  undo); the in-memory adapters share one `InMemoryAuditLog` so `memory://`
+  is atomic too.
 
 # Exit Criteria
 

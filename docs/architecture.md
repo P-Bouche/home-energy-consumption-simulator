@@ -90,7 +90,7 @@ flowchart LR
 ## 7. Open3CL Integration Strategy
 
 - `SimulationPort` (application) declares `simulate(dpeXml: string)` (P0) and `simulateBuilding(building: Building)` (P2).
-- `packages/open3cl-adapter` is the **only** module allowed to import the Open3CL engine. It maps the domain `Building` to the engine input (XML/JSON), executes the engine, and maps the output to `SimulationResult`.
+- `packages/open3cl-adapter` is the **only** module allowed to import the Open3CL engine. It maps the domain `Building` to the engine input: the verbatim retained DPE XML for unedited buildings (AC-P2-02), the retained document parsed with the engine's own `xmlParser` with user-edited (`source: "user"`) fields overlaid at the engine patch points (P4 edits / P5 forks), or a field-wise JSON reconstruction when no source document is retained. It then executes the engine and maps the output to `SimulationResult`.
 - The engine version is **pinned**; contract tests run against real DPE fixtures from the engine's test corpus.
 - Flow: `Building → Open3CL Adapter → Open3CL → SimulationResult`. No alternative engine, no local re-implementation of 3CL formulas.
 - Performance budget: simulation < 3 s. Results are cached by input hash; long runs are executed as queued jobs.

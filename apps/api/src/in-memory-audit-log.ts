@@ -5,15 +5,22 @@ import type { AuditLog } from '@hes/application';
  * In-memory AuditLog used when DATABASE_URL=memory:// (local demos and
  * Playwright e2e without Docker). Not for production persistence; the
  * append-only guarantee is a DB-level concern of the Postgres adapter.
+ *
+ * `record` (not on the port) is called synchronously by
+ * InMemoryBuildingRepository.update so the state write and the audit write
+ * are one atomic unit, like the Postgres transaction.
  */
 export class InMemoryAuditLog implements AuditLog {
   private readonly entries = new Map<BuildingId, AuditEntry[]>();
 
-  append(entry: AuditEntry): Promise<void> {
+  /**
+   * Records one audit entry (called by the in-memory building repository
+   * inside its atomic update).
+   */
+  record(entry: AuditEntry): void {
     const list = this.entries.get(entry.buildingId) ?? [];
     list.push(entry);
     this.entries.set(entry.buildingId, list);
-    return Promise.resolve();
   }
 
   listByBuilding(buildingId: BuildingId): Promise<readonly AuditEntry[]> {

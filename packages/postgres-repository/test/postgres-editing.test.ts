@@ -103,6 +103,11 @@ function makeEntry(overrides: Partial<AuditEntryJson> = {}): AuditEntryJson {
   };
 }
 
+
+function makeAuditEntry(): ReturnType<typeof auditEntryFromJson> {
+  return auditEntryFromJson(makeEntry());
+}
+
 interface CapturedQuery {
   text: string;
   values?: unknown[];
@@ -147,19 +152,25 @@ describe('PostgresBuildingRepository.update (optimistic locking, schema v3)', ()
     );
     expect(edited.ok).toBe(true);
     if (!edited.ok) return;
-    const stored = await repo.update({ building: edited.value, report: makeReport(), expectedVersion: 0 });
+    const stored = await repo.update({ building: edited.value, report: makeReport(), expectedVersion: 0, auditEntry: makeAuditEntry() });
     expect(stored.building.version).toBe(1);
     const texts = queries.map((q) => q.text);
     expect(texts[0]).toBe('BEGIN');
     expect(texts[1]).toContain('FOR UPDATE');
     expect(texts[2]).toContain('UPDATE buildings SET data = $2, version = $3 WHERE id = $1 AND version = $4');
-    expect(texts[3]).toBe('COMMIT');
+    expect(texts[3]).toContain('INSERT INTO audit_entries'); // audit row in the SAME transaction
+    expect(texts[4]).toBe('COMMIT');
     const updateValues = queries[2]?.values as unknown[];
-    expect(updateValues[1]).toBe(1); // new version
-    expect(updateValues[3]).toBe(0); // expectedVersion in WHERE
-    const data = JSON.parse(updateValues[0] as string) as { walls: { uValueWm2K: { source: string } }[] };
+    expect(updateValues[0]).toBe(BUILDING_ID); // $1 = id (uuid)
+    expect(updateValues[2]).toBe(1); // $3 = new version
+    expect(updateValues[3]).toBe(0); // $4 = expectedVersion in WHERE
+    const data = JSON.parse(updateValues[1] as string) as { walls: { uValueWm2K: { source: string } }[] };
     expect(data.walls[0]?.uValueWm2K.source).toBe('user');
     expect('version' in data).toBe(false); // version lives in the column, not in the JSONB document
+    const auditValues = queries[3]?.values as unknown[];
+    expect(auditValues[0]).toBe('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');
+    expect(auditValues[1]).toBe(BUILDING_ID);
+    expect(JSON.parse(auditValues[5] as string)[0].newValue.source).toBe('user');
   });
 
   it('throws StaleVersionError and rolls back when the persisted version moved', async () => {
@@ -170,7 +181,7 @@ describe('PostgresBuildingRepository.update (optimistic locking, schema v3)', ()
     const repo = new PostgresBuildingRepository(pool);
     const building = makeBuilding(BUILDING_ID);
     const error = await repo
-      .update({ building, report: makeReport(), expectedVersion: 0 })
+      .update({ building, report: makeReport(), expectedVersion: 0, auditEntry: makeAuditEntry() })
       .catch((e: unknown) => e);
     expect(error).toBeInstanceOf(StaleVersionError);
     expect((error as StaleVersionError).currentVersion).toBe(3);
@@ -181,7 +192,7 @@ describe('PostgresBuildingRepository.update (optimistic locking, schema v3)', ()
   it('throws BuildingNotFoundError when the building row is missing', async () => {
     const { pool } = scriptedPool(() => emptyResult);
     const repo = new PostgresBuildingRepository(pool);
-    await expect(repo.update({ building: makeBuilding(BUILDING_ID), report: makeReport(), expectedVersion: 0 })).rejects.toBeInstanceOf(
+    await expect(repo.update({ building: makeBuilding(BUILDING_ID), report: makeReport(), expectedVersion: 0, auditEntry: makeAuditEntry() })).rejects.toBeInstanceOf(
       BuildingNotFoundError
     );
   });
@@ -194,7 +205,7 @@ describe('PostgresBuildingRepository.update (optimistic locking, schema v3)', ()
     });
     const repo = new PostgresBuildingRepository(pool);
     await expect(
-      repo.update({ building: makeBuilding(BUILDING_ID), report: makeReport(), expectedVersion: 0 })
+      repo.update({ building: makeBuilding(BUILDING_ID), report: makeReport(), expectedVersion: 0, auditEntry: makeAuditEntry() })
     ).rejects.toBeInstanceOf(StaleVersionError);
   });
 
@@ -217,18 +228,9 @@ describe('PostgresBuildingRepository.update (optimistic locking, schema v3)', ()
   });
 });
 
-describe('PostgresAuditLog (append-only audit, schema v3)', () => {
-  it('append() inserts the full entry', async () => {
-    const { pool, queries } = scriptedPool(() => emptyResult);
-    const log = new PostgresAuditLog(pool);
-    await log.append(auditEntryFromJson(makeEntry()));
-    expect(queries[0]?.text).toContain('INSERT INTO audit_entries');
-    const values = queries[0]?.values as unknown[];
-    expect(values[0]).toBe('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');
-    expect(values[1]).toBe(BUILDING_ID);
-    expect(values[2]).toBe('user-42');
-    expect(values[6]).toBe(1);
-    expect(JSON.parse(values[5] as string)[0].newValue.source).toBe('user');
+describe('PostgresAuditLog (read side of the append-only audit, schema v3)', () => {
+  it('writes are not on this port: the audit INSERT lives in the repository update transaction (see above)', () => {
+    expect('append' in new PostgresAuditLog(scriptedPool(() => emptyResult).pool)).toBe(false);
   });
 
   it('listByBuilding() maps rows to AuditEntry and orders oldest first; latestByBuilding() takes the last', async () => {

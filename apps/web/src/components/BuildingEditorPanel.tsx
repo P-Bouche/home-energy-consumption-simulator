@@ -345,7 +345,9 @@ export function BuildingEditorPanel({ buildingId }: { readonly buildingId: strin
                 label={f.label}
                 type={f.numeric ? 'number' : 'text'}
                 value={form[f.field] ?? ''}
-                slotProps={{ htmlInput: { 'data-testid': `field-${f.field}` } }}
+                slotProps={{
+                  htmlInput: { 'data-testid': `field-${f.field}` }
+                }}
                 error={(fieldErrors[f.field]?.length ?? 0) > 0}
                 helperText={fieldErrors[f.field]?.join(' ; ') ?? ' '}
                 onChange={(e) => setForm((prev) => ({ ...prev, [f.field]: e.target.value }))}

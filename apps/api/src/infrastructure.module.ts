@@ -68,9 +68,11 @@ export const PG_CONTEXT = Symbol('PgContext');
     },
     {
       provide: BUILDING_REPOSITORY,
-      useFactory: (pg: PgContext | null): BuildingRepository =>
-        pg === null ? new InMemoryBuildingRepository() : new PostgresBuildingRepository(pg.pool),
-      inject: [PG_CONTEXT]
+      useFactory: (pg: PgContext | null, auditLog: AuditLog): BuildingRepository =>
+        pg === null
+          ? new InMemoryBuildingRepository(auditLog as InMemoryAuditLog)
+          : new PostgresBuildingRepository(pg.pool),
+      inject: [PG_CONTEXT, AUDIT_LOG]
     },
     {
       provide: SIMULATION_REPOSITORY,

@@ -7,9 +7,10 @@ import { Test } from '@nestjs/testing';
 import { afterEach, describe, expect, it } from 'vitest';
 import 'reflect-metadata';
 import { createSimulationResult, type Building, type SimulationResult } from '@hes/domain';
-import { BUILDING_REPOSITORY, SIMULATION_PORT, SIMULATION_REPOSITORY, type SimulationPort } from '@hes/application';
+import { AUDIT_LOG, BUILDING_REPOSITORY, SIMULATION_PORT, SIMULATION_REPOSITORY, type SimulationPort } from '@hes/application';
 import { AppModule } from '../src/app.module.ts';
 import { HttpExceptionFilter } from '../src/http/http-exception-filter.ts';
+import { InMemoryAuditLog } from '../src/in-memory-audit-log.ts';
 import { InMemoryBuildingRepository } from '../src/in-memory-building-repository.ts';
 import { InMemorySimulationRepository } from '../src/in-memory-simulation-repository.ts';
 import { PG_CONTEXT } from '../src/infrastructure.module.ts';
@@ -21,12 +22,14 @@ const fixtureFile = path.join(
 
 class CountingSimulationPort implements SimulationPort {
   calls = 0;
+  readonly servedBuildings: Building[] = [];
   async simulate(_dpeXml: string): Promise<SimulationResult> {
     this.calls += 1;
     return this.produce();
   }
-  async simulateBuilding(_building: Building): Promise<SimulationResult> {
+  async simulateBuilding(building: Building): Promise<SimulationResult> {
     this.calls += 1;
+    this.servedBuildings.push(building);
     return this.produce();
   }
   getEngineVersion(): string {
@@ -48,11 +51,14 @@ class CountingSimulationPort implements SimulationPort {
  * a counting SimulationPort so tests can assert engine call counts.
  */
 async function createEditingTestApp(port: SimulationPort): Promise<INestApplication> {
+  const auditLog = new InMemoryAuditLog();
   const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
     .overrideProvider(PG_CONTEXT)
     .useValue(null)
     .overrideProvider(BUILDING_REPOSITORY)
-    .useValue(new InMemoryBuildingRepository())
+    .useValue(new InMemoryBuildingRepository(auditLog))
+    .overrideProvider(AUDIT_LOG)
+    .useValue(auditLog)
     .overrideProvider(SIMULATION_REPOSITORY)
     .useValue(new InMemorySimulationRepository())
     .overrideProvider(SIMULATION_PORT)
@@ -142,6 +148,13 @@ describe('P4 editing API (memory://)', () => {
     expect(hash2).not.toBe(hash1);
     expect(port.calls).toBe(2);
     expect(sim2.body.result.id).not.toBe(sim1.body.result.id);
+    // the engine input served on the post-edit run carries the edited value (not just a new hash)
+    const servedAfterEdit = port.servedBuildings[1];
+    const servedWall = (servedAfterEdit?.walls as unknown as { uValueWm2K: { value: number; source: string } }[])[0];
+    expect(servedWall?.uValueWm2K.value).toBe(0.25);
+    expect(servedWall?.uValueWm2K.source).toBe('user');
+    const servedBefore = port.servedBuildings[0];
+    expect((servedBefore?.walls as unknown as { uValueWm2K: { source: string } }[])[0]?.uValueWm2K.source).toMatch(/^dpe-xml:/);
 
     // audit endpoint
     const audit = await request(server).get(`/buildings/${buildingId}/audit`).expect(200);
@@ -248,21 +261,23 @@ describe('P4 editing API (memory://)', () => {
       .set('x-user-id', 'user-42')
       .expect(200);
     expect(undone.body.version).toBe(2);
-    const wallUndone = (undone.body.building.walls as { uValueWm2K: { value: number; source: string } }[])[0];
+    const wallUndone = (undone.body.building.walls as { uValueWm2K: { value: number; source: string; confidence: number } }[])[0];
     expect(wallUndone?.uValueWm2K.value).toBe(originalU);
-    expect(wallUndone?.uValueWm2K.source).toBe('user'); // the restored value is still user-sourced
+    expect(wallUndone?.uValueWm2K.source).toMatch(/^dpe-xml:/); // full original Confidence restored from the audit entry
+    expect(wallUndone?.uValueWm2K.confidence).toBe(1);
 
     const audit = await request(server).get(`/buildings/${buildingId}/audit`).expect(200);
     const entries = audit.body.entries as AuditEntryBody[];
     expect(entries).toHaveLength(2);
     expect(entries[1]?.changes[0]?.newValue?.value).toBe(originalU);
 
-    // re-simulation after undo is again a cache miss with a new input hash
+    // re-simulation after undo: the restored aggregate is identical to the
+    // original (full Confidence provenance restored from the audit entry), so
+    // the input hash is back to the baseline → cache HIT, engine NOT re-run
     const simAfterUndo = await request(server).post(`/buildings/${buildingId}/simulations`).expect(201);
-    expect(simAfterUndo.body.result.inputHash).not.toBe(hash0);
-    expect(port.calls).toBe(2);
-    await request(server).post(`/buildings/${buildingId}/simulations`).expect(201); // cached
-    expect(port.calls).toBe(2);
+    expect(simAfterUndo.body.cached).toBe(true);
+    expect(simAfterUndo.body.result.inputHash).toBe(hash0);
+    expect(port.calls).toBe(1);
   });
 
   it('404 on unknown building for all P4 endpoints', async () => {

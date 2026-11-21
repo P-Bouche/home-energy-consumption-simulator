@@ -1,4 +1,4 @@
-import { inverseOfAuditEntry, type BuildingId } from '@hes/domain';
+import type { BuildingId } from '@hes/domain';
 import { BuildingNotFoundError, NothingToUndoError, StaleVersionError } from '../errors.ts';
 import type { Logger } from '../logger.ts';
 import { consoleLogger } from '../logger.ts';
@@ -22,18 +22,22 @@ export const UNDO_LAST_CHANGE_USE_CASE = Symbol('UndoLastChangeUseCase');
 
 /**
  * Use case (P4, FR-P4-05): undo the last change of a building by reading the
- * latest audit entry and applying its inverse command through the exact same
- * validated + optimistic-locked + audited path as a normal edit (the undo is
- * itself audit-logged).
+ * latest audit entry and restoring its previous values through the exact same
+ * validated + optimistic-locked + atomically-audited path as a normal edit.
+ * The restored fields keep their ORIGINAL Confidence (source/confidence from
+ * the audit entry's oldValue, e.g. `dpe-xml:…`), not a fresh `user` stamp —
+ * so the building genuinely returns to its pre-edit state (and the Open3CL
+ * overlay does not treat the restored value as user-entered). The undo is
+ * itself audit-logged.
  *
  * @throws BuildingNotFoundError (404) when the id is unknown
  * @throws NothingToUndoError (400) when no audit entry exists
  * @throws StaleVersionError (409) when expectedVersion is not current
  */
 export class UndoLastChangeUseCase {
-  private readonly edit: EditBuildingUseCase;
   private readonly buildingRepository: BuildingRepository;
   private readonly auditLog: AuditLog;
+  private readonly edit: EditBuildingUseCase;
   private readonly logger: Logger;
 
   constructor(deps: UndoLastChangeUseCaseDeps) {
@@ -42,7 +46,6 @@ export class UndoLastChangeUseCase {
     this.logger = deps.logger ?? consoleLogger;
     this.edit = new EditBuildingUseCase({
       buildingRepository: deps.buildingRepository,
-      auditLog: deps.auditLog,
       logger: deps.logger,
       now: deps.now
     });
@@ -64,11 +67,7 @@ export class UndoLastChangeUseCase {
     if (latest === null) {
       throw new NothingToUndoError(buildingId);
     }
-    const inverse = inverseOfAuditEntry(latest);
-    if (!inverse.ok) {
-      throw inverse.error;
-    }
-    this.logger.log(`undo of building ${buildingId}: inverse of audit entry ${latest.id} (${latest.commandType})`);
-    return this.edit.execute(buildingId, inverse.value, options);
+    this.logger.log(`undo of building ${buildingId}: restoration of audit entry ${latest.id} (${latest.commandType})`);
+    return this.edit.executeRestoration(buildingId, latest, options);
   }
 }
