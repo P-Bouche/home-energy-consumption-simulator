@@ -5,7 +5,11 @@ import {
   Button,
   Chip,
   Divider,
+  FormControl,
+  FormHelperText,
   IconButton,
+  InputLabel,
+  ListItemText,
   MenuItem,
   Paper,
   Select,
@@ -24,7 +28,10 @@ import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { useScenarioStore } from '../store/scenario-store.ts';
-import { buildCommand, catalogEntryFor, COMMAND_CATALOG } from './command-catalog.ts';
+import { buildCommand, catalogEntryFor, COMMAND_CATALOG, type CommandCatalogField } from './command-catalog.ts';
+import { useEnumLabels } from '../hooks/use-enum-labels.ts';
+import { enumOptions } from '../services/enum-labels.ts';
+import { describeU } from '../services/u-reading.ts';
 import type { CommandJson, ComparisonEntryJson } from '../types.ts';
 
 const LABEL_COLORS: Record<string, string> = {
@@ -59,6 +66,16 @@ interface CommandRow {
   readonly values: Record<string, string>;
 }
 
+/** plain-language noun for the U reading, per catalog target kind */
+const U_NOUN: Record<string, { noun: string; gender: 'm' | 'f' }> = {
+  walls: { noun: 'mur', gender: 'm' },
+  roofs: { noun: 'toiture', gender: 'f' },
+  floors: { noun: 'plancher', gender: 'm' },
+  windows: { noun: 'baie vitrée', gender: 'f' },
+  heatingSystems: { noun: 'paroi', gender: 'f' },
+  ventilationSystems: { noun: 'paroi', gender: 'f' }
+};
+
 /**
  * Scenario panel (P5 headless): scenario list + editor (command catalog) +
  * comparison table with label badges and deltas + apply. Presentation only:
@@ -83,6 +100,7 @@ export function ScenarioPanel({ buildingId }: { readonly buildingId: string }) {
   const [description, setDescription] = useState('');
   const [rows, setRows] = useState<CommandRow[]>([{ type: 'building.wall.update.v1', targetId: '', values: { uValueWm2K: '' } }]);
   const [formError, setFormError] = useState<string | null>(null);
+  const enumTables = useEnumLabels(['installationType', 'ventilationType']);
 
   useEffect(() => {
     void load(buildingId);
@@ -99,6 +117,69 @@ export function ScenarioPanel({ buildingId }: { readonly buildingId: string }) {
       ventilationSystems: building.ventilationSystems
     };
   }, [building]);
+
+  /**
+   * Renders one catalog field: enum fields as a labeled select (French label
+   * first, raw id secondary; the raw id is still what `buildCommand` sends),
+   * numeric fields with their min/max bounds and a plain-language U reading
+   * in the helper text.
+   */
+  const renderCatalogField = (
+    field: CommandCatalogField,
+    targetKind: string,
+    row: CommandRow,
+    index: number
+  ): React.ReactElement => {
+    const value = row.values[field.key] ?? '';
+    const setValue = (next: string): void =>
+      setRows(rows.map((r, i) => (i === index ? { ...r, values: { ...r.values, [field.key]: next } } : r)));
+    if (field.enumKind !== undefined) {
+      const table = enumTables[field.enumKind] ?? null;
+      const options = enumOptions(table, value);
+      return (
+        <FormControl key={field.key} size="small" sx={{ minWidth: 220 }} data-testid={`command-field-${index}-${field.key}`}>
+          <InputLabel>{field.label}</InputLabel>
+          <Select label={field.label} value={value} onChange={(e) => setValue(String(e.target.value))}>
+            <MenuItem value="" disabled>
+              Non modifié
+            </MenuItem>
+            {options.map((o) => (
+              <MenuItem key={o.id} value={o.id}>
+                <ListItemText
+                  primary={o.label}
+                  secondary={o.known ? `id ${o.id}` : `id ${o.id} — inconnu de la table DPE (envoyé tel quel)`}
+                />
+              </MenuItem>
+            ))}
+          </Select>
+          <FormHelperText>{value === '' ? ' ' : `Valeur envoyée : id ${value}`}</FormHelperText>
+        </FormControl>
+      );
+    }
+    const typedNum = value.trim() === '' ? Number.NaN : Number(value);
+    const noun = U_NOUN[targetKind] ?? { noun: 'paroi', gender: 'f' as const };
+    const reading = Number.isFinite(typedNum) && typedNum > 0 ? describeU(typedNum, noun.noun, noun.gender) : '';
+    const helper = [reading, field.helper].filter((p) => p !== undefined && p !== '').join(' · ');
+    return (
+      <TextField
+        key={field.key}
+        size="small"
+        type={field.input === 'number' ? 'number' : 'text'}
+        label={field.label}
+        placeholder={field.placeholder}
+        value={value}
+        data-testid={`command-field-${index}-${field.key}`}
+        slotProps={{
+          htmlInput: {
+            ...(field.min !== undefined ? { min: field.min } : {}),
+            ...(field.max !== undefined ? { max: field.max } : {})
+          }
+        }}
+        helperText={helper === '' ? ' ' : helper}
+        onChange={(e) => setValue(e.target.value)}
+      />
+    );
+  };
 
   const onCreate = async (): Promise<void> => {
     setFormError(null);
@@ -219,20 +300,7 @@ export function ScenarioPanel({ buildingId }: { readonly buildingId: string }) {
                 </MenuItem>
               ))}
             </Select>
-            {entry?.fields.map((field) => (
-              <TextField
-                key={field.key}
-                size="small"
-                type={field.input === 'number' ? 'number' : 'text'}
-                label={field.label}
-                placeholder={field.placeholder}
-                value={row.values[field.key] ?? ''}
-                data-testid={`command-field-${index}-${field.key}`}
-                onChange={(e) =>
-                  setRows(rows.map((r, i) => (i === index ? { ...r, values: { ...r.values, [field.key]: e.target.value } } : r)))
-                }
-              />
-            ))}
+            {entry?.fields.map((field) => renderCatalogField(field, entry.targetKind, row, index))}
             <IconButton size="small" aria-label="retirer la commande" data-testid={`remove-command-${index}`} onClick={() => setRows(rows.filter((_, i) => i !== index))}>
               <DeleteIcon fontSize="small" />
             </IconButton>

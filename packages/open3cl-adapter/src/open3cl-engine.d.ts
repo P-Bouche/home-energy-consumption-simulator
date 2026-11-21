@@ -75,3 +75,15 @@ declare module '@open3cl/engine/utils.js' {
     parse(xmlContent: string): Record<string, unknown>;
   };
 }
+
+/**
+ * The engine's full enum tables (src/enums.js in the engine repo, published
+ * at the package root as enums.js), default export: table name -> { id -> label }.
+ * Not re-exported by the engine entry point, so the adapter vendors the tables
+ * it needs in enum-labels.ts and this deep import is only used by tests to
+ * prove the vendored copy is byte-identical to the pinned engine.
+ */
+declare module '@open3cl/engine/enums.js' {
+  const enums: Record<string, Record<string, string>>;
+  export default enums;
+}

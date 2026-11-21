@@ -39,10 +39,27 @@ test('AC-P4-02: invalid edit (negative U-value) is rejected with a field-level m
 
   await page.getByTestId('edit-wall-wall-1').click();
   await page.getByTestId('field-uValueWm2K').fill('-1');
+  // the raw value is still sent unchanged (frozen command contract) — the domain rejects it
+  const patchRequest = page.waitForRequest((r) => r.url().includes(`/api/buildings/${buildingId}`) && r.method() === 'PATCH');
   await page.getByTestId('save-edit').click();
+  const sent = (await (await patchRequest).postDataJSON()) as Record<string, unknown>;
+  // frozen contract: raw DPE enum ids and numeric U, exactly as before the labeled UI
+  expect(sent).toMatchObject({
+    type: 'building.wall.update.v1',
+    buildingId,
+    wallId: 'wall-1',
+    uValueWm2K: -1,
+    orientation: '2',
+    wallType: '13',
+    adjacencyType: '1'
+  });
 
-  // field-level message from the API (400 COMMAND_VALIDATION.fieldErrors)
-  await expect(page.getByRole('dialog').locator('.MuiFormHelperText-root.Mui-error')).toContainText('must be in (0, 4]');
+  // field-level message from the API (400 COMMAND_VALIDATION.fieldErrors),
+  // translated to plain French at the render layer; the raw message stays in the technical expander
+  await expect(page.getByRole('dialog').locator('.MuiFormHelperText-root.Mui-error')).toContainText(
+    'U doit être compris entre 0 et 4 W/m².K'
+  );
+  await expect(page.getByTestId('raw-error-details')).toContainText('must be in (0, 4] W/m².K');
   // dialog stays open, version unchanged, audit empty
   await expect(page.getByTestId('building-version')).toContainText('version 0');
   await expect(page.getByTestId('audit-list')).toContainText('Aucune modification enregistrée');
@@ -69,11 +86,25 @@ test('AC-P4-01 + AC-P4-03 + AC-P4-04: edit → save → re-simulate (cache miss)
   const consumption0 = history0.results[0]!.consumptionKwh;
   const label0 = history0.results[0]!.energyLabel;
 
-  // AC-P4-01: edit the wall U-value 1.6393 → 0.25 and save
+  // AC-P4-01: edit the wall U-value 1.6393 → 0.25 and save; the command
+  // payload is byte-identical to the frozen building.*.update.v1 contract.
+  // wave-1 A1: the editor lives in its own tab of the workspace
   await page.getByTestId('tab-editor').click();
   await page.getByTestId('edit-wall-wall-1').click();
   await page.getByTestId('field-uValueWm2K').fill('0.25');
+  const patchRequest = page.waitForRequest((r) => r.url().includes(`/api/buildings/${buildingId}`) && r.method() === 'PATCH');
   await page.getByTestId('save-edit').click();
+  const sent = (await (await patchRequest).postDataJSON()) as Record<string, unknown>;
+  // frozen contract: raw DPE enum ids and numeric U, exactly as before the labeled UI
+  expect(sent).toMatchObject({
+    type: 'building.wall.update.v1',
+    buildingId,
+    wallId: 'wall-1',
+    uValueWm2K: 0.25,
+    orientation: '2',
+    wallType: '13',
+    adjacencyType: '1'
+  });
 
   await expect(page.getByTestId('building-version')).toContainText('version 1');
   // the editor store automatically re-ran the simulation through P2 — wait
