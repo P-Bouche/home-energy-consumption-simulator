@@ -1,14 +1,19 @@
 import type {
+  ApplyScenarioResponse,
   AuditLogResponse,
   BuildingCommandJson,
+  ComparisonResponse,
   EditBuildingResponse,
   ErrorBody,
   GeometryResponse,
   GetBuildingResponse,
   ImportDpeResponse,
   RunSimulationResponse,
+  ScenarioJson,
+  ScenarioListResponse,
   SimulationHistoryResponse,
-  SimulationJobJson
+  SimulationJobJson,
+  SimulateScenarioResponse
 } from '../types.ts';
 
 /**
@@ -165,4 +170,97 @@ export async function undoBuilding(buildingId: string, version: number, userId: 
     throw new ApiError(response.status, body, body?.message ?? `undo failed with status ${response.status}`);
   }
   return (await response.json()) as EditBuildingResponse;
+}
+
+// ---------------------------------------------------------------------------
+// P5 scenarios
+
+async function readError(response: Response, fallback: string): Promise<never> {
+  const body = (await response.json().catch(() => null)) as ErrorBody | null;
+  throw new ApiError(response.status, body, body?.message ?? fallback);
+}
+
+/**
+ * Creates a scenario: POST /api/buildings/:id/scenarios. `commands` is the raw
+ * change-set (frozen P4 vocabulary; `buildingId` is stamped server-side).
+ * Throws ApiError 400 (invalid command) / 404 (unknown building/element).
+ */
+export async function createScenario(
+  buildingId: string,
+  input: { name: string; description?: string; commands: readonly BuildingCommandJson[] }
+): Promise<ScenarioJson> {
+  const response = await fetch(`/api/buildings/${buildingId}/scenarios`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(input)
+  });
+  if (!response.ok) await readError(response, `create scenario failed with status ${response.status}`);
+  return (await response.json()) as ScenarioJson;
+}
+
+/**
+ * Lists the scenarios of a building: GET /api/buildings/:id/scenarios.
+ */
+export async function listScenarios(buildingId: string): Promise<ScenarioListResponse> {
+  const response = await fetch(`/api/buildings/${buildingId}/scenarios`);
+  if (!response.ok) await readError(response, `scenario list failed with status ${response.status}`);
+  return (await response.json()) as ScenarioListResponse;
+}
+
+/**
+ * Patches a scenario: PATCH /api/scenarios/:id.
+ */
+export async function updateScenario(
+  scenarioId: string,
+  input: { name?: string; description?: string; commands?: readonly BuildingCommandJson[] }
+): Promise<ScenarioJson> {
+  const response = await fetch(`/api/scenarios/${scenarioId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(input)
+  });
+  if (!response.ok) await readError(response, `update scenario failed with status ${response.status}`);
+  return (await response.json()) as ScenarioJson;
+}
+
+/**
+ * Deletes a scenario (building and simulation results are kept): DELETE /api/scenarios/:id (204).
+ */
+export async function deleteScenario(scenarioId: string): Promise<void> {
+  const response = await fetch(`/api/scenarios/${scenarioId}`, { method: 'DELETE' });
+  if (!response.ok && response.status !== 204) await readError(response, `delete scenario failed with status ${response.status}`);
+}
+
+/**
+ * Simulates a scenario through the P2 pipeline: POST /api/scenarios/:id/simulate (201).
+ */
+export async function simulateScenario(scenarioId: string): Promise<SimulateScenarioResponse> {
+  const response = await fetch(`/api/scenarios/${scenarioId}/simulate`, { method: 'POST' });
+  if (!response.ok) await readError(response, `scenario simulation failed with status ${response.status}`);
+  return (await response.json()) as SimulateScenarioResponse;
+}
+
+/**
+ * Applies a scenario to its building: POST /api/scenarios/:id/apply (200).
+ */
+export async function applyScenario(scenarioId: string, userId = 'anonymous'): Promise<ApplyScenarioResponse> {
+  const response = await fetch(`/api/scenarios/${scenarioId}/apply`, {
+    method: 'POST',
+    headers: { 'x-user-id': userId }
+  });
+  if (!response.ok) await readError(response, `apply scenario failed with status ${response.status}`);
+  return (await response.json()) as ApplyScenarioResponse;
+}
+
+/**
+ * Compares baseline + scenarios: POST /api/buildings/:id/compare (200).
+ */
+export async function compareScenarios(buildingId: string, scenarioIds?: readonly string[]): Promise<ComparisonResponse> {
+  const response = await fetch(`/api/buildings/${buildingId}/compare`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(scenarioIds === undefined ? {} : { scenarioIds })
+  });
+  if (!response.ok) await readError(response, `compare failed with status ${response.status}`);
+  return (await response.json()) as ComparisonResponse;
 }
