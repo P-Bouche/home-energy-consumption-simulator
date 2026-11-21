@@ -8,7 +8,7 @@
 
 Element ids are the most load-bearing **implicit** contract in the project. Today they hold by convention only — nothing in the repository recorded them as an enforced contract until now. Four phases depend on the same convention, each for a different reason:
 
-- **P1 — import** (`packages/dpe-xml-importer`): the importer mints element ids as `<kind>-<i+1>` (`wall-1`, `window-2`, …) **in source-document order**, exactly one id per entry of the corresponding DPE collection — see `packages/dpe-xml-importer/src/mappers.ts` (`id: \`wall-${i + 1}\`` at lines 194, 216, 237, 258, 283, 324, 342, 357 for wall / roof / floor / window / door / heating / ventilation / pv, inside the `.map((entry, i) => …)` over each collection).
+- **P1 — import** (`packages/dpe-xml-importer`): the importer mints element ids as `<kind>-<i+1>` (`wall-1`, `window-2`, …) **in source-document order**, exactly one id per entry of the corresponding DPE collection — see `packages/dpe-xml-importer/src/mappers.ts` (`id: \`wall-${i + 1}\`` at lines 194, 216, 237, 258, 283, 324, 342, 357 for wall / roof / floor / window / door / heating / ventilation / pv, inside `.forEach((item, i) => …)` loops over each collection — loops at lines 184, 208, 229, 250, 275, 318, 335, 354).
 - **P3 — 3D picking**: the geometry adapter stamps those ids on pickable mesh groups (`packages/geometry/src/buffers.ts:20,62`, `elementId: el.id`) and the viewer selects/hovered elements strictly by id (`apps/web/src/store/viewer-store.ts:55,95`). Stable ids make elements selectable and addressable from the UI.
 - **P4 — edit commands**: commands target elements strictly by id with versioned tags (`building.<element>.update.v1`) — `packages/domain/src/commands.ts:17,37-38,129` (`idField: 'wallId'`, `kind: 'wall'`). Ids are persisted inside command JSON and audit rows, so they are also a data-stability requirement.
 - **P5 — edited-building overlay**: the adapter maps a domain id back to a position in the parsed source document — `elementIndex(id, kind)` in `packages/open3cl-adapter/src/map-building-to-engine-input.ts:171` turns `wall-3` into index `2` (regex `^<kind>-(\\d+)$`, minus one), used by `overlayElements` at line 187 to patch exactly the intended entry of the source collection (`umur_saisi` + `enum_methode_saisie_u_id`, etc.). This is the **positional inverse of the importer's minting rule** and is only valid under the 1:1 document-order invariant.
@@ -47,6 +47,8 @@ Any change to this rule requires a new ADR superseding this one.
 - If the invariant ever changes, the id→position mapping must be versioned explicitly (e.g. `idMappingVersion` recorded with the geometry/overlay), not silently reinterpreted.
 
 ## Safety net — enforcement points (regression guards)
+
+*Citation note: line numbers in this ADR are exact as of commit `9a3b364` (this PR's base). Where an exported symbol exists — `elementIndex`, `overlayElements`, `assertOverlayCoversUserEdits` — the symbol name is the stable citation handle and survives refactors; line numbers are evidence, not the contract.*
 
 These are the named guards; a change that breaks the contract must fail them:
 
