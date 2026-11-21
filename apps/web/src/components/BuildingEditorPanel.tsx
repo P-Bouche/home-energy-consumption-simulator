@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   Alert,
   Box,
   Button,
@@ -9,16 +12,28 @@ import {
   DialogContent,
   DialogTitle,
   Divider,
+  FormControl,
+  FormControlLabel,
+  FormHelperText,
+  InputLabel,
   List,
   ListItem,
   ListItemText,
+  MenuItem,
   Paper,
+  Select,
+  Switch,
   TextField,
   Typography
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import UndoIcon from '@mui/icons-material/Undo';
 import { useEditorStore } from '../store/editor-store.ts';
+import { useEnumLabels } from '../hooks/use-enum-labels.ts';
+import { ENUM_KINDS, enumOptions, resolveEnumLabel, type EnumLabelKind } from '../services/enum-labels.ts';
+import { describeU } from '../services/u-reading.ts';
+import { translateFieldError } from '../services/error-messages.ts';
 import type {
   AuditEntryJson,
   BuildingCommandJson,
@@ -32,6 +47,19 @@ interface FieldDef {
   readonly field: string;
   readonly label: string;
   readonly numeric: boolean;
+  /** enum fields render as a labeled select; the raw id is still what gets sent */
+  readonly enumKind?: EnumLabelKind;
+  /**
+   * Min/max shown on numeric inputs. Presentation data only — mirrors the
+   * domain invariants `U_VALUE_MAX` etc.; the domain remains the enforcing
+   * layer (400 fieldErrors). U range is (0, 4] W/m².K: 0 is exclusive.
+   */
+  readonly min?: number;
+  readonly max?: number;
+  /** plain-language example promoted from the catalog description into helper text */
+  readonly helper?: string;
+  /** noun + gender for the plain-language reading of the U value */
+  readonly uNoun?: { readonly noun: string; readonly gender: 'm' | 'f' };
 }
 
 interface KindDef {
@@ -47,12 +75,12 @@ const KINDS: Record<EditableKind, KindDef> = {
     idField: 'wallId',
     label: 'Mur',
     fields: [
-      { field: 'uValueWm2K', label: 'U (W/m².K)', numeric: true },
+      { field: 'uValueWm2K', label: 'U (W/m².K)', numeric: true, min: 0, max: 4, helper: 'ex. 0,2 pour une isolation par l’extérieur', uNoun: { noun: 'mur', gender: 'm' } },
       { field: 'areaM2', label: 'Surface (m²)', numeric: true },
       { field: 'description', label: 'Description', numeric: false },
-      { field: 'orientation', label: 'Orientation (enum id)', numeric: false },
-      { field: 'wallType', label: 'Type de mur (enum id)', numeric: false },
-      { field: 'adjacencyType', label: 'Adjacence (enum id)', numeric: false }
+      { field: 'orientation', label: 'Orientation', numeric: false, enumKind: 'orientation' },
+      { field: 'wallType', label: 'Type de mur', numeric: false, enumKind: 'wallType' },
+      { field: 'adjacencyType', label: 'Adjacence', numeric: false, enumKind: 'adjacencyType' }
     ]
   },
   window: {
@@ -60,14 +88,14 @@ const KINDS: Record<EditableKind, KindDef> = {
     idField: 'windowId',
     label: 'Fenêtre',
     fields: [
-      { field: 'uValueWm2K', label: 'Uw (W/m².K)', numeric: true },
+      { field: 'uValueWm2K', label: 'Uw (W/m².K)', numeric: true, min: 0, max: 4, helper: 'ex. 1,1 pour du double vitrage récent', uNoun: { noun: 'baie vitrée', gender: 'f' } },
       { field: 'areaM2', label: 'Surface (m²)', numeric: true },
       { field: 'description', label: 'Description', numeric: false },
-      { field: 'orientation', label: 'Orientation (enum id)', numeric: false },
+      { field: 'orientation', label: 'Orientation', numeric: false, enumKind: 'orientation' },
       { field: 'count', label: 'Nombre', numeric: true },
       { field: 'solarFactorSw', label: 'Facteur solaire Sw', numeric: true },
-      { field: 'glazingType', label: 'Vitrage (enum id)', numeric: false },
-      { field: 'frameMaterial', label: 'Menuiserie (enum id)', numeric: false }
+      { field: 'glazingType', label: 'Vitrage', numeric: false, enumKind: 'glazingType' },
+      { field: 'frameMaterial', label: 'Menuiserie', numeric: false, enumKind: 'frameMaterial' }
     ]
   },
   roof: {
@@ -75,11 +103,11 @@ const KINDS: Record<EditableKind, KindDef> = {
     idField: 'roofId',
     label: 'Toiture / plancher haut',
     fields: [
-      { field: 'uValueWm2K', label: 'U (W/m².K)', numeric: true },
+      { field: 'uValueWm2K', label: 'U (W/m².K)', numeric: true, min: 0, max: 4, uNoun: { noun: 'toiture', gender: 'f' } },
       { field: 'areaM2', label: 'Surface (m²)', numeric: true },
       { field: 'description', label: 'Description', numeric: false },
-      { field: 'roofType', label: 'Type (enum id)', numeric: false },
-      { field: 'adjacencyType', label: 'Adjacence (enum id)', numeric: false }
+      { field: 'roofType', label: 'Type de toiture', numeric: false, enumKind: 'roofType' },
+      { field: 'adjacencyType', label: 'Adjacence', numeric: false, enumKind: 'adjacencyType' }
     ]
   },
   floor: {
@@ -87,11 +115,11 @@ const KINDS: Record<EditableKind, KindDef> = {
     idField: 'floorId',
     label: 'Plancher bas',
     fields: [
-      { field: 'uValueWm2K', label: 'U (W/m².K)', numeric: true },
+      { field: 'uValueWm2K', label: 'U (W/m².K)', numeric: true, min: 0, max: 4, uNoun: { noun: 'plancher', gender: 'm' } },
       { field: 'areaM2', label: 'Surface (m²)', numeric: true },
       { field: 'description', label: 'Description', numeric: false },
-      { field: 'floorType', label: 'Type (enum id)', numeric: false },
-      { field: 'adjacencyType', label: 'Adjacence (enum id)', numeric: false }
+      { field: 'floorType', label: 'Type de plancher', numeric: false, enumKind: 'floorType' },
+      { field: 'adjacencyType', label: 'Adjacence', numeric: false, enumKind: 'adjacencyType' }
     ]
   },
   'heating-system': {
@@ -100,7 +128,7 @@ const KINDS: Record<EditableKind, KindDef> = {
     label: 'Chauffage',
     fields: [
       { field: 'description', label: 'Description', numeric: false },
-      { field: 'installationType', label: 'Type d’installation (enum id)', numeric: false },
+      { field: 'installationType', label: 'Type d’installation', numeric: false, enumKind: 'installationType' },
       { field: 'heatedAreaM2', label: 'Surface chauffée (m²)', numeric: true }
     ]
   },
@@ -110,7 +138,7 @@ const KINDS: Record<EditableKind, KindDef> = {
     label: 'Ventilation',
     fields: [
       { field: 'description', label: 'Description', numeric: false },
-      { field: 'ventilationType', label: 'Type de ventilation (enum id)', numeric: false },
+      { field: 'ventilationType', label: 'Type de ventilation', numeric: false, enumKind: 'ventilationType' },
       { field: 'ventilatedAreaM2', label: 'Surface ventilée (m²)', numeric: true },
       { field: 'q4paConv', label: 'q4pa conv (m³/h.m²)', numeric: true }
     ]
@@ -165,6 +193,8 @@ export function BuildingEditorPanel({ buildingId }: { readonly buildingId: strin
   const [target, setTarget] = useState<EditTarget | null>(null);
   const [form, setForm] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
+  const [showTechnical, setShowTechnical] = useState(false);
+  const enumTables = useEnumLabels(ENUM_KINDS);
 
   useEffect(() => {
     void load(buildingId);
@@ -180,12 +210,14 @@ export function BuildingEditorPanel({ buildingId }: { readonly buildingId: strin
     setTarget({ kind, id, element });
     setForm(initial);
     setFormError(null);
+    setShowTechnical(false);
   };
 
   const closeEditor = (): void => {
     setTarget(null);
     setForm({});
     setFormError(null);
+    setShowTechnical(false);
   };
 
   const onSave = async (): Promise<void> => {
@@ -280,6 +312,88 @@ export function BuildingEditorPanel({ buildingId }: { readonly buildingId: strin
     }
   ];
 
+  /** French subject used in translated validation messages ("U" vs "Uw" for windows) */
+  const fieldSubject = (f: FieldDef): string | undefined =>
+    f.field === 'uValueWm2K' ? (f.label.startsWith('Uw') ? 'Uw' : 'U') : undefined;
+
+  /**
+   * Renders one dialog field: enum fields as a labeled select (French label
+   * first, raw id secondary, unknown ids flagged honestly), U fields as a
+   * bounded numeric input with a plain-language reading, other fields as
+   * plain inputs. Validation messages are translated at render time only —
+   * the raw API message stays in the store and in the technical expander.
+   */
+  const renderField = (f: FieldDef): React.ReactElement => {
+    const value = form[f.field] ?? '';
+    const rawErrors = fieldErrors[f.field] ?? [];
+    const frenchErrors = rawErrors.map((m) => translateFieldError(f.field, m, fieldSubject(f)).french);
+    if (f.enumKind !== undefined) {
+      const table = enumTables[f.enumKind] ?? null;
+      const options = enumOptions(table, value);
+      const resolved = resolveEnumLabel(table, value);
+      return (
+        <FormControl key={f.field} fullWidth error={rawErrors.length > 0} data-testid={`field-${f.field}`}>
+          <InputLabel>{f.label}</InputLabel>
+          <Select
+            label={f.label}
+            value={value}
+            onChange={(e) => setForm((prev) => ({ ...prev, [f.field]: String(e.target.value) }))}
+          >
+            <MenuItem value="" disabled>
+              Non modifié
+            </MenuItem>
+            {options.map((o) => (
+              <MenuItem key={o.id} value={o.id}>
+                <ListItemText
+                  primary={o.label}
+                  secondary={o.known ? `id ${o.id}` : `id ${o.id} — inconnu de la table DPE (envoyé tel quel)`}
+                />
+              </MenuItem>
+            ))}
+          </Select>
+          <FormHelperText>
+            {rawErrors.length > 0
+              ? frenchErrors.join(' ; ')
+              : value === ''
+                ? ' '
+                : resolved.known
+                  ? `Valeur envoyée : id ${value}`
+                  : `id ${value} inconnu — envoyé tel quel`}
+          </FormHelperText>
+        </FormControl>
+      );
+    }
+    const typedNum = value.trim() === '' ? Number.NaN : Number(value);
+    const currentRaw = target?.element[f.field] as ConfidenceJson<unknown> | null | undefined;
+    const current = currentRaw === null || currentRaw === undefined ? '' : String(currentRaw.value);
+    const effective = Number.isFinite(typedNum) && typedNum > 0 ? typedNum : Number(current);
+    const reading =
+      f.uNoun !== undefined && Number.isFinite(effective) && effective > 0
+        ? describeU(effective, f.uNoun.noun, f.uNoun.gender)
+        : '';
+    const helperText = rawErrors.length > 0 ? frenchErrors.join(' ; ') : [reading, f.helper].filter((p) => p !== '').join(' · ') || ' ';
+    return (
+      <TextField
+        key={f.field}
+        label={f.label}
+        type={f.numeric ? 'number' : 'text'}
+        value={value}
+        slotProps={{
+          htmlInput: {
+            'data-testid': `field-${f.field}`,
+            ...(f.min !== undefined ? { min: f.min } : {}),
+            ...(f.max !== undefined ? { max: f.max } : {})
+          }
+        }}
+        error={rawErrors.length > 0}
+        helperText={helperText}
+        onChange={(e) => setForm((prev) => ({ ...prev, [f.field]: e.target.value }))}
+      />
+    );
+  };
+
+  const hasFieldErrors = Object.values(fieldErrors).some((messages) => messages.length > 0);
+
   return (
     <Paper variant="outlined" sx={{ p: 2, mt: 3 }} data-testid="editor-panel">
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
@@ -338,25 +452,54 @@ export function BuildingEditorPanel({ buildingId }: { readonly buildingId: strin
           {target !== null ? `Modifier — ${KINDS[target.kind].label} ${target.id}` : ''}
         </DialogTitle>
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
-          {target !== null &&
-            KINDS[target.kind].fields.map((f) => (
-              <TextField
-                key={f.field}
-                label={f.label}
-                type={f.numeric ? 'number' : 'text'}
-                value={form[f.field] ?? ''}
-                slotProps={{
-                  htmlInput: { 'data-testid': `field-${f.field}` }
-                }}
-                error={(fieldErrors[f.field]?.length ?? 0) > 0}
-                helperText={fieldErrors[f.field]?.join(' ; ') ?? ' '}
-                onChange={(e) => setForm((prev) => ({ ...prev, [f.field]: e.target.value }))}
-              />
-            ))}
+          {target !== null && KINDS[target.kind].fields.map((f) => renderField(f))}
+          {hasFieldErrors && (
+            <Accordion data-testid="raw-error-details">
+              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <Typography variant="body2">Message technique (tel que renvoyé par l’API)</Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                {Object.entries(fieldErrors).flatMap(([field, messages]) =>
+                  messages.map((m) => (
+                    <Typography key={`${field}:${m}`} variant="body2" sx={{ fontFamily: 'monospace' }}>
+                      {field}: {m}
+                    </Typography>
+                  ))
+                )}
+              </AccordionDetails>
+            </Accordion>
+          )}
           {formError !== null && (
             <Alert severity="error" data-testid="form-error">
               {formError}
             </Alert>
+          )}
+          {target !== null && (
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={showTechnical}
+                  onChange={(e) => setShowTechnical(e.target.checked)}
+                  data-testid="show-technical-values"
+                />
+              }
+              label="Afficher les valeurs techniques"
+            />
+          )}
+          {target !== null && showTechnical && (
+            <Box
+              data-testid="technical-values"
+              sx={{ p: 1, border: '1px dashed', borderColor: 'divider', borderRadius: 1 }}
+            >
+              <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
+                {KINDS[target.kind].tag} · {KINDS[target.kind].idField}={target.id}
+              </Typography>
+              {KINDS[target.kind].fields.map((f) => (
+                <Typography key={f.field} variant="body2" sx={{ fontFamily: 'monospace' }}>
+                  {f.field} = {JSON.stringify(form[f.field] ?? '')}
+                </Typography>
+              ))}
+            </Box>
           )}
         </DialogContent>
         <DialogActions>

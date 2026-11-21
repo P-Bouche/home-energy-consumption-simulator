@@ -1,4 +1,5 @@
 import type { BuildingCommandJson } from '../types.ts';
+import type { EnumLabelKind } from '../services/enum-labels.ts';
 
 /**
  * Command catalog (P5 headless, built on the frozen P4 command vocabulary) —
@@ -26,6 +27,18 @@ export interface CommandCatalogField {
   readonly label: string;
   readonly input: 'number' | 'text';
   readonly placeholder?: string;
+  /**
+   * Min/max bounds shown on numeric inputs. Presentation data only — these
+   * mirror the domain invariants `U_VALUE_MAX` etc. (packages/domain/src/commands.ts);
+   * the domain remains the enforcing layer (400 fieldErrors). 0 is exclusive
+   * for U values: the valid range is (0, 4] W/m².K.
+   */
+  readonly min?: number;
+  readonly max?: number;
+  /** when set, the field is a DPE enum rendered as a labeled select (raw id still sent) */
+  readonly enumKind?: EnumLabelKind;
+  /** plain-language example promoted from the catalog description into helper text */
+  readonly helper?: string;
 }
 
 export const COMMAND_CATALOG: readonly CommandCatalogEntry[] = [
@@ -35,7 +48,9 @@ export const COMMAND_CATALOG: readonly CommandCatalogEntry[] = [
     description: 'Nouveau U du mur (W/m².K), ex. 0.2 pour une isolation par l’extérieur',
     targetKind: 'walls',
     targetIdField: 'wallId',
-    fields: [{ key: 'uValueWm2K', label: 'U (W/m².K)', input: 'number', placeholder: '0.2' }]
+    fields: [
+      { key: 'uValueWm2K', label: 'U (W/m².K)', input: 'number', placeholder: '0.2', min: 0, max: 4, helper: 'ex. 0,2 pour une isolation par l’extérieur' }
+    ]
   },
   {
     type: 'building.roof.update.v1',
@@ -43,7 +58,7 @@ export const COMMAND_CATALOG: readonly CommandCatalogEntry[] = [
     description: 'Nouveau U du plancher haut (W/m².K)',
     targetKind: 'roofs',
     targetIdField: 'roofId',
-    fields: [{ key: 'uValueWm2K', label: 'U (W/m².K)', input: 'number', placeholder: '0.15' }]
+    fields: [{ key: 'uValueWm2K', label: 'U (W/m².K)', input: 'number', placeholder: '0.15', min: 0, max: 4 }]
   },
   {
     type: 'building.floor.update.v1',
@@ -51,7 +66,7 @@ export const COMMAND_CATALOG: readonly CommandCatalogEntry[] = [
     description: 'Nouveau U du plancher bas (W/m².K)',
     targetKind: 'floors',
     targetIdField: 'floorId',
-    fields: [{ key: 'uValueWm2K', label: 'U (W/m².K)', input: 'number', placeholder: '0.3' }]
+    fields: [{ key: 'uValueWm2K', label: 'U (W/m².K)', input: 'number', placeholder: '0.3', min: 0, max: 4 }]
   },
   {
     type: 'building.window.update.v1',
@@ -59,7 +74,9 @@ export const COMMAND_CATALOG: readonly CommandCatalogEntry[] = [
     description: 'Nouveau Uw de la baie (W/m².K), ex. 1.1 pour du double vitrage récent',
     targetKind: 'windows',
     targetIdField: 'windowId',
-    fields: [{ key: 'uValueWm2K', label: 'Uw (W/m².K)', input: 'number', placeholder: '1.1' }]
+    fields: [
+      { key: 'uValueWm2K', label: 'Uw (W/m².K)', input: 'number', placeholder: '1.1', min: 0, max: 4, helper: 'ex. 1,1 pour du double vitrage récent' }
+    ]
   },
   {
     type: 'building.heating-system.update.v1',
@@ -67,7 +84,9 @@ export const COMMAND_CATALOG: readonly CommandCatalogEntry[] = [
     description: 'Nouveau type d’installation de chauffage (id enum DPE)',
     targetKind: 'heatingSystems',
     targetIdField: 'systemId',
-    fields: [{ key: 'installationType', label: 'Type d’installation (id)', input: 'text', placeholder: '4' }]
+    fields: [
+      { key: 'installationType', label: 'Type d’installation', input: 'text', placeholder: '4', enumKind: 'installationType' }
+    ]
   },
   {
     type: 'building.ventilation-system.update.v1',
@@ -75,7 +94,9 @@ export const COMMAND_CATALOG: readonly CommandCatalogEntry[] = [
     description: 'Nouveau type de ventilation (id enum DPE)',
     targetKind: 'ventilationSystems',
     targetIdField: 'systemId',
-    fields: [{ key: 'ventilationType', label: 'Type de ventilation (id)', input: 'text', placeholder: '2' }]
+    fields: [
+      { key: 'ventilationType', label: 'Type de ventilation', input: 'text', placeholder: '2', enumKind: 'ventilationType' }
+    ]
   }
 ];
 
