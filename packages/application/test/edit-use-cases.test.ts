@@ -130,7 +130,7 @@ class FakeBuildingRepository implements BuildingRepository {
       throw new StaleVersionError(input.building.id, input.expectedVersion, current.building.version);
     }
     this.updates += 1;
-    this.auditLog?.record(input.auditEntry);
+    for (const e of input.auditEntries) this.auditLog?.record(e);
     const stored: StoredBuilding = { building: input.building, report: input.report };
     this.store.set(input.building.id, stored);
     return stored;

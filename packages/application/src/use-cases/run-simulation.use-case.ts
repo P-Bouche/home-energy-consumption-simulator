@@ -1,10 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import {
   createSimulationJob,
-  createSimulationResultRecord,
-  SimulationCompleted,
-  SimulationError,
-  SimulationFailed,
   type Building,
   type BuildingId,
   type DomainEvent,
@@ -17,6 +13,7 @@ import { BuildingNotFoundError, SimulationAlreadyInFlightError } from '../errors
 import type { Logger } from '../logger.ts';
 import { consoleLogger } from '../logger.ts';
 import type { BuildingRepository, SimulationRepository, SimulationPort } from '../ports/index.ts';
+import { runInlineSimulation } from './inline-simulation.ts';
 import type { SimulationJobRunner } from './simulation-job-runner.ts';
 
 /**
@@ -88,6 +85,15 @@ export function estimateSimulationMs(building: Building): number {
  * Errors from the engine propagate as typed SimulationError subclasses
  * (mapped to 422/500 by the API layer); on the sync path a failure also emits
  * SimulationFailed.
+ *
+ * The sync path delegates to the shared {@link runInlineSimulation} (one
+ * cache/409/persist kernel, also used by the P5 scenario use cases). P5
+ * scenario simulations deliberately NEVER queue: a scenario input is at most
+ * baseline-sized (engine p95 ≈ 25 ms on the corpus), and the compare endpoint
+ * must answer synchronously. Trade-off, documented per review: a ~5 MB source
+ * DPE would make a scenario simulate an ~12 s inline HTTP request instead of
+ * returning 202 — accepted for now (the baseline endpoint keeps the queued
+ * path for such inputs).
  */
 export class RunSimulationUseCase {
   private readonly buildingRepository: BuildingRepository;
@@ -160,41 +166,16 @@ export class RunSimulationUseCase {
   }
 
   private async runSync(building: Building, inputHash: SimulationInputHash): Promise<RunSimulationResult> {
-    const buildingId = building.id;
-    let result;
-    try {
-      result = await this.simulation.simulateBuilding(building);
-    } catch (error) {
-      const code = error instanceof SimulationError ? error.code : 'UNEXPECTED';
-      const message = error instanceof Error ? error.message : String(error);
-      this.eventSink?.(
-        new SimulationFailed({ buildingId, inputHash, errorCode: code, message, occurredAt: this.now() })
-      );
-      this.logger.error(`simulation of building ${buildingId} failed: [${code}] ${message}`);
-      throw error;
-    }
-    const record = createSimulationResultRecord({
-      ...result,
-      id: randomUUID(),
-      buildingId,
-      inputHash,
-      engineVersion: this.simulation.getEngineVersion(),
-      createdAt: this.now()
-    });
-    const persisted = await this.simulationRepository.saveResult(record);
-    if (persisted.id !== record.id) {
-      // A concurrent identical run won the (buildingId, inputHash) uniqueness
-      // race: serve the persisted winner instead of an unpersisted record.
-      this.logger.log(
-        `simulation of building ${buildingId} lost the persistence race: serving cached result ${persisted.id} (hash ${inputHash})`
-      );
-      return { kind: 'cached', record: persisted, events: [] };
-    }
-    const events: DomainEvent[] = [new SimulationCompleted(buildingId, persisted.id, inputHash, this.now())];
-    for (const event of events) {
-      this.eventSink?.(event);
-    }
-    this.logger.log(`simulation of building ${buildingId} completed: result ${persisted.id} (hash ${inputHash})`);
-    return { kind: 'completed', record: persisted, events };
+    void inputHash; // the shared path recomputes the hash from the building state
+    return runInlineSimulation(
+      {
+        simulationRepository: this.simulationRepository,
+        simulation: this.simulation,
+        logger: this.logger,
+        now: this.now,
+        eventSink: this.eventSink ?? undefined
+      },
+      building
+    );
   }
 }

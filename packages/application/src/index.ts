@@ -14,8 +14,14 @@ export {
 } from './ports/building-repository.ts';
 export { DPE_IMPORTER_PORT, type DpeImporterPort, type DpeImportResult } from './ports/dpe-importer-port.ts';
 export {
+  SCENARIO_REPOSITORY,
+  type ScenarioRepository,
+  type ScenarioResultLink
+} from './ports/scenario-repository.ts';
+export {
   BuildingNotFoundError,
   NothingToUndoError,
+  ScenarioNotFoundError,
   SimulationAlreadyInFlightError,
   SimulationJobNotFoundError,
   SimulationNotFoundError,
@@ -89,3 +95,55 @@ export {
   type GetAuditLogResult,
   type GetAuditLogUseCaseDeps
 } from './use-cases/get-audit-log.use-case.ts';
+export {
+  type InlineSimulationDeps,
+  type InlineSimulationOutcome,
+  runInlineSimulation
+} from './use-cases/inline-simulation.ts';
+export {
+  forkOrThrow,
+  parseScenarioCommands,
+  SCENARIO_USER_ID
+} from './use-cases/scenario-commands.ts';
+export {
+  CREATE_SCENARIO_USE_CASE,
+  CreateScenarioUseCase,
+  type CreateScenarioInput,
+  type CreateScenarioResult,
+  type CreateScenarioUseCaseDeps
+} from './use-cases/create-scenario.use-case.ts';
+export {
+  DELETE_SCENARIO_USE_CASE,
+  DeleteScenarioUseCase,
+  GET_SCENARIO_USE_CASE,
+  GetScenarioUseCase,
+  LIST_SCENARIOS_USE_CASE,
+  ListScenariosUseCase,
+  UPDATE_SCENARIO_USE_CASE,
+  UpdateScenarioUseCase,
+  type ScenarioReadUseCaseDeps,
+  type UpdateScenarioInput
+} from './use-cases/scenario-read.use-cases.ts';
+export {
+  SIMULATE_SCENARIO_USE_CASE,
+  SimulateScenarioUseCase,
+  expectedScenarioHash,
+  scenarioFork,
+  simulateScenarioAndGetRecord,
+  type SimulateScenarioResult,
+  type SimulateScenarioUseCaseDeps
+} from './use-cases/simulate-scenario.use-case.ts';
+export {
+  COMPARE_SCENARIOS_USE_CASE,
+  CompareScenariosUseCase,
+  type CompareScenariosOptions,
+  type CompareScenariosResult,
+  type CompareScenariosUseCaseDeps
+} from './use-cases/compare-scenarios.use-case.ts';
+export {
+  APPLY_SCENARIO_USE_CASE,
+  ApplyScenarioUseCase,
+  type ApplyScenarioOptions,
+  type ApplyScenarioResult,
+  type ApplyScenarioUseCaseDeps
+} from './use-cases/apply-scenario.use-case.ts';

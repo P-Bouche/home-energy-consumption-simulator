@@ -134,7 +134,7 @@ export class EditBuildingUseCase {
       throw new Error(`apply on building ${buildingId} did not emit a BuildingUpdated event`);
     }
     const entry = auditEntryFromEvent(randomUUID(), updated);
-    await this.buildingRepository.update({ building: next, report, expectedVersion: options.expectedVersion, auditEntry: entry });
+    await this.buildingRepository.update({ building: next, report, expectedVersion: options.expectedVersion, auditEntries: [entry] });
     this.logger.log(
       `building ${buildingId} updated by ${options.userId}: ${updated.commandType} → version ${next.version} (audit ${entry.id})`
     );

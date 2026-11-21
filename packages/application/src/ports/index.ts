@@ -10,3 +10,8 @@ export { DPE_IMPORTER_PORT, type DpeImporterPort, type DpeImportResult } from '.
 export { GEOMETRY_PORT, type GeometryPort } from './geometry-port.ts';
 export { SIMULATION_PORT, type SimulationPort } from './simulation-port.ts';
 export { SIMULATION_REPOSITORY, type SimulationRepository } from './simulation-repository.ts';
+export {
+  SCENARIO_REPOSITORY,
+  type ScenarioRepository,
+  type ScenarioResultLink
+} from './scenario-repository.ts';

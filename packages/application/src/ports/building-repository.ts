@@ -30,12 +30,14 @@ export interface UpdateBuildingInput {
    */
   readonly expectedVersion: number;
   /**
-   * The audit entry of this edit. Implementations MUST write it in the SAME
-   * transaction as the building update (one unit of work): a committed edit
-   * without its audit row — or an audit row for a rejected edit — would break
-   * the audit trail and undo.
+   * The audit entries of this edit (one per applied command; P4's single
+   * edit passes a one-element array, P5 apply-scenario one per scenario
+   * command). Implementations MUST write them in the SAME transaction as the
+   * building update (one unit of work): a committed edit without its audit
+   * rows — or audit rows for a rejected edit — would break the audit trail
+   * and undo.
    */
-  readonly auditEntry: AuditEntry;
+  readonly auditEntries: readonly AuditEntry[];
 }
 
 /**
