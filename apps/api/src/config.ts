@@ -1,3 +1,15 @@
+import { fileURLToPath } from 'node:url';
+
+/**
+ * Default migrations directory, resolved from this file's location
+ * (apps/api/src -> repo root) so it never depends on the process cwd.
+ * `npm run start -w apps/api` starts the API with cwd = apps/api, where a
+ * relative default would resolve to a non-existent path.
+ */
+const DEFAULT_MIGRATIONS_DIR = fileURLToPath(
+  new URL('../../../infrastructure/postgres/migrations', import.meta.url)
+);
+
 /**
  * Runtime configuration of the API, read from environment variables
  * (see .env.example). No secrets are hardcoded.
@@ -45,7 +57,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ApiConfig {
     databaseUrl: env['DATABASE_URL'] ?? 'postgres://postgres:postgres@localhost:5432/hecs',
     corsOrigin: env['CORS_ORIGIN'] ?? 'http://localhost:5173',
     maxUploadBytes,
-    migrationsDir: env['MIGRATIONS_DIR'] ?? 'infrastructure/postgres/migrations',
+    migrationsDir: env['MIGRATIONS_DIR'] ?? DEFAULT_MIGRATIONS_DIR,
     simulationSyncBudgetMs,
     simulationForceAsync: (env['SIMULATION_FORCE_ASYNC'] ?? 'false').toLowerCase() === 'true'
   };
