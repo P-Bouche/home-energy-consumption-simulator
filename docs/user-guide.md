@@ -12,7 +12,7 @@ TODO: add screenshots of the import page, editor panel and comparison table when
 ## 2. Import your DPE (XML)
 
 1. On the home page (« Importer un DPE (XML) »), click **« Choisir un fichier DPE… »** and select your DPE file (`.xml`).
-2. The file is imported in under a second. A success banner shows « Bâtiment importé : `<id>` » and an **import report** appears.
+2. The file is imported in under a second. A success banner shows « Bâtiment importé : `<id>` » and the **workspace** opens on the **« Synthèse »** tab. Four tabs organize the building: **« Synthèse »**, **« Rapport d'import »**, **« Éditeur du bâtiment »**, **« Scénarios de rénovation »**. The workspace header always shows the primary action **« Lancer la simulation »** and the link **« Voir le modèle 3D »**. The « Synthèse » tab shows the latest simulation summary at the top, plus the values that had to be estimated, marked « estimé — à vérifier »; the full field-by-field import report is in the **« Rapport d'import »** tab.
 3. An invalid file shows an error banner and nothing is saved.
 
 ### Reading the import report
@@ -23,9 +23,10 @@ TODO: add screenshots of the import page, editor panel and comparison table when
 
 ## 3. Run the energy simulation
 
-1. Below the import report, the panel « Simulation énergétique (Open3CL) » offers **« Lancer la simulation »**.
-2. The result shows the **energy label** (« Énergie : X ») and **climate label** (« Climat : X »), the consumption `n kWh/m².an`, emissions `n kg CO₂/m².an`, the totals in kWh and kg CO₂e, and the engine version (« moteur Open3CL v… »).
-3. Each run is saved in the building's **history**. Running again on an unchanged building instantly returns the cached result — no recalculation.
+1. **« Lancer la simulation »** is the single primary button of the **workspace header** — always visible, whatever tab you are on.
+2. The latest result summary appears at the **top of the « Synthèse » tab**: the **energy label** (« Énergie : X ») and **climate label** (« Climat : X »), the consumption `n kWh/m².an`, emissions `n kg CO₂/m².an`, the totals in kWh and kg CO₂e, and the engine version (« moteur Open3CL v… »).
+3. In the same tab, the panel « Simulation énergétique (Open3CL) » keeps the technical detail behind expanders: the **history** (« Historique (n) ») and the raw engine output (« Voir la sortie brute du moteur », opt-in).
+4. Each run is saved in the building's **history**. Running again on an unchanged building instantly returns the cached result — no recalculation (a « résultat servi depuis le cache » badge appears in the header).
 
 ## 4. What the numbers mean
 
