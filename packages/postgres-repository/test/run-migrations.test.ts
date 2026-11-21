@@ -139,10 +139,10 @@ describe('runMigrations', () => {
     expect(calls.map((c) => c.text)).toContain('ROLLBACK');
   });
 
-  it('the checked-in migration set is schema v1 + v2 (P2 simulations) + v3 (P4 audit)', () => {
+  it('the checked-in migration set is schema v1 + v2 (P2 simulations) + v3 (P4 audit) + v4 (P5 scenarios)', () => {
     const realDir = fileURLToPath(new URL('../../../infrastructure/postgres/migrations', import.meta.url));
     const files = readdirSync(realDir).filter((f) => f.endsWith('.sql')).sort();
-    expect(files).toEqual(['0001_init.sql', '0002_simulations.sql', '0003_audit.sql']);
+    expect(files).toEqual(['0001_init.sql', '0002_simulations.sql', '0003_audit.sql', '0004_scenarios.sql']);
     const v2 = readFileSync(path.join(realDir, '0002_simulations.sql'), 'utf8');
     expect(v2).toContain('CREATE TABLE IF NOT EXISTS simulations');
     expect(v2).toContain('CREATE TABLE IF NOT EXISTS simulation_jobs');
@@ -152,5 +152,13 @@ describe('runMigrations', () => {
     expect(v3).toContain('CREATE TABLE IF NOT EXISTS audit_entries');
     expect(v3).toContain('audit_entries_no_row_mutation');
     expect(v3).toContain('audit_entries_no_truncate');
+    const v4 = readFileSync(path.join(realDir, '0004_scenarios.sql'), 'utf8');
+    expect(v4).toContain('CREATE TABLE IF NOT EXISTS scenarios');
+    expect(v4).toContain('CREATE TABLE IF NOT EXISTS scenario_results');
+    expect(v4).toContain('baseline_version integer NOT NULL CHECK (baseline_version >= 0)');
+    // v4 must NOT re-define the v3 objects (P4 owns buildings.version + audit_entries)
+    expect(v4).not.toContain('CREATE TABLE IF NOT EXISTS audit_entries');
+    expect(v4).not.toContain('ADD COLUMN IF NOT EXISTS version');
+    expect(v4).not.toMatch(/ALTER TABLE buildings/);
   });
 });
