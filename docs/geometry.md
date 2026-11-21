@@ -95,7 +95,10 @@ the < 2 s budget and hash stability do not depend on client hardware).
 React Three Fiber + three.js. Buffers are merged by material class (envelope /
 inferred-hatch / openings / rooms → ≤ 4 draw calls, TR-P3-02) via
 `@hes/geometry` (pure) and `@hes/geometry/three` (`THREE.BufferGeometry`).
-Picking: raycast → `faceIndex * 3` → buffer group → stable element id → Zustand
+The domain geometry is Z-up while three.js is Y-up: `@hes/geometry/three`
+converts the axes once at the rendering boundary (`(x, y, z) → (x, z, −y)` in
+`toThreeBufferGeometry`), so the domain objects and the mesh hash are never
+touched. Picking: raycast → `faceIndex * 3` → buffer group → stable element id → Zustand
 store → MUI side panel (U-value, area, orientation, confidence). Room labels
 and the hover tooltip are DOM overlays projected from the Canvas. No business
 logic in components.

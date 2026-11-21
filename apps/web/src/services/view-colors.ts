@@ -27,8 +27,24 @@ const KIND_COLORS: Readonly<Record<GeometryElementKind, [number, number, number]
 };
 
 const INFERRED_COLOR: [number, number, number] = [0.96, 0.62, 0.13];
+
+/**
+ * Accent color of the selection, used both for the 50/50 color mix and for the
+ * edge outline drawn around the selected element (UI audit F11). Hex twin of
+ * `SELECTED_COLOR` below.
+ */
+export const SELECTION_OUTLINE_COLOR = '#1f73f2';
+
 const SELECTED_COLOR: [number, number, number] = [0.12, 0.45, 0.95];
-const HOVERED_LIFT = 0.12;
+
+/**
+ * Hover lift applied to the per-element vertex color. The layer meshes are
+ * merged by material class (one material per layer), so a per-mesh
+ * `emissive` would lift the whole layer; the lift is therefore applied to the
+ * hovered element's own vertices (its "emissive"), which reads as a visible
+ * emissive glow on hover (UI audit F11).
+ */
+const HOVERED_LIFT = 0.3;
 
 function mix(a: [number, number, number], b: [number, number, number], t: number): [number, number, number] {
   return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
