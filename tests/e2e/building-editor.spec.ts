@@ -25,6 +25,8 @@ async function importFixtureAndOpenEditor(page: import('@playwright/test').Page)
   await page.goto('/');
   await page.getByTestId('file-input').setInputFiles(fixture);
   await expect(page.getByTestId('upload-success')).toContainText('Bâtiment importé');
+  // wave-1 A1: the editor lives in its own tab of the workspace
+  await page.getByTestId('tab-editor').click();
   await expect(page.getByTestId('editor-panel')).toBeVisible();
   await expect(page.getByTestId('building-version')).toContainText('version 0');
   const buildingId = (await page.getByTestId('building-id').textContent())?.trim() ?? '';
@@ -58,6 +60,8 @@ test('AC-P4-01 + AC-P4-03 + AC-P4-04: edit → save → re-simulate (cache miss)
 
   // baseline simulation through the P2 endpoint (verbatim source document)
   await page.getByTestId('run-simulation').click();
+  // wave-1 A1: the result summary renders at the top of the « Synthèse » tab
+  await page.getByTestId('tab-synthese').click();
   await expect(page.getByTestId('simulation-result')).toBeVisible({ timeout: 30_000 });
   const history0 = (await (await page.request.get(`/api/buildings/${buildingId}/simulations`)).json()) as SimulationHistoryPayload;
   expect(history0.results).toHaveLength(1);
@@ -66,6 +70,7 @@ test('AC-P4-01 + AC-P4-03 + AC-P4-04: edit → save → re-simulate (cache miss)
   const label0 = history0.results[0]!.energyLabel;
 
   // AC-P4-01: edit the wall U-value 1.6393 → 0.25 and save
+  await page.getByTestId('tab-editor').click();
   await page.getByTestId('edit-wall-wall-1').click();
   await page.getByTestId('field-uValueWm2K').fill('0.25');
   await page.getByTestId('save-edit').click();
@@ -83,6 +88,8 @@ test('AC-P4-01 + AC-P4-03 + AC-P4-04: edit → save → re-simulate (cache miss)
       { timeout: 30_000 }
     )
     .toBe(2);
+  // the refreshed result summary is on the « Synthèse » tab
+  await page.getByTestId('tab-synthese').click();
   await expect(page.getByTestId('simulation-result')).toBeVisible({ timeout: 30_000 });
 
   // cache-miss proof: a NEW simulation result exists with a different input hash
@@ -108,6 +115,7 @@ test('AC-P4-01 + AC-P4-03 + AC-P4-04: edit → save → re-simulate (cache miss)
   expect(walls1[0]?.uValueWm2K.confidence).toBe(1);
 
   // AC-P4-03: audit view shows the change old→new with source "user"
+  await page.getByTestId('tab-editor').click();
   await expect(page.getByTestId('audit-list')).toContainText('building.wall.update.v1');
   const auditEntry = page.getByTestId('audit-entry').first();
   await expect(auditEntry).toContainText('uValueWm2K');

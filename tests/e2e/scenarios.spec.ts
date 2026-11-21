@@ -28,6 +28,8 @@ test('create 2 scenarios, compare, and the table shows correct deltas and the la
   await page.goto('/');
   await page.getByTestId('file-input').setInputFiles(fixture);
   await expect(page.getByTestId('upload-success')).toContainText('Bâtiment importé');
+  // wave-1 A1: scenarios live in their own tab of the workspace
+  await page.getByTestId('tab-scenarios').click();
   await expect(page.getByTestId('scenario-panel')).toBeVisible();
 
   const buildingId = (await page.getByTestId('building-id').textContent())?.trim() ?? '';
