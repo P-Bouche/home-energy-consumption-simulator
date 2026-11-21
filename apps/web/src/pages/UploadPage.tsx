@@ -2,14 +2,12 @@ import { useRef, useState } from 'react';
 import { Alert, Box, Button, Container, LinearProgress, Typography } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { useImportStore } from '../store/import-store.ts';
-import { ImportReportView } from '../components/ImportReportView.tsx';
-import { SimulationPanel } from '../components/SimulationPanel.tsx';
-import { BuildingEditorPanel } from '../components/BuildingEditorPanel.tsx';
-import { ScenarioPanel } from '../components/ScenarioPanel.tsx';
+import { WorkspaceShell } from '../components/WorkspaceShell.tsx';
 
 /**
- * Upload page: file picker → POST /api/imports/dpe → import report view.
- * No business logic here: the store owns the flow.
+ * Upload page: file picker → POST /api/imports/dpe → tabbed workspace
+ * (Synthèse / Rapport d'import / Éditeur / Scénarios). No business logic
+ * here: the store owns the flow.
  */
 export function UploadPage() {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -29,7 +27,7 @@ export function UploadPage() {
   };
 
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
+    <Container maxWidth="lg" sx={{ py: 4 }}>
       <Typography variant="h4" component="h1">
         Importer un DPE (XML)
       </Typography>
@@ -69,21 +67,7 @@ export function UploadPage() {
           <Alert severity="success" sx={{ mt: 2 }} data-testid="upload-success">
             Bâtiment importé : {buildingId}
           </Alert>
-          <Box sx={{ mt: 2 }}>
-            <Button
-              variant="outlined"
-              data-testid="view-3d"
-              onClick={() => {
-                window.location.hash = `#/building/${buildingId ?? ''}`;
-              }}
-            >
-              Voir le modèle 3D
-            </Button>
-          </Box>
-          <ImportReportView report={report} />
-          <SimulationPanel buildingId={buildingId} />
-          <BuildingEditorPanel buildingId={buildingId} />
-          <ScenarioPanel buildingId={buildingId} />
+          <WorkspaceShell buildingId={buildingId} report={report} />
         </>
       )}
     </Container>
