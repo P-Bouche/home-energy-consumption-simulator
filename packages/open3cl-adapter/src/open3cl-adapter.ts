@@ -78,6 +78,17 @@ export class Open3clAdapter implements SimulationPort {
       this.logger.warn(
         `simulation of building ${view.id}: engine input is the verbatim retained source DPE document (measured, confidence 1)`
       );
+    } else if (mapping.editedSource) {
+      // P4/P5: user edits overlaid onto the parsed source document — logged,
+      // never silent (each entry: path, value, source "user", confidence 1).
+      this.logger.warn(
+        `simulation of building ${view.id}: engine input is the retained source DPE document with ${mapping.defaults.length} user edit(s) overlaid (P4/P5)`
+      );
+      for (const d of mapping.defaults) {
+        this.logger.warn(
+          `simulation of building ${view.id}: user edit at ${d.path} = ${JSON.stringify(d.value)} (source ${d.source}, confidence ${d.confidence})`
+        );
+      }
     } else {
       for (const d of mapping.defaults) {
         this.logger.warn(

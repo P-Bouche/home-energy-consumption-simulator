@@ -18,7 +18,7 @@ const fixture = path.join(
  */
 
 interface SimulationHistoryPayload {
-  results: { id: string; inputHash: string; createdAt: string }[];
+  results: { id: string; inputHash: string; createdAt: string; consumptionKwh: number; energyLabel: string }[];
 }
 
 async function importFixtureAndOpenEditor(page: import('@playwright/test').Page): Promise<string> {
@@ -40,7 +40,7 @@ test('AC-P4-02: invalid edit (negative U-value) is rejected with a field-level m
   await page.getByTestId('save-edit').click();
 
   // field-level message from the API (400 COMMAND_VALIDATION.fieldErrors)
-  await expect(page.getByText(/must be in \(0, 4\]/)).toBeVisible();
+  await expect(page.getByRole('dialog').locator('.MuiFormHelperText-root.Mui-error')).toContainText('must be in (0, 4]');
   // dialog stays open, version unchanged, audit empty
   await expect(page.getByTestId('building-version')).toContainText('version 0');
   await expect(page.getByTestId('audit-list')).toContainText('Aucune modification enregistrée');
@@ -62,6 +62,8 @@ test('AC-P4-01 + AC-P4-03 + AC-P4-04: edit → save → re-simulate (cache miss)
   const history0 = (await (await page.request.get(`/api/buildings/${buildingId}/simulations`)).json()) as SimulationHistoryPayload;
   expect(history0.results).toHaveLength(1);
   const hash0 = history0.results[0]!.inputHash;
+  const consumption0 = history0.results[0]!.consumptionKwh;
+  const label0 = history0.results[0]!.energyLabel;
 
   // AC-P4-01: edit the wall U-value 1.6393 → 0.25 and save
   await page.getByTestId('edit-wall-wall-1').click();
@@ -78,6 +80,12 @@ test('AC-P4-01 + AC-P4-03 + AC-P4-04: edit → save → re-simulate (cache miss)
   const hashes1 = history1.results.map((r) => r.inputHash);
   expect(hashes1).toContain(hash0);
   expect(hashes1.some((h) => h !== hash0)).toBe(true);
+  // the re-simulation after the edit reflects the edit in the ENGINE INPUT:
+  // insulating the wall (U 1.6393 → 0.25) must lower the consumption
+  const newest = history1.results[0]!;
+  expect(newest.inputHash).not.toBe(hash0);
+  expect(newest.consumptionKwh).toBeLessThan(consumption0);
+  expect(newest.energyLabel).not.toBe(label0); // label moved (D→C on this fixture)
 
   // the persisted wall value is user-sourced with confidence 1.0
   const building1 = await page.request.get(`/api/buildings/${buildingId}`);
@@ -103,7 +111,7 @@ test('AC-P4-01 + AC-P4-03 + AC-P4-04: edit → save → re-simulate (cache miss)
   const building2 = await page.request.get(`/api/buildings/${buildingId}`);
   const walls2 = (await building2.json()).building.walls as { uValueWm2K: { value: number; source: string } }[];
   expect(walls2[0]?.uValueWm2K.value).toBeCloseTo(1.6393);
-  expect(walls2[0]?.uValueWm2K.source).toBe('user'); // restored value is still user-sourced
+  expect(walls2[0]?.uValueWm2K.source).toMatch(/^dpe-xml:/); // full original Confidence restored from the audit entry
 
   const audit2 = (await (await page.request.get(`/api/buildings/${buildingId}/audit`)).json()) as { entries: { commandType: string; version: number }[] };
   expect(audit2.entries).toHaveLength(2);
@@ -115,6 +123,9 @@ test('AC-P4-01 + AC-P4-03 + AC-P4-04: edit → save → re-simulate (cache miss)
   const history2 = (await (await page.request.get(`/api/buildings/${buildingId}/simulations`)).json()) as SimulationHistoryPayload;
   expect(history2.results.length).toBe(3);
   expect(new Set(history2.results.map((r) => r.inputHash)).size).toBe(3);
+  const afterUndo = history2.results[0]!;
+  expect(afterUndo.consumptionKwh).toBeGreaterThan(newest.consumptionKwh); // undoing the insulation raises consumption again
+  expect(afterUndo.consumptionKwh).toBeCloseTo(consumption0, 0);
 });
 
 test('stale If-Match is rejected with 409 and the UI reloads the current version', async ({ page }) => {

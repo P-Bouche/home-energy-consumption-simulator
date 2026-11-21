@@ -23,6 +23,7 @@ export interface EditorState {
   readonly error: string | null;
   readonly conflict: boolean;
   readonly fieldErrors: Record<string, string[]>;
+  readonly pendingSimulation: boolean;
   readonly load: (buildingId: string) => Promise<void>;
   readonly save: (command: BuildingCommandJson) => Promise<boolean>;
   readonly undo: () => Promise<void>;
@@ -31,6 +32,28 @@ export interface EditorState {
 }
 
 const USER_ID = 'local-user';
+
+/**
+ * Triggers the P2 re-simulation after an edit, but never concurrently with an
+ * in-flight run: if a simulation is already running/queued, the re-run is
+ * deferred (pendingSimulation) and chained when the current one finishes
+ * (subscription at the bottom of this file), so rapid successive saves cannot
+ * fire overlapping engine runs.
+ */
+function triggerSimulation(
+  set: (partial: Partial<EditorState>) => void,
+  get: () => EditorState
+): void {
+  const { building } = get();
+  if (building === null) return;
+  const simStatus = useSimulationStore.getState().status;
+  if (simStatus === 'running' || simStatus === 'queued') {
+    set({ pendingSimulation: true });
+    return;
+  }
+  set({ pendingSimulation: false });
+  void useSimulationStore.getState().run(building.id);
+}
 
 /**
  * Creates the editor store.
@@ -43,6 +66,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   error: null,
   conflict: false,
   fieldErrors: {},
+  pendingSimulation: false,
 
   load: async (buildingId) => {
     set({ status: 'loading', error: null });
@@ -66,7 +90,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       await get().loadAudit();
       // after a successful edit, re-simulate through the P2 endpoint
       // (the input hash changed → cache miss → new engine run)
-      void useSimulationStore.getState().run(building.id);
+      triggerSimulation(set, get);
       return true;
     } catch (error) {
       if (error instanceof ApiError && error.status === 400 && error.body?.fieldErrors !== undefined) {
@@ -97,7 +121,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       const response = await undoBuilding(building.id, version, USER_ID);
       set({ building: response.building, version: response.version, status: 'idle' });
       await get().loadAudit();
-      void useSimulationStore.getState().run(building.id);
+      triggerSimulation(set, get);
     } catch (error) {
       if (error instanceof ApiError && error.status === 409) {
         set({ status: 'error', conflict: true, error: error.message });
@@ -121,5 +145,16 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     }
   },
 
-  reset: () => set({ building: null, version: 0, audit: [], status: 'idle', error: null, conflict: false, fieldErrors: {} })
+  reset: () => set({ building: null, version: 0, audit: [], status: 'idle', error: null, conflict: false, fieldErrors: {}, pendingSimulation: false })
 }));
+
+// chain a deferred re-simulation when the in-flight one reaches a terminal state
+useSimulationStore.subscribe((state, previous) => {
+  if (state.status === previous.status) return;
+  if (state.status !== 'done' && state.status !== 'error') return;
+  const editor = useEditorStore.getState();
+  if (editor.pendingSimulation && editor.building !== null) {
+    useEditorStore.setState({ pendingSimulation: false });
+    void useSimulationStore.getState().run(editor.building.id);
+  }
+});

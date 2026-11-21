@@ -108,6 +108,7 @@ class FakeBuildingRepository implements BuildingRepository {
   readonly store = new Map<BuildingId, StoredBuilding>();
   updates = 0;
   failNextUpdateWithStale = false;
+  auditLog: FakeAuditLog | null = null;
 
   async save(input: SaveBuildingInput): Promise<BuildingId> {
     this.store.set(input.building.id, { building: input.building, report: input.report });
@@ -129,6 +130,7 @@ class FakeBuildingRepository implements BuildingRepository {
       throw new StaleVersionError(input.building.id, input.expectedVersion, current.building.version);
     }
     this.updates += 1;
+    this.auditLog?.record(input.auditEntry);
     const stored: StoredBuilding = { building: input.building, report: input.report };
     this.store.set(input.building.id, stored);
     return stored;
@@ -137,7 +139,7 @@ class FakeBuildingRepository implements BuildingRepository {
 
 class FakeAuditLog implements AuditLog {
   readonly entries = new Map<BuildingId, AuditEntry[]>();
-  async append(entry: AuditEntry): Promise<void> {
+  record(entry: AuditEntry): void {
     const list = this.entries.get(entry.buildingId) ?? [];
     list.push(entry);
     this.entries.set(entry.buildingId, list);
@@ -187,12 +189,14 @@ class FakeSimulationRepository implements SimulationRepository {
 
 class CountingSimulationPort implements SimulationPort {
   calls = 0;
+  readonly servedBuildings: Building[] = [];
   async simulate(_dpeXml: string): Promise<SimulationResult> {
     this.calls += 1;
     return this.produce();
   }
-  async simulateBuilding(_building: Building): Promise<SimulationResult> {
+  async simulateBuilding(building: Building): Promise<SimulationResult> {
     this.calls += 1;
+    this.servedBuildings.push(building);
     return this.produce();
   }
   getEngineVersion(): string {
@@ -214,8 +218,9 @@ const fakeRunner = { enqueue: () => undefined } as unknown as SimulationJobRunne
 function setup() {
   const buildingRepository = new FakeBuildingRepository();
   const auditLog = new FakeAuditLog();
+  buildingRepository.auditLog = auditLog;
   const now = () => new Date('2026-11-21T09:30:00.000Z');
-  const edit = new EditBuildingUseCase({ buildingRepository, auditLog, now, logger: silentLogger });
+  const edit = new EditBuildingUseCase({ buildingRepository, now, logger: silentLogger });
   const undo = new UndoLastChangeUseCase({ buildingRepository, auditLog, now, logger: silentLogger });
   const getAudit = new GetAuditLogUseCase({ buildingRepository, auditLog });
   const building = makeBuilding(BUILDING_ID);
@@ -309,6 +314,7 @@ describe('UndoLastChangeUseCase (P4 FR-P4-05)', () => {
     const result = await undo.execute(BUILDING_ID, { expectedVersion: 1, userId: 'user-42' });
     expect(result.building.version).toBe(2);
     expect(result.building.walls[0]?.uValueWm2K?.value).toBe(1.64);
+    expect(result.building.walls[0]?.uValueWm2K?.source).toBe('dpe-xml:x'); // full original Confidence restored
     expect(buildingRepository.store.get(BUILDING_ID)?.building.version).toBe(2);
     const entries = auditLog.entries.get(BUILDING_ID) ?? [];
     expect(entries).toHaveLength(2);
@@ -368,6 +374,11 @@ describe('edit → re-simulation via P2 (cache-miss check)', () => {
     const second = await run.execute(BUILDING_ID);
     expect(second.kind).toBe('completed');
     expect(port.calls).toBe(2);
+    // the engine input served on the second run carries the edited value with user provenance
+    const served = port.servedBuildings[1];
+    expect(served?.walls[0]?.uValueWm2K?.value).toBe(0.25);
+    expect(served?.walls[0]?.uValueWm2K?.source).toBe('user');
+    expect(port.servedBuildings[0]?.walls[0]?.uValueWm2K?.source).toMatch(/^dpe-xml:/);
     if (second.kind === 'completed') {
       expect(second.record.inputHash).toBe(hashAfter);
       expect(second.record.id).not.toBe(first.kind === 'completed' ? first.record.id : '');

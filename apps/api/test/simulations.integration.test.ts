@@ -8,9 +8,10 @@ import { afterEach, describe, expect, it } from 'vitest';
 import 'reflect-metadata';
 import type { Building, SimulationResult } from '@hes/domain';
 import { createSimulationResult, EngineExecutionError, SimulationMappingError } from '@hes/domain';
-import { BUILDING_REPOSITORY, SIMULATION_PORT, SIMULATION_REPOSITORY, type SimulationPort } from '@hes/application';
+import { AUDIT_LOG, BUILDING_REPOSITORY, SIMULATION_PORT, SIMULATION_REPOSITORY, type SimulationPort } from '@hes/application';
 import { AppModule } from '../src/app.module.ts';
 import { HttpExceptionFilter } from '../src/http/http-exception-filter.ts';
+import { InMemoryAuditLog } from '../src/in-memory-audit-log.ts';
 import { InMemoryBuildingRepository } from '../src/in-memory-building-repository.ts';
 import { InMemorySimulationRepository } from '../src/in-memory-simulation-repository.ts';
 import { PG_CONTEXT } from '../src/infrastructure.module.ts';
@@ -75,11 +76,14 @@ async function createSimulationTestApp(port?: SimulationPort, forceAsync = false
     process.env['SIMULATION_FORCE_ASYNC'] = 'true';
   }
   try {
+    const auditLog = new InMemoryAuditLog();
     let builder = Test.createTestingModule({ imports: [AppModule] })
       .overrideProvider(PG_CONTEXT)
       .useValue(null)
       .overrideProvider(BUILDING_REPOSITORY)
-      .useValue(new InMemoryBuildingRepository())
+      .useValue(new InMemoryBuildingRepository(auditLog))
+      .overrideProvider(AUDIT_LOG)
+      .useValue(auditLog)
       .overrideProvider(SIMULATION_REPOSITORY)
       .useValue(new InMemorySimulationRepository());
     if (port !== undefined) {

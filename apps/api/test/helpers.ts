@@ -1,9 +1,10 @@
 import 'reflect-metadata';
 import { Test } from '@nestjs/testing';
 import type { INestApplication } from '@nestjs/common';
-import { BUILDING_REPOSITORY } from '@hes/application';
+import { AUDIT_LOG, BUILDING_REPOSITORY } from '@hes/application';
 import { AppModule } from '../src/app.module.ts';
 import { HttpExceptionFilter } from '../src/http/http-exception-filter.ts';
+import { InMemoryAuditLog } from '../src/in-memory-audit-log.ts';
 import { InMemoryBuildingRepository } from '../src/in-memory-building-repository.ts';
 import { PG_CONTEXT } from '../src/infrastructure.module.ts';
 
@@ -13,11 +14,14 @@ import { PG_CONTEXT } from '../src/infrastructure.module.ts';
  * context (no database needed for these tests).
  */
 export async function createTestApp(): Promise<INestApplication> {
+  const auditLog = new InMemoryAuditLog();
   const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
     .overrideProvider(PG_CONTEXT)
     .useValue(null)
     .overrideProvider(BUILDING_REPOSITORY)
-    .useValue(new InMemoryBuildingRepository())
+    .useValue(new InMemoryBuildingRepository(auditLog))
+    .overrideProvider(AUDIT_LOG)
+    .useValue(auditLog)
     .compile();
   const app = moduleRef.createNestApplication();
   app.useGlobalFilters(new HttpExceptionFilter());

@@ -393,7 +393,7 @@ describe('audit entries (P4)', () => {
     if (!isRight(inverse)) return;
     expect(inverse.value.type).toBe('building.wall.update.v1');
     expect((inverse.value as UpdateWallCommand).uValueWm2K).toBe(1.64);
-    // applying the inverse restores the previous value
+    // applying the inverse command restores the previous value (re-stamped user)
     const undone = result.value.apply(inverse.value, editCtx);
     expect(isRight(undone)).toBe(true);
     if (isRight(undone)) {
@@ -401,6 +401,27 @@ describe('audit entries (P4)', () => {
       expect(undone.value.walls[0]?.uValueWm2K?.source).toBe('user');
       expect(undone.value.version).toBe(2);
     }
+  });
+
+  it('applyRestoration (undo) restores the FULL original Confidence (dpe-xml provenance)', () => {
+    const building = makeBuilding();
+    const result = building.apply(wallCommand, editCtx);
+    expect(isRight(result)).toBe(true);
+    if (!isRight(result)) return;
+    const event = result.value.pullDomainEvents()[0];
+    if (!(event instanceof BuildingUpdated)) throw new Error('expected BuildingUpdated');
+    const entry = auditEntryFromEvent('entry-1', event);
+    const restored = result.value.applyRestoration(entry, editCtx);
+    expect(isRight(restored)).toBe(true);
+    if (!isRight(restored)) return;
+    const wall = restored.value.walls[0]?.uValueWm2K;
+    expect(wall?.value).toBe(1.64);
+    expect(wall?.source).toBe('dpe-xml:x');
+    expect(wall?.confidence).toBe(1);
+    expect(wall?.importDate).toEqual(date);
+    // the restored aggregate is identical to the original (same input hash)
+    expect(restored.value.toJson()).toEqual(building.toJson());
+    expect(restored.value.version).toBe(2);
   });
 });
 

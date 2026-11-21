@@ -1,9 +1,11 @@
-import { isMeasured, type BuildingSimulationView, type Confidence } from '@hes/domain';
+import { xmlParser } from '@open3cl/engine/utils.js';
+import { isMeasured, SimulationMappingError, USER_SOURCE, type BuildingSimulationView, type Confidence } from '@hes/domain';
 
 /**
  * Engine input produced by {@link buildEngineInput}: either the verbatim
- * retained DPE XML document, or a DPE JSON object reconstructed field-wise
- * from the domain view.
+ * retained DPE XML document, the retained document parsed with the user edits
+ * overlaid (P4/P5), or a DPE JSON object reconstructed field-wise from the
+ * domain view (fallback when no source document is retained).
  */
 export type EngineInput =
   | { readonly kind: 'xml'; readonly xml: string }
@@ -32,6 +34,221 @@ export interface EngineInputMapping {
    * (confidence 1, measured provenance) rather than a reconstruction.
    */
   readonly verbatimSource: boolean;
+  /**
+   * True when the engine input is the retained source document parsed to JS
+   * with the user-supplied fields (source `user`) overlaid onto it (P4
+   * editor edits / P5 scenario forks). The rest of the source document is
+   * kept verbatim, so nothing unmodelled is invented.
+   */
+  readonly editedSource: boolean;
+}
+
+/**
+ * @returns true when any Confidence-wrapped field of the view carries the
+ * user source (a P4 edit or a P5 scenario command was applied to the building)
+ */
+export function hasUserEdits(view: BuildingSimulationView): boolean {
+  return containsUserSource(view);
+}
+
+function containsUserSource(value: unknown): boolean {
+  if (Array.isArray(value)) {
+    return value.some(containsUserSource);
+  }
+  if (typeof value === 'object' && value !== null) {
+    const rec = value as Record<string, unknown>;
+    if (rec['source'] === USER_SOURCE && typeof rec['confidence'] === 'number') {
+      return true;
+    }
+    return Object.values(rec).some(containsUserSource);
+  }
+  return false;
+}
+
+interface OverlayCtx {
+  readonly dpe: Record<string, unknown>;
+  readonly defaults: MappingDefault[];
+}
+
+function child(obj: Record<string, unknown>, key: string): Record<string, unknown> {
+  const existing = obj[key];
+  if (typeof existing === 'object' && existing !== null && !Array.isArray(existing)) {
+    return existing as Record<string, unknown>;
+  }
+  const created: Record<string, unknown> = {};
+  obj[key] = created;
+  return created;
+}
+
+function collection(dpe: Record<string, unknown>, path: string[]): Record<string, unknown>[] {
+  let node: Record<string, unknown> = dpe;
+  for (let i = 0; i < path.length - 1; i += 1) {
+    node = child(node, path[i] as string);
+  }
+  const last = path[path.length - 1] as string;
+  const existing = node[last];
+  if (Array.isArray(existing)) {
+    return existing as Record<string, unknown>[];
+  }
+  const created: Record<string, unknown>[] = [];
+  node[last] = created;
+  return created;
+}
+
+function userValue(c: Confidence<unknown> | null): unknown {
+  return c === null ? undefined : c.value;
+}
+
+function isUser(c: Confidence<unknown> | null): c is Confidence<unknown> {
+  return c !== null && c.source === USER_SOURCE;
+}
+
+function log(ctx: OverlayCtx, path: string, value: unknown): void {
+  ctx.defaults.push({ path, value, source: USER_SOURCE, confidence: 1 });
+}
+
+/**
+ * Index of a domain element id (`wall-3` → 2): the importer assigns
+ * `<kind>-<i+1>` ids in document order, so the index addresses the matching
+ * entry of the source document's collection.
+ */
+function elementIndex(id: string, kind: string): number | null {
+  const match = new RegExp(`^${kind}-(\\d+)$`).exec(id);
+  if (match === null) return null;
+  const index = Number(match[1]) - 1;
+  return Number.isInteger(index) && index >= 0 ? index : null;
+}
+
+function overlayElements<T extends { id: string }>(
+  ctx: OverlayCtx,
+  collectionPath: string[],
+  elements: readonly T[],
+  kind: string,
+  apply: (entry: Record<string, unknown>, element: T, ctx: OverlayCtx) => void
+): void {
+  const items = collection(ctx.dpe, collectionPath);
+  for (const element of elements) {
+    const index = elementIndex(element.id, kind);
+    if (index === null || index >= items.length) continue;
+    apply(items[index] as Record<string, unknown>, element, ctx);
+  }
+}
+
+/**
+ * Overlays every user-supplied (source `user`) field of the view onto the
+ * parsed source DPE document. Engine patch points (verified against engine
+ * 1.11.6): a U-value change sets the `*_saisi` input field AND switches the
+ * saisie method enum so the engine actually uses the entered value (e.g.
+ * `enum_methode_saisie_u_id = '9'` + `umur_saisi` for a wall), plus the
+ * `donnee_intermediaire` value for audit. Detection is vocabulary-agnostic:
+ * it keys off `Confidence.source === 'user'`, which P4 stamps on every edit.
+ *
+ * @returns the mapping-default log of every overlaid user value
+ */
+export function overlayUserEdits(dpe: Record<string, unknown>, view: BuildingSimulationView): MappingDefault[] {
+  const ctx: OverlayCtx = { dpe, defaults: [] };
+  const env = ['logement', 'enveloppe'];
+
+  overlayElements(ctx, [...env, 'mur_collection', 'mur'], view.walls, 'wall', (mur, wall) => {
+    const de = child(mur, 'donnee_entree');
+    const di = child(mur, 'donnee_intermediaire');
+    if (isUser(wall.uValueWm2K)) {
+      const v = userValue(wall.uValueWm2K);
+      de['enum_methode_saisie_u_id'] = '9';
+      de['umur_saisi'] = v;
+      di['umur'] = v;
+      log(ctx, 'mur/donnee_entree/umur_saisi', v);
+    }
+    if (isUser(wall.areaM2)) { de['surface_paroi_totale'] = userValue(wall.areaM2); log(ctx, 'mur/donnee_entree/surface_paroi_totale', userValue(wall.areaM2)); }
+    if (isUser(wall.description)) { de['description'] = userValue(wall.description); log(ctx, 'mur/donnee_entree/description', userValue(wall.description)); }
+    if (isUser(wall.orientation)) { de['enum_orientation_id'] = userValue(wall.orientation); log(ctx, 'mur/donnee_entree/enum_orientation_id', userValue(wall.orientation)); }
+    if (isUser(wall.wallType)) { de['enum_materiaux_structure_mur_id'] = userValue(wall.wallType); log(ctx, 'mur/donnee_entree/enum_materiaux_structure_mur_id', userValue(wall.wallType)); }
+    if (isUser(wall.adjacencyType)) { de['enum_type_adjacence_id'] = userValue(wall.adjacencyType); log(ctx, 'mur/donnee_entree/enum_type_adjacence_id', userValue(wall.adjacencyType)); }
+  });
+
+  overlayElements(ctx, [...env, 'plancher_haut_collection', 'plancher_haut'], view.roofs, 'roof', (item, roof) => {
+    const de = child(item, 'donnee_entree');
+    const di = child(item, 'donnee_intermediaire');
+    if (isUser(roof.uValueWm2K)) {
+      const v = userValue(roof.uValueWm2K);
+      de['enum_methode_saisie_u_id'] = '9';
+      de['uph_saisi'] = v;
+      di['uph'] = v;
+      log(ctx, 'plancher_haut/donnee_entree/uph_saisi', v);
+    }
+    if (isUser(roof.areaM2)) { de['surface_paroi_opaque'] = userValue(roof.areaM2); log(ctx, 'plancher_haut/donnee_entree/surface_paroi_opaque', userValue(roof.areaM2)); }
+    if (isUser(roof.description)) { de['description'] = userValue(roof.description); log(ctx, 'plancher_haut/donnee_entree/description', userValue(roof.description)); }
+    if (isUser(roof.roofType)) { de['enum_type_plancher_haut_id'] = userValue(roof.roofType); log(ctx, 'plancher_haut/donnee_entree/enum_type_plancher_haut_id', userValue(roof.roofType)); }
+    if (isUser(roof.adjacencyType)) { de['enum_type_adjacence_id'] = userValue(roof.adjacencyType); log(ctx, 'plancher_haut/donnee_entree/enum_type_adjacence_id', userValue(roof.adjacencyType)); }
+  });
+
+  overlayElements(ctx, [...env, 'plancher_bas_collection', 'plancher_bas'], view.floors, 'floor', (item, floor) => {
+    const de = child(item, 'donnee_entree');
+    const di = child(item, 'donnee_intermediaire');
+    if (isUser(floor.uValueWm2K)) {
+      const v = userValue(floor.uValueWm2K);
+      de['enum_methode_saisie_u_id'] = '9';
+      de['upb_saisi'] = v;
+      di['upb'] = v;
+      log(ctx, 'plancher_bas/donnee_entree/upb_saisi', v);
+    }
+    if (isUser(floor.areaM2)) { de['surface_paroi_opaque'] = userValue(floor.areaM2); log(ctx, 'plancher_bas/donnee_entree/surface_paroi_opaque', userValue(floor.areaM2)); }
+    if (isUser(floor.description)) { de['description'] = userValue(floor.description); log(ctx, 'plancher_bas/donnee_entree/description', userValue(floor.description)); }
+    if (isUser(floor.floorType)) { de['enum_type_plancher_bas_id'] = userValue(floor.floorType); log(ctx, 'plancher_bas/donnee_entree/enum_type_plancher_bas_id', userValue(floor.floorType)); }
+    if (isUser(floor.adjacencyType)) { de['enum_type_adjacence_id'] = userValue(floor.adjacencyType); log(ctx, 'plancher_bas/donnee_entree/enum_type_adjacence_id', userValue(floor.adjacencyType)); }
+  });
+
+  overlayElements(ctx, [...env, 'baie_vitree_collection', 'baie_vitree'], view.windows, 'window', (item, window) => {
+    const de = child(item, 'donnee_entree');
+    const di = child(item, 'donnee_intermediaire');
+    if (isUser(window.uValueWm2K)) {
+      const v = userValue(window.uValueWm2K);
+      de['uw_saisi'] = v;
+      di['uw'] = v;
+      log(ctx, 'baie_vitree/donnee_entree/uw_saisi', v);
+    }
+    if (isUser(window.areaM2)) { de['surface_totale_baie'] = userValue(window.areaM2); log(ctx, 'baie_vitree/donnee_entree/surface_totale_baie', userValue(window.areaM2)); }
+    if (isUser(window.count)) { de['nb_baie'] = userValue(window.count); log(ctx, 'baie_vitree/donnee_entree/nb_baie', userValue(window.count)); }
+    if (isUser(window.description)) { de['description'] = userValue(window.description); log(ctx, 'baie_vitree/donnee_entree/description', userValue(window.description)); }
+    if (isUser(window.orientation)) { de['enum_orientation_id'] = userValue(window.orientation); log(ctx, 'baie_vitree/donnee_entree/enum_orientation_id', userValue(window.orientation)); }
+    if (isUser(window.glazingType)) { de['enum_type_vitrage_id'] = userValue(window.glazingType); log(ctx, 'baie_vitree/donnee_entree/enum_type_vitrage_id', userValue(window.glazingType)); }
+    if (isUser(window.frameMaterial)) { de['enum_type_materiaux_menuiserie_id'] = userValue(window.frameMaterial); log(ctx, 'baie_vitree/donnee_entree/enum_type_materiaux_menuiserie_id', userValue(window.frameMaterial)); }
+    if (isUser(window.solarFactorSw)) { di['sw'] = userValue(window.solarFactorSw); log(ctx, 'baie_vitree/donnee_intermediaire/sw', userValue(window.solarFactorSw)); }
+  });
+
+  overlayElements(ctx, [...env, 'porte_collection', 'porte'], view.doors, 'door', (item, door) => {
+    const de = child(item, 'donnee_entree');
+    const di = child(item, 'donnee_intermediaire');
+    if (isUser(door.uValueWm2K)) {
+      const v = userValue(door.uValueWm2K);
+      de['enum_methode_saisie_uporte_id'] = '2';
+      de['uporte_saisi'] = v;
+      di['uporte'] = v;
+      log(ctx, 'porte/donnee_entree/uporte_saisi', v);
+    }
+    if (isUser(door.areaM2)) { de['surface_porte'] = userValue(door.areaM2); log(ctx, 'porte/donnee_entree/surface_porte', userValue(door.areaM2)); }
+    if (isUser(door.count)) { de['nb_porte'] = userValue(door.count); log(ctx, 'porte/donnee_entree/nb_porte', userValue(door.count)); }
+    if (isUser(door.description)) { de['description'] = userValue(door.description); log(ctx, 'porte/donnee_entree/description', userValue(door.description)); }
+    if (isUser(door.doorType)) { de['enum_type_porte_id'] = userValue(door.doorType); log(ctx, 'porte/donnee_entree/enum_type_porte_id', userValue(door.doorType)); }
+  });
+
+  overlayElements(ctx, ['logement', 'installation_chauffage_collection', 'installation_chauffage'], view.heatingSystems, 'heating', (item, system) => {
+    const de = child(item, 'donnee_entree');
+    if (isUser(system.installationType)) { de['enum_type_installation_id'] = userValue(system.installationType); log(ctx, 'installation_chauffage/donnee_entree/enum_type_installation_id', userValue(system.installationType)); }
+    if (isUser(system.description)) { de['description'] = userValue(system.description); log(ctx, 'installation_chauffage/donnee_entree/description', userValue(system.description)); }
+    if (isUser(system.heatedAreaM2)) { de['surface_chauffee'] = userValue(system.heatedAreaM2); log(ctx, 'installation_chauffage/donnee_entree/surface_chauffee', userValue(system.heatedAreaM2)); }
+  });
+
+  overlayElements(ctx, ['logement', 'ventilation_collection', 'ventilation'], view.ventilationSystems, 'ventilation', (item, system) => {
+    const de = child(item, 'donnee_entree');
+    const di = child(item, 'donnee_intermediaire');
+    if (isUser(system.ventilationType)) { de['enum_type_ventilation_id'] = userValue(system.ventilationType); log(ctx, 'ventilation/donnee_entree/enum_type_ventilation_id', userValue(system.ventilationType)); }
+    if (isUser(system.description)) { de['description'] = userValue(system.description); log(ctx, 'ventilation/donnee_entree/description', userValue(system.description)); }
+    if (isUser(system.ventilatedAreaM2)) { de['surface_ventile'] = userValue(system.ventilatedAreaM2); log(ctx, 'ventilation/donnee_entree/surface_ventile', userValue(system.ventilatedAreaM2)); }
+    if (isUser(system.q4paConv)) { di['q4pa_conv'] = userValue(system.q4paConv); log(ctx, 'ventilation/donnee_intermediaire/q4pa_conv', userValue(system.q4paConv)); }
+  });
+
+  return ctx.defaults;
 }
 
 /**
@@ -104,22 +321,45 @@ function putRaw(ctx: Ctx, path: string[], value: unknown): void {
 /**
  * Maps a {@link BuildingSimulationView} to the Open3CL engine input.
  *
- * Two paths (see docs/phases/P2-simulation-mapping.md):
- * 1. **Verbatim source** (all imported buildings): when the view carries the
- *    retained source DPE XML, the engine input is exactly that document —
- *    this is what makes the adapter reproducible byte-for-byte against a
- *    direct engine run on the original diagnostic (AC-P2-02).
- * 2. **Reconstruction** (edited buildings, P4+): a DPE JSON object is
- *    rebuilt field-wise from the domain model. Every value taken from an
- *    inferred (confidence < 1) field, and every conventional default applied
- *    for an absent field, is recorded in `defaults` with its source and
- *    confidence — the caller must log them, never pass them silently.
+ * Three paths (see docs/phases/P2-simulation-mapping.md):
+ * 1. **Verbatim source** (imported buildings without user edits): when the
+ *    view carries the retained source DPE XML and no field is user-supplied,
+ *    the engine input is exactly that document — this is what makes the
+ *    adapter reproducible byte-for-byte against a direct engine run on the
+ *    original diagnostic (AC-P2-02).
+ * 1b. **Source + user-edit overlay** (P4 edits / P5 scenario forks): the
+ *    retained source document is parsed with the engine's own `xmlParser`
+ *    and ONLY the fields whose `Confidence.source === 'user'` are overlaid
+ *    at the engine patch points (`umur_saisi` + `enum_methode_saisie_u_id =
+ *    '9'`, …). The rest of the document stays verbatim; every overlay is
+ *    logged in `defaults` with source `user` and confidence 1.
+ * 2. **Reconstruction** (buildings without a retained source document, P4+):
+ *    a DPE JSON object is rebuilt field-wise from the domain model. Every
+ *    value taken from an inferred (confidence < 1) field, and every
+ *    conventional default applied for an absent field, is recorded in
+ *    `defaults` with its source and confidence — the caller must log them,
+ *    never pass them silently.
  *
  * @param view - read-only projection of the Building aggregate
  */
 export function buildEngineInput(view: BuildingSimulationView): EngineInputMapping {
   if (view.sourceDpeXml !== null && view.sourceDpeXml.trim().length > 0) {
-    return { input: { kind: 'xml', xml: view.sourceDpeXml }, defaults: [], verbatimSource: true };
+    // Path 1: verbatim source (imported buildings without user edits) —
+    // byte-for-byte the direct engine run (AC-P2-02).
+    if (!hasUserEdits(view)) {
+      return { input: { kind: 'xml', xml: view.sourceDpeXml }, defaults: [], verbatimSource: true, editedSource: false };
+    }
+    // Path 1b (P4/P5): the retained source document parsed exactly like
+    // calcul_3cl_xml does, with the user-supplied fields overlaid onto it.
+    // Nothing unmodelled is invented: the rest of the document stays verbatim.
+    const parsed = xmlParser.parse(view.sourceDpeXml) as Record<string, unknown>;
+    const dpe = parsed['dpe'];
+    if (typeof dpe !== 'object' || dpe === null || Array.isArray(dpe)) {
+      throw new SimulationMappingError('the retained source DPE XML did not parse to a dpe object');
+    }
+    const dpeObj = dpe as Record<string, unknown>;
+    const defaults = overlayUserEdits(dpeObj, view);
+    return { input: { kind: 'json', json: dpeObj }, defaults, verbatimSource: false, editedSource: true };
   }
   const ctx: Ctx = { root: {}, defaults: [] };
   const d = ENGINE_INPUT_DEFAULTS;
@@ -295,5 +535,5 @@ export function buildEngineInput(view: BuildingSimulationView): EngineInputMappi
     });
   }
 
-  return { input: { kind: 'json', json: ctx.root }, defaults: ctx.defaults, verbatimSource: false };
+  return { input: { kind: 'json', json: ctx.root }, defaults: ctx.defaults, verbatimSource: false, editedSource: false };
 }

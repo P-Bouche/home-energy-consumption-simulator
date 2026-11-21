@@ -4,6 +4,8 @@ export { createOpen3clAdapter, Open3clAdapter, type AdapterLogger } from './open
 export {
   buildEngineInput,
   ENGINE_INPUT_DEFAULTS,
+  hasUserEdits,
+  overlayUserEdits,
   type EngineInput,
   type EngineInputMapping,
   type MappingDefault

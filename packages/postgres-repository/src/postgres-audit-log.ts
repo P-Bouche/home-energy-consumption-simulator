@@ -4,37 +4,16 @@ import type { Pool } from 'pg';
 
 /**
  * Postgres adapter for the AuditLog port (P4): reads from the append-only
- * `audit_entries` table (schema v3). Writes go through {@link append}; the
- * append-only triggers of migration 0003_audit.sql reject any later mutation.
+ * `audit_entries` table (schema v3). Writes happen atomically with the
+ * building update inside PostgresBuildingRepository.update (same
+ * transaction); the append-only triggers of migration 0003_audit.sql reject
+ * any later mutation of an audit row.
  */
 export class PostgresAuditLog implements AuditLog {
   private readonly pool: Pool;
 
   constructor(pool: Pool) {
     this.pool = pool;
-  }
-
-  /**
-   * Appends one audit entry. The table rejects UPDATE/DELETE/TRUNCATE at DB
-   * level, so an appended entry can never be silently altered.
-   *
-   * @throws when the insert fails (error rethrown — never swallowed)
-   */
-  async append(entry: AuditEntry): Promise<void> {
-    await this.pool.query(
-      `INSERT INTO audit_entries (id, building_id, user_id, command_type, command, changes, version, created_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-      [
-        entry.id,
-        entry.buildingId,
-        entry.userId,
-        entry.commandType,
-        JSON.stringify(entry.command),
-        JSON.stringify(entry.changes),
-        entry.version,
-        entry.timestamp
-      ]
-    );
   }
 
   /**

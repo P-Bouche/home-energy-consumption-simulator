@@ -11,7 +11,7 @@ import {
 import { BuildingNotFoundError, StaleVersionError } from '../errors.ts';
 import type { Logger } from '../logger.ts';
 import { consoleLogger } from '../logger.ts';
-import type { AuditLog, BuildingRepository } from '../ports/index.ts';
+import type { BuildingRepository } from '../ports/index.ts';
 
 /**
  * Options of {@link EditBuildingUseCase.execute}: optimistic-locking
@@ -43,7 +43,6 @@ export interface EditBuildingResult {
  */
 export interface EditBuildingUseCaseDeps {
   readonly buildingRepository: BuildingRepository;
-  readonly auditLog: AuditLog;
   readonly logger?: Logger;
   readonly now?: () => Date;
 }
@@ -55,13 +54,13 @@ export const EDIT_BUILDING_USE_CASE = Symbol('EditBuildingUseCase');
 
 /**
  * Use case (P4): apply one validated domain command to a persisted building
- * and persist the result with optimistic locking + audit trail.
+ * and persist the result atomically with optimistic locking + audit trail.
  *
  * Flow: load (404) → version pre-check (409) → `Building.apply(command)`
  * (pure domain validation; typed CommandError → 400/404, nothing persisted) →
- * repository.update with expectedVersion (409 on race) → auditLog.append
- * (append-only). The update is written before the audit row so a rejected
- * edit never leaves an orphan audit entry.
+ * ONE `repository.update({ building, report, expectedVersion, auditEntry })`
+ * call that writes the new state and the audit row in a single transaction
+ * (409 on race — in which case nothing at all is written).
  *
  * After a successful edit the building's input hash changes, so the next P2
  * `POST /buildings/:id/simulations` is a cache miss and runs the engine again
@@ -69,13 +68,11 @@ export const EDIT_BUILDING_USE_CASE = Symbol('EditBuildingUseCase');
  */
 export class EditBuildingUseCase {
   private readonly buildingRepository: BuildingRepository;
-  private readonly auditLog: AuditLog;
   private readonly logger: Logger;
   private readonly now: () => Date;
 
   constructor(deps: EditBuildingUseCaseDeps) {
     this.buildingRepository = deps.buildingRepository;
-    this.auditLog = deps.auditLog;
     this.logger = deps.logger ?? consoleLogger;
     this.now = deps.now ?? (() => new Date());
   }
@@ -89,6 +86,35 @@ export class EditBuildingUseCase {
    * @throws CommandError subclasses (400/404) when the domain rejects the command
    */
   async execute(buildingId: BuildingId, command: BuildingCommand, options: EditBuildingOptions): Promise<EditBuildingResult> {
+    return this.executeInternal(buildingId, options, (building, ctx) => building.apply(command, ctx));
+  }
+
+  /**
+   * Undo path (FR-P4-05): applies the inverse of an audit entry while
+   * restoring the FULL original Confidence (source/confidence) of every
+   * changed field — the building genuinely returns to its pre-edit provenance.
+   *
+   * @param buildingId - id of the building to undo
+   * @param entry - the audit entry to undo (its inverse command is applied
+   * and the undo itself is audit-logged)
+   * @param options - expectedVersion (If-Match) + userId
+   */
+  async executeRestoration(
+    buildingId: BuildingId,
+    entry: AuditEntry,
+    options: EditBuildingOptions
+  ): Promise<EditBuildingResult> {
+    return this.executeInternal(buildingId, options, (building, ctx) => building.applyRestoration(entry, ctx));
+  }
+
+  /**
+   * Shared flow of {@link execute} and {@link executeRestoration}.
+   */
+  private async executeInternal(
+    buildingId: BuildingId,
+    options: EditBuildingOptions,
+    applyFn: (building: Building, ctx: { now: Date; userId: string }) => ReturnType<Building['apply']>
+  ): Promise<EditBuildingResult> {
     const stored = await this.buildingRepository.findById(buildingId);
     if (stored === null) {
       throw new BuildingNotFoundError(buildingId);
@@ -97,34 +123,21 @@ export class EditBuildingUseCase {
     if (building.version !== options.expectedVersion) {
       throw new StaleVersionError(buildingId, options.expectedVersion, building.version);
     }
-    const applied = building.apply(command, { now: this.now(), userId: options.userId });
+    const applied = applyFn(building, { now: this.now(), userId: options.userId });
     if (!applied.ok) {
       throw applied.error;
     }
     const next = applied.value;
     const events = next.pullDomainEvents();
     const updated = events.find((e): e is BuildingUpdated => e instanceof BuildingUpdated);
-    const entry = auditEntryFromEvent(randomUUID(), updated ?? fallbackEvent(next, command, options));
-    await this.buildingRepository.update({ building: next, report, expectedVersion: options.expectedVersion });
-    await this.auditLog.append(entry);
+    if (updated === undefined) {
+      throw new Error(`apply on building ${buildingId} did not emit a BuildingUpdated event`);
+    }
+    const entry = auditEntryFromEvent(randomUUID(), updated);
+    await this.buildingRepository.update({ building: next, report, expectedVersion: options.expectedVersion, auditEntry: entry });
     this.logger.log(
-      `building ${buildingId} updated by ${options.userId}: ${command.type} → version ${next.version} (audit ${entry.id})`
+      `building ${buildingId} updated by ${options.userId}: ${updated.commandType} → version ${next.version} (audit ${entry.id})`
     );
     return { building: next, entry, events };
   }
-}
-
-/**
- * Defensive fallback: apply() always emits exactly one BuildingUpdated event,
- * so this is only reachable if that invariant is broken.
- */
-function fallbackEvent(building: Building, command: BuildingCommand, options: EditBuildingOptions): BuildingUpdated {
-  return new BuildingUpdated({
-    buildingId: building.id,
-    userId: options.userId,
-    command,
-    changes: [],
-    version: building.version,
-    occurredAt: new Date()
-  });
 }

@@ -6,9 +6,11 @@ import {
   type Confidence,
   type ConfidenceJson
 } from './confidence.ts';
+import type { AuditEntry } from './audit.ts';
 import {
   COMMAND_EDITABLE_FIELDS,
   COMMAND_ELEMENT,
+  inverseOfCommand,
   validateCommandFields,
   type BuildingCommand
 } from './commands.ts';
@@ -389,6 +391,43 @@ export class Building {
    * @returns Right(new Building) on success, Left(CommandError) on rejection
    */
   apply(command: BuildingCommand, ctx: { readonly now: Date; readonly userId: string }): Either<CommandError, Building> {
+    return this.applyInternal(command, ctx, null);
+  }
+
+  /**
+   * Applies the inverse of an audit entry, restoring the FULL original
+   * Confidence of every changed field (source + confidence + importDate, e.g.
+   * `dpe-xml:…`) instead of re-stamping `source: "user"` (P4 undo, FR-P4-05).
+   * The building therefore genuinely returns to its pre-edit provenance —
+   * which also keeps the Open3CL overlay path from treating a restored value
+   * as a user-entered one. Pure: returns a new aggregate, emits
+   * {@link BuildingUpdated} with the inverse command.
+   *
+   * @param entry - the audit entry to undo
+   * @param ctx - `now` and `userId`
+   */
+  applyRestoration(entry: AuditEntry, ctx: { readonly now: Date; readonly userId: string }): Either<CommandError, Building> {
+    const inverse = inverseOfCommand(entry.command, entry.changes);
+    if (!inverse.ok) {
+      return inverse;
+    }
+    const restoration = new Map<string, ConfidenceJson<unknown> | null>(
+      entry.changes.map((c) => [c.field, c.oldValue])
+    );
+    return this.applyInternal(inverse.value, ctx, restoration);
+  }
+
+  /**
+   * Shared pure application path of {@link apply} and {@link applyRestoration}.
+   *
+   * @param restoration - when set, field values are taken from the audited
+   * old Confidence JSON (full provenance) instead of being re-stamped "user"
+   */
+  private applyInternal(
+    command: BuildingCommand,
+    ctx: { readonly now: Date; readonly userId: string },
+    restoration: ReadonlyMap<string, ConfidenceJson<unknown> | null> | null
+  ): Either<CommandError, Building> {
     if (command.buildingId !== this.id) {
       return left(
         new CommandValidationError([
@@ -400,7 +439,7 @@ export class Building {
     if (fieldErrors.length > 0) {
       return left(new CommandValidationError(fieldErrors));
     }
-    const applied = this.applyToElements(command, ctx.now);
+    const applied = this.applyToElements(command, ctx.now, restoration);
     if (!applied.ok) {
       return applied;
     }
@@ -454,7 +493,8 @@ export class Building {
    */
   private applyToElements(
     command: BuildingCommand,
-    now: Date
+    now: Date,
+    restoration: ReadonlyMap<string, ConfidenceJson<unknown> | null> | null = null
   ): Either<CommandError, { patch: Partial<BuildingInput>; changes: FieldChange[] }> {
     const { idField, kind } = COMMAND_ELEMENT[command.type];
     const rec = command as unknown as Record<string, unknown>;
@@ -485,7 +525,15 @@ export class Building {
       const value = rec[field];
       if (value === undefined) continue;
       const oldConfidence = (element[field] ?? null) as Confidence<unknown> | null;
-      const newConfidence = value === null ? null : userSupplied(value, now);
+      const restored = restoration?.get(field) ?? undefined;
+      const newConfidence =
+        restored !== undefined
+          ? restored === null
+            ? null
+            : confidenceFromJson(restored)
+          : value === null
+            ? null
+            : userSupplied(value, now);
       patched[field] = newConfidence;
       changes.push({
         field,
@@ -497,7 +545,12 @@ export class Building {
     if (command.type === 'building.window.update.v1' && rec['areaM2'] !== undefined) {
       const wallsArea = this.walls.reduce((sum, w) => sum + (w.areaM2?.value ?? 0), 0);
       const windowsArea = this.windows.reduce((sum, w) => {
-        const area = w.id === elementId && rec['areaM2'] !== null ? (rec['areaM2'] as number) : (w.areaM2?.value ?? 0);
+        const area =
+          w.id === elementId
+            ? rec['areaM2'] === null
+              ? 0 // cleared: counts as no window area
+              : (rec['areaM2'] as number)
+            : (w.areaM2?.value ?? 0);
         return sum + area;
       }, 0);
       if (wallsArea > 0 && windowsArea > wallsArea) {

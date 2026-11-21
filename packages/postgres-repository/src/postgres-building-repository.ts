@@ -81,17 +81,18 @@ export class PostgresBuildingRepository implements BuildingRepository {
   }
 
   /**
-   * Persists an edited aggregate with optimistic locking (P4, TR-P4-02) in a
-   * single transaction: `SELECT … FOR UPDATE`, version check, conditional
-   * `UPDATE`. The JSONB document is rewritten; the `version` column is the
-   * lock (not duplicated inside `data`).
+   * Persists an edited aggregate and its audit entry atomically (P4) in ONE
+   * transaction: `SELECT … FOR UPDATE`, version check, conditional `UPDATE`
+   * of the JSONB document + `version` column, and the `INSERT` into the
+   * append-only `audit_entries` table. A crash can never leave version N+1
+   * without its audit row.
    *
    * @throws BuildingNotFoundError when the id is unknown
    * @throws StaleVersionError when the persisted version no longer equals
-   * expectedVersion (another edit won the race → HTTP 409)
+   * expectedVersion (another edit won the race → HTTP 409; nothing is written)
    */
   async update(input: UpdateBuildingInput): Promise<StoredBuilding> {
-    const { building, report, expectedVersion } = input;
+    const { building, report, expectedVersion, auditEntry } = input;
     const client = await this.pool.connect();
     try {
       await client.query('BEGIN');
@@ -105,11 +106,25 @@ export class PostgresBuildingRepository implements BuildingRepository {
       }
       const updated = await client.query(
         'UPDATE buildings SET data = $2, version = $3 WHERE id = $1 AND version = $4',
-        [JSON.stringify(building.toJson()), building.version, building.id, expectedVersion]
+        [building.id, JSON.stringify(building.toJson()), building.version, expectedVersion]
       );
       if (updated.rowCount !== 1) {
         throw new StaleVersionError(building.id, expectedVersion, lockedRow.version);
       }
+      await client.query(
+        `INSERT INTO audit_entries (id, building_id, user_id, command_type, command, changes, version, created_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+        [
+          auditEntry.id,
+          auditEntry.buildingId,
+          auditEntry.userId,
+          auditEntry.commandType,
+          JSON.stringify(auditEntry.command),
+          JSON.stringify(auditEntry.changes),
+          auditEntry.version,
+          auditEntry.timestamp
+        ]
+      );
       await client.query('COMMIT');
       return { building, report };
     } catch (error) {
