@@ -1,6 +1,6 @@
 # Mission: wave-1 A2 — collapsed import report, copy hygiene, MUI theme (UX US 6, 11; UI F1, F2)
 
-Open ONE pull request on branch `feat/web-report-and-theme` targeting `main`. Leave it open for
+Open ONE pull request on branch `feat/web-report-and-theme` targeting `main` — **issue #27 (PR body ends with `Closes #27`)**. Leave it open for
 review; do not merge. Read `AGENTS.md` first, then both audits
 (`docs/audits/2026-11-21-ux-audit.md`, `docs/audits/2026-11-21-ui-3d-audit.md`): you are
 implementing **UX US 6 and 11 plus UI findings F1 and F2**. Presentation-only; no API/domain/engine

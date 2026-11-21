@@ -1,6 +1,6 @@
 # Mission: wave-1 C — 3D visual pass (UX US 5 visual part; UI audit F8, F9, F10, F11, F12)
 
-Open ONE pull request on branch `feat/web-3d-visual-pass` targeting `main`. Leave it open for
+Open ONE pull request on branch `feat/web-3d-visual-pass` targeting `main` — **issue #29 (PR body ends with `Closes #29`)**. Leave it open for
 review; do not merge. Read `AGENTS.md` first, then `docs/audits/2026-11-21-ui-3d-audit.md`: you
 are implementing the **Class A ("visual-only") items of §5/§6**. Geometry (Class B: pitched
 roof, real openings, multi-level) is OUT of scope and will be its own wave-3 mission with its

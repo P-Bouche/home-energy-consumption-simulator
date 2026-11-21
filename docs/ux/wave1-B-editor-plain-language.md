@@ -1,6 +1,6 @@
 # Mission: wave-1 B — plain-language editor, level S (UX audit US 1, 8, 9 = the BLOCKER)
 
-Open ONE pull request on branch `feat/web-editor-plain-language` targeting `main`. Leave it open
+Open ONE pull request on branch `feat/web-editor-plain-language` targeting `main` — **issue #28 (PR body ends with `Closes #28`)**. Leave it open
 for review; do not merge. Read `AGENTS.md` first, then `docs/audits/2026-11-21-ux-audit.md`: you
 are implementing the **"S — label and explain"** option of the editor deep-dive (US 1 partially,
 US 8, US 9). Level S only — presets (M) and work-first editing (L) are future missions; do not
