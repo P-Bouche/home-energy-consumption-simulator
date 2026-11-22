@@ -76,3 +76,28 @@ test('« Voir le modèle 3D » in the workspace header opens the 3D viewer route
   await expect(page).toHaveURL(/#\/building\/[0-9a-f-]{36}$/);
   await expect(page.getByTestId('viewer-3d')).toBeVisible({ timeout: 30_000 });
 });
+
+/**
+ * Issue #42 (M2, mobile): the workspace tabs must stay reachable by touch on a
+ * small screen — scrollable variant with scroll buttons instead of a hidden
+ * overflow that clips tabs off-screen.
+ */
+test('mobile viewport: workspace tabs are scrollable, not clipped (issue #42)', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  await page.getByTestId('file-input').setInputFiles(fixture);
+  await expect(page.getByTestId('upload-success')).toContainText('Bâtiment importé');
+  const tabsBar = page.getByTestId('workspace-tabs');
+  await expect(tabsBar).toBeVisible();
+  const scroller = tabsBar.locator('.MuiTabs-scroller');
+  await expect(scroller).toHaveClass(/MuiTabs-scrollableX/);
+  const info = await page.evaluate(() => {
+    const scroller = document.querySelector('[data-testid="workspace-tabs"] .MuiTabs-scroller') as HTMLElement;
+    const cs = getComputedStyle(scroller);
+    return { overflowX: cs.overflowX, scrollButtons: document.querySelectorAll('[data-testid="workspace-tabs"] .MuiTabs-scrollButtons').length };
+  });
+  expect(info.overflowX).not.toBe('hidden');
+  for (const id of ['tab-synthese', 'tab-report', 'tab-editor', 'tab-scenarios']) {
+    await expect(page.getByTestId(id)).toBeAttached();
+  }
+});

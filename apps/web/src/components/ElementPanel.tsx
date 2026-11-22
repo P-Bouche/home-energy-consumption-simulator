@@ -41,7 +41,13 @@ export function ElementPanel() {
     <Paper
       data-testid="element-panel"
       elevation={3}
-      sx={{ width: 320, p: 2, overflowY: 'auto', borderRadius: theme.shape.borderRadius }}
+      sx={{
+        width: { xs: '100%', md: 320 },
+        maxHeight: { xs: '38vh', md: 'none' },
+        p: 2,
+        overflowY: 'auto',
+        borderRadius: theme.shape.borderRadius
+      }}
     >
       <Typography variant="h6" component="h2">
         Élément sélectionné

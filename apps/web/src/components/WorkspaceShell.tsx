@@ -91,6 +91,9 @@ export function WorkspaceShell({
       <Tabs
         value={tab}
         onChange={(_event, value) => setTab(value as WorkspaceTab)}
+        variant="scrollable"
+        scrollButtons="auto"
+        allowScrollButtonsMobile
         sx={{ mt: 2 }}
         data-testid="workspace-tabs"
       >
