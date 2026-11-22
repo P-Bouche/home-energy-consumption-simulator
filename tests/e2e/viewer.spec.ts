@@ -339,3 +339,28 @@ test.describe('AC-P3-02: corpus fixtures render (screenshot + mesh-hash regressi
     });
   }
 });
+
+/**
+ * Issue #42 (M1, mobile): at a 390x844 viewport the 3D canvas must use the
+ * full screen width (the element panel moves below it in column layout),
+ * instead of being squeezed to ~70 px by the fixed 320 px side panel.
+ */
+test('mobile viewport: the 3D canvas spans the viewport width, panel below', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const xml = readFileSync(path.join(fixturesDir, '2238E0097309E.xml'), 'utf8');
+  await page.goto('/');
+  const buildingId = await uploadViaApi(page, xml, '2238E0097309E.xml');
+  await page.goto(`/#/building/${buildingId}`);
+  await page.locator('canvas').waitFor({ timeout: 30_000 });
+  await page.waitForTimeout(1500);
+  const layout = await page.evaluate(() => {
+    const canvas = document.querySelector('canvas') as HTMLCanvasElement;
+    const panel = document.querySelector('[data-testid="element-panel"]') as HTMLElement;
+    const cr = canvas.getBoundingClientRect();
+    const pr = panel.getBoundingClientRect();
+    return { viewportW: window.innerWidth, canvasW: cr.width, panelW: pr.width, panelTop: pr.top, canvasBottom: cr.bottom };
+  });
+  expect(layout.canvasW).toBeGreaterThan(layout.viewportW * 0.9);
+  expect(layout.panelW).toBeLessThanOrEqual(layout.viewportW);
+  expect(layout.panelTop).toBeGreaterThanOrEqual(layout.canvasBottom - 1);
+});

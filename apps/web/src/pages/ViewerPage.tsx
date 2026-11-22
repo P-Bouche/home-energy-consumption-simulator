@@ -189,9 +189,15 @@ export function ViewerPage({ buildingId }: Readonly<{ buildingId: string }>) {
           Pertes de chaleur indisponibles : {overlayError}
         </Alert>
       )}
-      <Box sx={{ display: 'flex', flex: 1, minHeight: 0 }}>
+      <Box sx={{ display: 'flex', flex: 1, minHeight: 0, flexDirection: { xs: 'column', md: 'row' } }}>
         <Box
-          sx={{ flex: 1, minWidth: 0, position: 'relative', cursor: hoveredElementId !== null ? 'pointer' : 'default' }}
+          sx={{
+            flex: 1,
+            minWidth: 0,
+            minHeight: 0,
+            position: 'relative',
+            cursor: hoveredElementId !== null ? 'pointer' : 'default'
+          }}
           data-testid="viewer-3d"
         >
           {geometry !== null && frame !== null && layout !== null && (
