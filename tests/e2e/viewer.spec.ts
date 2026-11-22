@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { expect, test } from '@playwright/test';
 import { BufferAttribute, BufferGeometry, Mesh, MeshBasicMaterial, PerspectiveCamera, Raycaster, Vector2, Vector3 } from 'three';
+import { confidenceInWords } from '../../apps/web/src/services/confidence-words.ts';
 
 const repoRoot = fileURLToPath(new URL('../../', import.meta.url));
 const fixturesDir = path.join(repoRoot, 'packages/open3cl-adapter/test/fixtures');
@@ -186,8 +187,17 @@ test('viewer renders the building upright, marks inferred elements, tooltip + pi
     const areaText = (await page.getByTestId('element-area').textContent()) ?? '';
     expect(areaText).toContain(`${picked.areaM2.value} m²`);
   }
+  // wave-2 D (US 7 / F6): the side panel renders confidence in plain words
+  // (« mesuré par le DPE » / « estimé — à vérifier »), the numeric score as a
+  // subtle secondary indicator, and the raw source path behind the
+  // « d'où vient cette valeur ? » detail
+  await expect(page.getByTestId('element-confidence')).toContainText(
+    picked !== undefined ? confidenceInWords(picked.placement) : 'confiance'
+  );
   await expect(page.getByTestId('element-confidence')).toContainText('confiance');
-  await expect(page.getByTestId('element-confidence')).toContainText(picked?.placement.source ?? 'source');
+  await expect(page.getByTestId('element-confidence-detail')).toBeHidden();
+  await page.getByTestId('element-confidence-toggle').click();
+  await expect(page.getByTestId('element-confidence-detail')).toContainText(picked?.placement.source ?? 'source');
 
   // AC-P3-03: hovering shows the tooltip with { source, confidence }
   await page.mouse.move(cx, cy);
