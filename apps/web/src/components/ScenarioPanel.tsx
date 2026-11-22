@@ -32,6 +32,13 @@ import { buildCommand, catalogEntryFor, COMMAND_CATALOG, type CommandCatalogFiel
 import { useEnumLabels } from '../hooks/use-enum-labels.ts';
 import { enumOptions } from '../services/enum-labels.ts';
 import { describeU } from '../services/u-reading.ts';
+import {
+  catalogEntryForWork,
+  composeWorkCommand,
+  elementOptionsForWork,
+  uNounForTargetKind,
+  WORK_CATALOG
+} from '../services/work-catalog.ts';
 import type { CommandJson, ComparisonEntryJson } from '../types.ts';
 
 const LABEL_COLORS: Record<string, string> = {
@@ -66,15 +73,18 @@ interface CommandRow {
   readonly values: Record<string, string>;
 }
 
-/** plain-language noun for the U reading, per catalog target kind */
-const U_NOUN: Record<string, { noun: string; gender: 'm' | 'f' }> = {
-  walls: { noun: 'mur', gender: 'm' },
-  roofs: { noun: 'toiture', gender: 'f' },
-  floors: { noun: 'plancher', gender: 'm' },
-  windows: { noun: 'baie vitrée', gender: 'f' },
-  heatingSystems: { noun: 'paroi', gender: 'f' },
-  ventilationSystems: { noun: 'paroi', gender: 'f' }
-};
+/** one row of the work-first form: a named work + its target element + parameter values */
+interface WorkRow {
+  readonly workId: string;
+  readonly targetId: string;
+  readonly values: Record<string, string>;
+}
+
+/** form mode: work-first (default, UX US 10) or the raw command-row editor (advanced) */
+type FormMode = 'work' | 'advanced';
+
+const DEFAULT_WORK_ROW: WorkRow = { workId: 'wall-insulation', targetId: '', values: { uValueWm2K: '' } };
+const DEFAULT_COMMAND_ROW: CommandRow = { type: 'building.wall.update.v1', targetId: '', values: { uValueWm2K: '' } };
 
 /**
  * Scenario panel (P5 headless): scenario list + editor (command catalog) +
@@ -98,9 +108,11 @@ export function ScenarioPanel({ buildingId }: { readonly buildingId: string }) {
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [rows, setRows] = useState<CommandRow[]>([{ type: 'building.wall.update.v1', targetId: '', values: { uValueWm2K: '' } }]);
+  const [mode, setMode] = useState<FormMode>('work');
+  const [works, setWorks] = useState<WorkRow[]>([{ ...DEFAULT_WORK_ROW, values: { ...DEFAULT_WORK_ROW.values } }]);
+  const [rows, setRows] = useState<CommandRow[]>([{ ...DEFAULT_COMMAND_ROW, values: { ...DEFAULT_COMMAND_ROW.values } }]);
   const [formError, setFormError] = useState<string | null>(null);
-  const enumTables = useEnumLabels(['installationType', 'ventilationType']);
+  const enumTables = useEnumLabels(['orientation', 'installationType', 'ventilationType']);
 
   useEffect(() => {
     void load(buildingId);
@@ -119,25 +131,25 @@ export function ScenarioPanel({ buildingId }: { readonly buildingId: string }) {
   }, [building]);
 
   /**
-   * Renders one catalog field: enum fields as a labeled select (French label
-   * first, raw id secondary; the raw id is still what `buildCommand` sends),
-   * numeric fields with their min/max bounds and a plain-language U reading
-   * in the helper text.
+   * Renders one catalog field (shared by the work-first form and the advanced
+   * command rows): enum fields as a labeled select (French label first, raw id
+   * secondary; the raw id is still what `buildCommand` sends), numeric fields
+   * with their min/max bounds and a plain-language U reading in the helper
+   * text.
    */
   const renderCatalogField = (
     field: CommandCatalogField,
     targetKind: string,
-    row: CommandRow,
-    index: number
+    values: Record<string, string>,
+    setValue: (next: string) => void,
+    testId: string
   ): React.ReactElement => {
-    const value = row.values[field.key] ?? '';
-    const setValue = (next: string): void =>
-      setRows(rows.map((r, i) => (i === index ? { ...r, values: { ...r.values, [field.key]: next } } : r)));
+    const value = values[field.key] ?? '';
     if (field.enumKind !== undefined) {
       const table = enumTables[field.enumKind] ?? null;
       const options = enumOptions(table, value);
       return (
-        <FormControl key={field.key} size="small" sx={{ minWidth: 220, flexShrink: 0 }} data-testid={`command-field-${index}-${field.key}`}>
+        <FormControl key={field.key} size="small" sx={{ minWidth: 220, flexShrink: 0 }} data-testid={testId}>
           <InputLabel>{field.label}</InputLabel>
           <Select label={field.label} value={value} onChange={(e) => setValue(String(e.target.value))}>
             <MenuItem value="" disabled>
@@ -157,7 +169,7 @@ export function ScenarioPanel({ buildingId }: { readonly buildingId: string }) {
       );
     }
     const typedNum = value.trim() === '' ? Number.NaN : Number(value);
-    const noun = U_NOUN[targetKind] ?? { noun: 'paroi', gender: 'f' as const };
+    const noun = uNounForTargetKind(targetKind);
     const reading = Number.isFinite(typedNum) && typedNum > 0 ? describeU(typedNum, noun.noun, noun.gender) : '';
     const helper = [reading, field.helper].filter((p) => p !== undefined && p !== '').join(' · ');
     return (
@@ -168,7 +180,7 @@ export function ScenarioPanel({ buildingId }: { readonly buildingId: string }) {
         label={field.label}
         placeholder={field.placeholder}
         value={value}
-        data-testid={`command-field-${index}-${field.key}`}
+        data-testid={testId}
         slotProps={{
           htmlInput: {
             ...(field.min !== undefined ? { min: field.min } : {}),
@@ -189,19 +201,32 @@ export function ScenarioPanel({ buildingId }: { readonly buildingId: string }) {
       return;
     }
     const commands: CommandJson[] = [];
-    for (const row of rows) {
-      const entry = catalogEntryFor(row.type);
-      if (entry === undefined || row.targetId === '') {
-        setFormError('Chaque commande doit avoir un type et un élément cible.');
-        return;
+    if (mode === 'work') {
+      // work-first (US 10): each named work composes the exact same frozen
+      // command as the advanced row editor (same buildCommand path)
+      for (const work of works) {
+        if (catalogEntryForWork(work.workId) === undefined || work.targetId === '') {
+          setFormError('Chaque travail doit avoir un élément cible.');
+          return;
+        }
+        commands.push(composeWorkCommand(work.workId, work.targetId, work.values) as CommandJson);
       }
-      commands.push(buildCommand(row.type, entry.targetIdField, row.targetId, row.values));
+    } else {
+      for (const row of rows) {
+        const entry = catalogEntryFor(row.type);
+        if (entry === undefined || row.targetId === '') {
+          setFormError('Chaque commande doit avoir un type et un élément cible.');
+          return;
+        }
+        commands.push(buildCommand(row.type, entry.targetIdField, row.targetId, row.values));
+      }
     }
     try {
       await create({ name: name.trim(), description: description.trim(), commands });
       setName('');
       setDescription('');
-      setRows([{ type: 'building.wall.update.v1', targetId: '', values: { uValueWm2K: '' } }]);
+      setWorks([{ ...DEFAULT_WORK_ROW, values: { ...DEFAULT_WORK_ROW.values } }]);
+      setRows([{ ...DEFAULT_COMMAND_ROW, values: { ...DEFAULT_COMMAND_ROW.values } }]);
     } catch {
       // the store carries the error message
     }
@@ -213,8 +238,8 @@ export function ScenarioPanel({ buildingId }: { readonly buildingId: string }) {
         Scénarios de rénovation
       </Typography>
       <Typography variant="body2" color="text.secondary">
-        Chaque scénario est un ensemble de commandes déclaratives appliquées à une copie du bâtiment, simulées via
-        Open3CL puis comparées à l’état initial.
+        Décrivez les travaux envisagés : chaque scénario est simulé via Open3CL sur une copie du bâtiment, puis
+        comparé à l’état initial.
       </Typography>
 
       {status === 'error' && (
@@ -260,60 +285,160 @@ export function ScenarioPanel({ buildingId }: { readonly buildingId: string }) {
       </Box>
 
       <Divider sx={{ my: 2 }} />
-      <Typography variant="subtitle1">Nouveau scénario</Typography>
+      <Stack direction="row" spacing={1} sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
+        <Typography variant="subtitle1">Nouveau scénario</Typography>
+        <Button
+          size="small"
+          variant={mode === 'advanced' ? 'outlined' : 'text'}
+          data-testid="advanced-mode-toggle"
+          onClick={() => setMode(mode === 'work' ? 'advanced' : 'work')}
+        >
+          {mode === 'advanced' ? 'Mode travaux' : 'Mode avancé'}
+        </Button>
+      </Stack>
       <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
         <TextField size="small" label="Nom" value={name} onChange={(e) => setName(e.target.value)} data-testid="new-scenario-name" />
         <TextField size="small" label="Description" value={description} onChange={(e) => setDescription(e.target.value)} data-testid="new-scenario-description" sx={{ minWidth: 260 }} />
       </Stack>
-      {rows.map((row, index) => {
-        const entry = catalogEntryFor(row.type);
-        const targets = entry === undefined ? [] : (targetOptions[entry.targetKind] ?? []);
-        return (
-          <Stack direction="row" spacing={1} key={index} sx={{ mt: 1, alignItems: 'center', flexWrap: 'wrap' }} data-testid={`command-row-${index}`}>
-            <Select
-              size="small"
-              value={row.type}
-              data-testid={`command-type-${index}`}
-              sx={{ maxWidth: 240, '& .MuiSelect-select': { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }}
-              onChange={(e) => {
-                const next = catalogEntryFor(e.target.value);
-                setRows(rows.map((r, i) => (i === index ? { type: e.target.value, targetId: '', values: next === undefined ? {} : Object.fromEntries(next.fields.map((f) => [f.key, ''])) } : r)));
-              }}
-            >
-              {COMMAND_CATALOG.map((c) => (
-                <MenuItem key={c.type} value={c.type}>
-                  {c.label}
-                </MenuItem>
-              ))}
-            </Select>
-            <Select
-              size="small"
-              displayEmpty
-              value={row.targetId}
-              data-testid={`command-target-${index}`}
-              sx={{ maxWidth: 320, '& .MuiSelect-select': { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }}
-              onChange={(e) => setRows(rows.map((r, i) => (i === index ? { ...r, targetId: e.target.value } : r)))}
-            >
-              <MenuItem value="" disabled>
-                Élément…
-              </MenuItem>
-              {targets.map((t) => (
-                <MenuItem key={t.id} value={t.id} sx={{ whiteSpace: 'normal' }}>
-                  {t.id} — {t.description?.value ?? ''}
-                </MenuItem>
-              ))}
-            </Select>
-            {entry?.fields.map((field) => renderCatalogField(field, entry.targetKind, row, index))}
-            <IconButton size="small" aria-label="retirer la commande" data-testid={`remove-command-${index}`} onClick={() => setRows(rows.filter((_, i) => i !== index))}>
-              <DeleteIcon fontSize="small" />
-            </IconButton>
-          </Stack>
-        );
-      })}
+      {mode === 'work' ? (
+        <>
+          <Typography variant="subtitle2" sx={{ mt: 2 }}>
+            Travaux envisagés
+          </Typography>
+          {works.map((work, index) => {
+            const entry = catalogEntryForWork(work.workId);
+            const options = elementOptionsForWork(work.workId, building, enumTables);
+            return (
+              <Stack direction="row" spacing={1} key={index} sx={{ mt: 1, alignItems: 'center', flexWrap: 'wrap' }} data-testid={`work-row-${index}`}>
+                <FormControl size="small" sx={{ minWidth: 240, flexShrink: 0 }} data-testid={`work-type-${index}`}>
+                  <InputLabel>Travail</InputLabel>
+                  <Select
+                    label="Travail"
+                    value={work.workId}
+                    onChange={(e) => {
+                      const next = catalogEntryForWork(String(e.target.value));
+                      setWorks(
+                        works.map((w, i) =>
+                          i === index
+                            ? {
+                                workId: String(e.target.value),
+                                targetId: '',
+                                values: next === undefined ? {} : Object.fromEntries(next.fields.map((f) => [f.key, '']))
+                              }
+                            : w
+                        )
+                      );
+                    }}
+                  >
+                    {WORK_CATALOG.map((w) => (
+                      <MenuItem key={w.id} value={w.id}>
+                        <ListItemText primary={w.label} secondary={w.hint} />
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <FormControl size="small" sx={{ minWidth: 300, flexShrink: 0 }} data-testid={`work-target-${index}`}>
+                  <InputLabel>Élément</InputLabel>
+                  <Select
+                    label="Élément"
+                    displayEmpty
+                    value={work.targetId}
+                    sx={{ '& .MuiSelect-select': { whiteSpace: 'normal' } }}
+                    onChange={(e) => setWorks(works.map((w, i) => (i === index ? { ...w, targetId: String(e.target.value) } : w)))}
+                  >
+                    <MenuItem value="" disabled>
+                      Élément…
+                    </MenuItem>
+                    {options.map((o) => (
+                      <MenuItem key={o.id} value={o.id} sx={{ whiteSpace: 'normal' }}>
+                        <ListItemText primary={o.primary} secondary={o.secondary} />
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                {entry?.fields.map((field) =>
+                  renderCatalogField(
+                    field,
+                    entry.targetKind,
+                    work.values,
+                    (next) => setWorks(works.map((w, i) => (i === index ? { ...w, values: { ...w.values, [field.key]: next } } : w))),
+                    `work-field-${index}-${field.key}`
+                  )
+                )}
+                <IconButton size="small" aria-label="retirer le travail" data-testid={`remove-work-${index}`} onClick={() => setWorks(works.filter((_, i) => i !== index))}>
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
+              </Stack>
+            );
+          })}
+        </>
+      ) : (
+        <>
+          {rows.map((row, index) => {
+            const entry = catalogEntryFor(row.type);
+            const targets = entry === undefined ? [] : (targetOptions[entry.targetKind] ?? []);
+            return (
+              <Stack direction="row" spacing={1} key={index} sx={{ mt: 1, alignItems: 'center', flexWrap: 'wrap' }} data-testid={`command-row-${index}`}>
+                <Select
+                  size="small"
+                  value={row.type}
+                  data-testid={`command-type-${index}`}
+                  sx={{ maxWidth: 240, '& .MuiSelect-select': { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }}
+                  onChange={(e) => {
+                    const next = catalogEntryFor(e.target.value);
+                    setRows(rows.map((r, i) => (i === index ? { type: e.target.value, targetId: '', values: next === undefined ? {} : Object.fromEntries(next.fields.map((f) => [f.key, ''])) } : r)));
+                  }}
+                >
+                  {COMMAND_CATALOG.map((c) => (
+                    <MenuItem key={c.type} value={c.type}>
+                      {c.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+                <Select
+                  size="small"
+                  displayEmpty
+                  value={row.targetId}
+                  data-testid={`command-target-${index}`}
+                  sx={{ maxWidth: 320, '& .MuiSelect-select': { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }}
+                  onChange={(e) => setRows(rows.map((r, i) => (i === index ? { ...r, targetId: e.target.value } : r)))}
+                >
+                  <MenuItem value="" disabled>
+                    Élément…
+                  </MenuItem>
+                  {targets.map((t) => (
+                    <MenuItem key={t.id} value={t.id} sx={{ whiteSpace: 'normal' }}>
+                      {t.id} — {t.description?.value ?? ''}
+                    </MenuItem>
+                  ))}
+                </Select>
+                {entry?.fields.map((field) =>
+                  renderCatalogField(
+                    field,
+                    entry.targetKind,
+                    row.values,
+                    (next) => setRows(rows.map((r, i) => (i === index ? { ...r, values: { ...r.values, [field.key]: next } } : r))),
+                    `command-field-${index}-${field.key}`
+                  )
+                )}
+                <IconButton size="small" aria-label="retirer la commande" data-testid={`remove-command-${index}`} onClick={() => setRows(rows.filter((_, i) => i !== index))}>
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
+              </Stack>
+            );
+          })}
+        </>
+      )}
       <Box sx={{ mt: 1, display: 'flex', gap: 1 }}>
-        <Button size="small" startIcon={<AddIcon />} data-testid="add-command-button" onClick={() => setRows([...rows, { type: 'building.wall.update.v1', targetId: '', values: { uValueWm2K: '' } }])}>
-          Ajouter une commande
-        </Button>
+        {mode === 'work' ? (
+          <Button size="small" startIcon={<AddIcon />} data-testid="add-work-button" onClick={() => setWorks([...works, { ...DEFAULT_WORK_ROW, values: { ...DEFAULT_WORK_ROW.values } }])}>
+            Ajouter un travail
+          </Button>
+        ) : (
+          <Button size="small" startIcon={<AddIcon />} data-testid="add-command-button" onClick={() => setRows([...rows, { ...DEFAULT_COMMAND_ROW, values: { ...DEFAULT_COMMAND_ROW.values } }])}>
+            Ajouter une commande
+          </Button>
+        )}
         <Button variant="contained" data-testid="create-scenario-button" onClick={() => void onCreate()} disabled={status === 'busy'}>
           Créer le scénario
         </Button>
