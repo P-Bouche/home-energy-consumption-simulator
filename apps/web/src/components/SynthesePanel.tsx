@@ -1,6 +1,6 @@
 import { Alert, Box, Chip, Divider, List, ListItem, ListItemText, Paper, Typography } from '@mui/material';
 import { useSimulationStore } from '../store/simulation-store.ts';
-import { confidenceInWords } from '../services/confidence-words.ts';
+import { ConfidenceBadge } from './ConfidenceBadge.tsx';
 import type { ImportReportJson, SimulationResultJson } from '../types.ts';
 
 const LABEL_COLORS: Record<string, string> = {
@@ -67,6 +67,12 @@ export function SynthesePanel({ report }: { readonly report: ImportReportJson })
         {report.parsedFields.length} champs lus · {report.unrecognizedFields.length} chemins non reconnus ·{' '}
         {report.missingFields.length} champs absents
       </Typography>
+      {/* US 7 / F6: the estimated values are aggregated here, in one place,
+          instead of confidence chips repeated on every element row */}
+      <Typography variant="body2" sx={{ mt: 0.5 }} data-testid="synthese-confidence-summary">
+        {report.parsedFields.length} valeurs mesurées par le DPE · {report.inferredFields.length} valeurs estimées — à
+        vérifier
+      </Typography>
 
       {result !== null ? (
         <SimulationSummary result={result} />
@@ -88,11 +94,21 @@ export function SynthesePanel({ report }: { readonly report: ImportReportJson })
         </Alert>
       ) : (
         <List dense sx={{ maxHeight: 260, overflow: 'auto' }} data-testid="synthese-inferred-list">
-          {report.inferredFields.map((field) => (
+          {report.inferredFields.map((field, index) => (
             <ListItem key={field.path} data-testid="synthese-inferred-item">
               <ListItemText
-                primary={`${field.path} = ${JSON.stringify(field.value)}`}
-                secondary={`${confidenceInWords({ source: field.source, confidence: field.confidence })} · confiance ${field.confidence} · importé le ${new Date(field.importDate).toLocaleString('fr-FR')}`}
+                primary={JSON.stringify(field.value)}
+                secondary={
+                  <ConfidenceBadge
+                    value={{
+                      value: field.value,
+                      source: field.source,
+                      confidence: field.confidence,
+                      importDate: field.importDate
+                    }}
+                    testId={`synthese-inferred-source-${index}`}
+                  />
+                }
               />
             </ListItem>
           ))}

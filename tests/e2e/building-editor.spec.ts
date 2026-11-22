@@ -1,6 +1,7 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { expect, test } from '@playwright/test';
+import { formatSignedDelta, labelChangeText } from '../../apps/web/src/services/edit-impact.ts';
 
 const fixture = path.join(
   fileURLToPath(new URL('../../', import.meta.url)),
@@ -60,7 +61,8 @@ test('AC-P4-02: invalid edit (negative U-value) is rejected with a field-level m
     'U doit être compris entre 0 et 4 W/m².K'
   );
   await expect(page.getByTestId('raw-error-details')).toContainText('must be in (0, 4] W/m².K');
-  // dialog stays open, version unchanged, audit empty
+  // dialog stays open, version unchanged, audit empty (raw trail stays behind
+  // its expander; the collapsed content is still in the DOM)
   await expect(page.getByTestId('building-version')).toContainText('version 0');
   await expect(page.getByTestId('audit-list')).toContainText('Aucune modification enregistrée');
 
@@ -86,12 +88,18 @@ test('AC-P4-01 + AC-P4-03 + AC-P4-04: edit → save → re-simulate (cache miss)
   const consumption0 = history0.results[0]!.consumptionKwh;
   const label0 = history0.results[0]!.energyLabel;
 
-  // AC-P4-01: edit the wall U-value 1.6393 → 0.25 and save; the command
+  // AC-P4-01: edit the wall U-value 1.6393 → 0.2 and save; the command
   // payload is byte-identical to the frozen building.*.update.v1 contract.
   // wave-1 A1: the editor lives in its own tab of the workspace
   await page.getByTestId('tab-editor').click();
+  // wave-2 D (US 7 / F6): the element rows carry plain-word confidence
+  // (« mesuré par le DPE »), raw source path behind the detail toggle
+  await expect(page.getByTestId('source-dpe-1.6393').first()).toContainText('mesuré par le DPE');
+  await page.getByTestId('source-dpe-1.6393-toggle').first().click();
+  await expect(page.getByTestId('source-dpe-1.6393-detail').first()).toContainText('dpe-xml:');
+  await page.getByTestId('source-dpe-1.6393-toggle').first().click();
   await page.getByTestId('edit-wall-wall-1').click();
-  await page.getByTestId('field-uValueWm2K').fill('0.25');
+  await page.getByTestId('field-uValueWm2K').fill('0.2');
   const patchRequest = page.waitForRequest((r) => r.url().includes(`/api/buildings/${buildingId}`) && r.method() === 'PATCH');
   await page.getByTestId('save-edit').click();
   const sent = (await (await patchRequest).postDataJSON()) as Record<string, unknown>;
@@ -100,7 +108,7 @@ test('AC-P4-01 + AC-P4-03 + AC-P4-04: edit → save → re-simulate (cache miss)
     type: 'building.wall.update.v1',
     buildingId,
     wallId: 'wall-1',
-    uValueWm2K: 0.25,
+    uValueWm2K: 0.2,
     orientation: '2',
     wallType: '13',
     adjacencyType: '1'
@@ -130,28 +138,43 @@ test('AC-P4-01 + AC-P4-03 + AC-P4-04: edit → save → re-simulate (cache miss)
   expect(hashes1).toContain(hash0);
   expect(hashes1.some((h) => h !== hash0)).toBe(true);
   // the re-simulation after the edit reflects the edit in the ENGINE INPUT:
-  // insulating the wall (U 1.6393 → 0.25) must lower the consumption
+  // insulating the wall (U 1.6393 → 0.2) must lower the consumption
   const newest = history1.results[0]!;
   expect(newest.inputHash).not.toBe(hash0);
   expect(newest.consumptionKwh).toBeLessThan(consumption0);
   expect(newest.energyLabel).not.toBe(label0); // label moved (D→C on this fixture)
+  expect(label0).toBe('D');
+  expect(newest.energyLabel).toBe('C');
+
+  // wave-2 D (US 4 / F4): the impact summary sits right where the edit happened —
+  // « Simulation relancée : −X kWh/an, étiquette D → C » + plain-language diff
+  // « U du mur wall-1 : 1,64 → 0,20 » (known fixture figures)
+  await page.getByTestId('tab-editor').click();
+  const expectedDelta = formatSignedDelta(newest.consumptionKwh - consumption0, 'kWh/an');
+  await expect(page.getByTestId('impact-line')).toContainText(`Simulation relancée : ${expectedDelta}`);
+  await expect(page.getByTestId('impact-line')).toContainText(labelChangeText(label0, newest.energyLabel));
+  await expect(page.getByTestId('impact-line')).toContainText('étiquette D → C');
+  await expect(page.getByTestId('impact-diff')).toContainText('U du mur wall-1 : 1,64 → 0,20');
+  // US 7 / F6: the edited row now reads « saisi par vous » in plain words
+  await expect(page.getByTestId('source-user-0.2').first()).toContainText('saisi par vous');
 
   // the persisted wall value is user-sourced with confidence 1.0
   const building1 = await page.request.get(`/api/buildings/${buildingId}`);
   const walls1 = (await building1.json()).building.walls as {
     uValueWm2K: { value: number; source: string; confidence: number };
   }[];
-  expect(walls1[0]?.uValueWm2K.value).toBe(0.25);
+  expect(walls1[0]?.uValueWm2K.value).toBe(0.2);
   expect(walls1[0]?.uValueWm2K.source).toBe('user');
   expect(walls1[0]?.uValueWm2K.confidence).toBe(1);
 
-  // AC-P4-03: audit view shows the change old→new with source "user"
-  await page.getByTestId('tab-editor').click();
+  // AC-P4-03: the raw audit trail is kept as opt-in technical detail behind
+  // its expander, showing the change old→new with source "user"
+  await page.getByTestId('audit-expander').click();
   await expect(page.getByTestId('audit-list')).toContainText('building.wall.update.v1');
   const auditEntry = page.getByTestId('audit-entry').first();
   await expect(auditEntry).toContainText('uValueWm2K');
   await expect(auditEntry).toContainText('1.6393');
-  await expect(auditEntry).toContainText('0.25');
+  await expect(auditEntry).toContainText('0.2');
   await expect(auditEntry).toContainText('[user, confiance 1]');
 
   // AC-P4-04: undo restores the previous value, is audit-logged, re-simulates
@@ -173,6 +196,9 @@ test('AC-P4-01 + AC-P4-03 + AC-P4-04: edit → save → re-simulate (cache miss)
   // hash equals hash0 → cache HIT on the original result, no new row, no
   // engine re-run; the panel shows the cached original numbers again
   await expect(page.getByTestId('cached-badge')).toBeVisible({ timeout: 30_000 });
+  // wave-2 D: with no older baseline for the cached result, the impact line
+  // honestly shows the result without a delta
+  await expect(page.getByTestId('impact-line')).toContainText(`Simulation : étiquette ${label0}`);
   const history2 = (await (await page.request.get(`/api/buildings/${buildingId}/simulations`)).json()) as SimulationHistoryPayload;
   expect(history2.results.length).toBe(2);
   expect(new Set(history2.results.map((r) => r.inputHash)).size).toBe(2);

@@ -30,10 +30,14 @@ import EditIcon from '@mui/icons-material/Edit';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import UndoIcon from '@mui/icons-material/Undo';
 import { useEditorStore } from '../store/editor-store.ts';
+import { useSimulationStore } from '../store/simulation-store.ts';
 import { useEnumLabels } from '../hooks/use-enum-labels.ts';
 import { ENUM_KINDS, enumOptions, resolveEnumLabel, type EnumLabelKind } from '../services/enum-labels.ts';
 import { describeU } from '../services/u-reading.ts';
 import { translateFieldError } from '../services/error-messages.ts';
+import { previousResult } from '../services/edit-impact.ts';
+import { ConfidenceBadge } from './ConfidenceBadge.tsx';
+import { ImpactSummary } from './ImpactSummary.tsx';
 import type {
   AuditEntryJson,
   BuildingCommandJson,
@@ -151,20 +155,18 @@ interface EditTarget {
   readonly element: Record<string, unknown>;
 }
 
-function confidenceChip(c: ConfidenceJson<unknown> | null | undefined): React.ReactElement {
-  if (c === null || c === undefined) {
-    return <Chip size="small" label="absent" variant="outlined" />;
+/**
+ * The value whose provenance is shown on an element row (US 7 / F6): the
+ * U-value when the element has one, else the area, else the description —
+ * one plain-word badge per row instead of raw chips repeated everywhere; the
+ * Synthèse tab aggregates the estimated values.
+ */
+function primaryConfidence(element: Record<string, unknown>): ConfidenceJson<unknown> | null {
+  for (const field of ['uValueWm2K', 'areaM2', 'heatedAreaM2', 'ventilatedAreaM2', 'q4paConv', 'description']) {
+    const c = element[field] as ConfidenceJson<unknown> | null | undefined;
+    if (c !== null && c !== undefined) return c;
   }
-  const isUser = c.source === 'user';
-  return (
-    <Chip
-      size="small"
-      data-testid={`source-${isUser ? 'user' : 'dpe'}-${String(c.value)}`}
-      label={isUser ? `utilisateur (confiance ${c.confidence})` : `DPE (confiance ${c.confidence})`}
-      color={isUser ? 'success' : 'default'}
-      variant={isUser ? 'filled' : 'outlined'}
-    />
-  );
+  return null;
 }
 
 function formatChange(change: FieldChangeJson): string {
@@ -189,6 +191,9 @@ export function BuildingEditorPanel({ buildingId }: { readonly buildingId: strin
   const load = useEditorStore((s) => s.load);
   const save = useEditorStore((s) => s.save);
   const undo = useEditorStore((s) => s.undo);
+  const simResult = useSimulationStore((s) => s.result);
+  const simHistory = useSimulationStore((s) => s.history);
+  const simStatus = useSimulationStore((s) => s.status);
 
   const [target, setTarget] = useState<EditTarget | null>(null);
   const [form, setForm] = useState<Record<string, string>>({});
@@ -252,26 +257,33 @@ export function BuildingEditorPanel({ buildingId }: { readonly buildingId: strin
     id: string,
     element: Record<string, unknown>,
     summary: string
-  ): React.ReactElement => (
-    <ListItem
-      key={`${kind}-${id}`}
-      secondaryAction={
-        <Button size="small" startIcon={<EditIcon />} data-testid={`edit-${kind}-${id}`} onClick={() => openEditor(kind, id, element)}>
-          Modifier
-        </Button>
-      }
-    >
-      <ListItemText
-        primary={`${KINDS[kind].label} ${id} — ${summary}`}
-        secondary={
-          <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5, flexWrap: 'wrap' }}>
-            {confidenceChip(element['uValueWm2K'] as ConfidenceJson<number> | null)}
-            {confidenceChip(element['areaM2'] as ConfidenceJson<number> | null)}
-          </Box>
+  ): React.ReactElement => {
+    const primary = primaryConfidence(element);
+    return (
+      <ListItem
+        key={`${kind}-${id}`}
+        secondaryAction={
+          <Button size="small" startIcon={<EditIcon />} data-testid={`edit-${kind}-${id}`} onClick={() => openEditor(kind, id, element)}>
+            Modifier
+          </Button>
         }
-      />
-    </ListItem>
-  );
+      >
+        <ListItemText
+          primary={`${KINDS[kind].label} ${id} — ${summary}`}
+          secondary={
+            primary === null ? null : (
+              <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5, flexWrap: 'wrap' }}>
+                <ConfidenceBadge
+                  value={primary}
+                  testId={`source-${primary.source === 'user' ? 'user' : 'dpe'}-${String(primary.value)}`}
+                />
+              </Box>
+            )
+          }
+        />
+      </ListItem>
+    );
+  };
 
   const groups: { title: string; items: React.ReactElement[] }[] = building === null ? [] : [
     {
@@ -394,6 +406,9 @@ export function BuildingEditorPanel({ buildingId }: { readonly buildingId: strin
 
   const hasFieldErrors = Object.values(fieldErrors).some((messages) => messages.length > 0);
 
+  /** latest audit entry (history is oldest-first), drives the impact summary */
+  const latestEntry: AuditEntryJson | null = audit.length > 0 ? audit[audit.length - 1] ?? null : null;
+
   return (
     <Paper variant="outlined" sx={{ p: 2, mt: 3 }} data-testid="editor-panel">
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
@@ -411,6 +426,18 @@ export function BuildingEditorPanel({ buildingId }: { readonly buildingId: strin
           Annuler le dernier changement
         </Button>
       </Box>
+
+      {/* US 4 / F4: impact of the last edit right where it happened —
+          plain-language simulation delta + value diff; the raw audit trail
+          stays below as opt-in technical detail */}
+      {latestEntry !== null && (
+        <ImpactSummary
+          entry={latestEntry}
+          before={previousResult(simHistory, simResult)}
+          after={simResult}
+          pending={simStatus === 'running' || simStatus === 'queued'}
+        />
+      )}
 
       {conflict && (
         <Alert severity="warning" sx={{ mt: 1 }} data-testid="conflict-error">
@@ -434,18 +461,24 @@ export function BuildingEditorPanel({ buildingId }: { readonly buildingId: strin
         ))}
 
       <Divider sx={{ my: 2 }} />
-      <Typography variant="subtitle1">Piste d’audit</Typography>
-      <List dense data-testid="audit-list">
-        {audit.length === 0 && <ListItem><ListItemText primary="Aucune modification enregistrée" /></ListItem>}
-        {audit.map((entry: AuditEntryJson) => (
-          <ListItem key={entry.id} data-testid="audit-entry" alignItems="flex-start">
-            <ListItemText
-              primary={`${entry.commandType} · v${entry.version} · ${entry.userId} · ${new Date(entry.timestamp).toLocaleString('fr-FR')}`}
-              secondary={entry.changes.map((c) => formatChange(c)).join(' | ')}
-            />
-          </ListItem>
-        ))}
-      </List>
+      <Accordion data-testid="audit-expander">
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <Typography variant="subtitle1">Piste d’audit (détail technique)</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <List dense data-testid="audit-list">
+            {audit.length === 0 && <ListItem><ListItemText primary="Aucune modification enregistrée" /></ListItem>}
+            {audit.map((entry: AuditEntryJson) => (
+              <ListItem key={entry.id} data-testid="audit-entry" alignItems="flex-start">
+                <ListItemText
+                  primary={`${entry.commandType} · v${entry.version} · ${entry.userId} · ${new Date(entry.timestamp).toLocaleString('fr-FR')}`}
+                  secondary={entry.changes.map((c) => formatChange(c)).join(' | ')}
+                />
+              </ListItem>
+            ))}
+          </List>
+        </AccordionDetails>
+      </Accordion>
 
       <Dialog open={target !== null} onClose={closeEditor} fullWidth maxWidth="sm">
         <DialogTitle>
