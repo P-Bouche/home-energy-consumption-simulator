@@ -12,7 +12,7 @@ TODO: add screenshots of the import page, editor panel and comparison table when
 ## 2. Import your DPE (XML)
 
 1. On the home page (« Importer un DPE (XML) »), click **« Choisir un fichier DPE… »** and select your DPE file (`.xml`).
-2. The file is imported in under a second. A success banner shows « Bâtiment importé : `<id>` » and the **workspace** opens on the **« Synthèse »** tab. Four tabs organize the building: **« Synthèse »**, **« Rapport d'import »**, **« Éditeur du bâtiment »**, **« Scénarios de rénovation »**. The workspace header always shows the primary action **« Lancer la simulation »** and the link **« Voir le modèle 3D »**. The « Synthèse » tab shows the latest simulation summary at the top, plus the values that had to be estimated, marked « estimé — à vérifier »; the full field-by-field import report is in the **« Rapport d'import »** tab.
+2. The file is imported in under a second. A success banner shows « Bâtiment importé : DPE <numéro du DPE> » (e.g. « DPE 2238E0097309E »), with the raw building id in small monospace next to it, and the **workspace** opens on the **« Synthèse »** tab. Four tabs organize the building: **« Synthèse »**, **« Rapport d'import »**, **« Éditeur du bâtiment »**, **« Scénarios de rénovation »**. The workspace header always shows the primary action **« Lancer la simulation »** and the link **« Voir le modèle 3D »**. The « Synthèse » tab shows the latest simulation summary at the top, plus the values that had to be estimated, marked « estimé — à vérifier »; the full field-by-field import report is in the **« Rapport d'import »** tab.
 3. An invalid file shows an error banner and nothing is saved.
 
 ### Reading the import report
@@ -52,7 +52,7 @@ TODO: screenshot of the editor dialog with a field error, and of the audit trail
 
 ## 6. Compare renovation scenarios (P5) — golden path
 
-The panel « Scénarios de rénovation (P5) » lets you price several renovation packages before doing any work.
+The panel « Scénarios de rénovation » lets you price several renovation packages before doing any work.
 
 1. Create a scenario: name + description (e.g. « Isolation des murs »), then **« Ajouter une commande »** → pick an element (e.g. a wall) and a change (e.g. U = 0.2 W/m².K). Click **« Créer le scénario »**. The scenario appears in the list.
 2. Click **« Simuler »** on a scenario: it is simulated through the same regulatory engine as the current building.

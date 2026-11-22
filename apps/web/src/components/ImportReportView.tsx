@@ -52,9 +52,10 @@ function InferredCard({ field }: { readonly field: InferredField }) {
   return (
     <Card variant="outlined" data-testid="inferred-card">
       <CardContent sx={{ '&:last-child': { pb: 2 } }}>
-        <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', gap: 1 }}>
+        <XmlPath path={field.path} />
+        <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', gap: 1, mt: 0.5 }}>
           <Typography variant="body1" sx={{ fontWeight: 600, wordBreak: 'break-word' }}>
-            = {JSON.stringify(field.value)}
+            {JSON.stringify(field.value)}
           </Typography>
           <Chip
             size="small"
@@ -66,12 +67,9 @@ function InferredCard({ field }: { readonly field: InferredField }) {
         <Typography variant="body2" sx={{ mt: 0.5 }}>
           {confidenceInWords({ source: field.source, confidence: field.confidence })}
         </Typography>
-        <Stack direction="row" sx={{ alignItems: 'baseline', gap: 1, mt: 0.5, flexWrap: 'wrap' }}>
-          <XmlPath path={field.path} />
-          <Typography variant="caption" color="text.secondary">
-            importé le {new Date(field.importDate).toLocaleString('fr-FR')}
-          </Typography>
-        </Stack>
+        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+          importé le {new Date(field.importDate).toLocaleString('fr-FR')}
+        </Typography>
       </CardContent>
     </Card>
   );
@@ -113,7 +111,7 @@ export function ImportReportView({ report }: { readonly report: ImportReportJson
     link.href = url;
     link.download = `chemins-non-reconnus-${report.dpeNumber ?? 'dpe'}.txt`;
     link.click();
-    URL.revokeObjectURL(url);
+    setTimeout(() => URL.revokeObjectURL(url), 0);
   };
 
   return (
@@ -134,7 +132,12 @@ export function ImportReportView({ report }: { readonly report: ImportReportJson
           <List dense sx={{ maxHeight: 260, overflow: 'auto' }} data-testid="parsed-list">
             {report.parsedFields.map((field) => (
               <ListItem key={field.path}>
-                <ListItemText primary={field.value} secondary={<XmlPath path={field.path} />} />
+                <Box sx={{ width: '100%' }}>
+                  <XmlPath path={field.path} />
+                  <Typography variant="body2" sx={{ wordBreak: 'break-word' }}>
+                    {field.value}
+                  </Typography>
+                </Box>
               </ListItem>
             ))}
           </List>
