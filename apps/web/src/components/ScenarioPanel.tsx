@@ -137,7 +137,7 @@ export function ScenarioPanel({ buildingId }: { readonly buildingId: string }) {
       const table = enumTables[field.enumKind] ?? null;
       const options = enumOptions(table, value);
       return (
-        <FormControl key={field.key} size="small" sx={{ minWidth: 220 }} data-testid={`command-field-${index}-${field.key}`}>
+        <FormControl key={field.key} size="small" sx={{ minWidth: 220, flexShrink: 0 }} data-testid={`command-field-${index}-${field.key}`}>
           <InputLabel>{field.label}</InputLabel>
           <Select label={field.label} value={value} onChange={(e) => setValue(String(e.target.value))}>
             <MenuItem value="" disabled>
@@ -176,6 +176,7 @@ export function ScenarioPanel({ buildingId }: { readonly buildingId: string }) {
           }
         }}
         helperText={helper === '' ? ' ' : helper}
+        sx={{ minWidth: 120, flexShrink: 0 }}
         onChange={(e) => setValue(e.target.value)}
       />
     );
@@ -268,11 +269,12 @@ export function ScenarioPanel({ buildingId }: { readonly buildingId: string }) {
         const entry = catalogEntryFor(row.type);
         const targets = entry === undefined ? [] : (targetOptions[entry.targetKind] ?? []);
         return (
-          <Stack direction="row" spacing={1} key={index} sx={{ mt: 1, alignItems: 'center' }} data-testid={`command-row-${index}`}>
+          <Stack direction="row" spacing={1} key={index} sx={{ mt: 1, alignItems: 'center', flexWrap: 'wrap' }} data-testid={`command-row-${index}`}>
             <Select
               size="small"
               value={row.type}
               data-testid={`command-type-${index}`}
+              sx={{ maxWidth: 240, '& .MuiSelect-select': { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }}
               onChange={(e) => {
                 const next = catalogEntryFor(e.target.value);
                 setRows(rows.map((r, i) => (i === index ? { type: e.target.value, targetId: '', values: next === undefined ? {} : Object.fromEntries(next.fields.map((f) => [f.key, ''])) } : r)));
@@ -289,13 +291,14 @@ export function ScenarioPanel({ buildingId }: { readonly buildingId: string }) {
               displayEmpty
               value={row.targetId}
               data-testid={`command-target-${index}`}
+              sx={{ maxWidth: 320, '& .MuiSelect-select': { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }}
               onChange={(e) => setRows(rows.map((r, i) => (i === index ? { ...r, targetId: e.target.value } : r)))}
             >
               <MenuItem value="" disabled>
                 Élément…
               </MenuItem>
               {targets.map((t) => (
-                <MenuItem key={t.id} value={t.id}>
+                <MenuItem key={t.id} value={t.id} sx={{ whiteSpace: 'normal' }}>
                   {t.id} — {t.description?.value ?? ''}
                 </MenuItem>
               ))}
