@@ -40,6 +40,8 @@ test('create 2 scenarios, compare, and the table shows correct deltas and the la
   await inputOf(page, 'new-scenario-description').fill('Murs isolés (U = 0,2 W/m².K)');
   await selectOption(page, 'command-type-0', /mur/i);
   await selectOption(page, 'command-target-0', /wall-1/);
+  const uFieldBox = await inputOf(page, 'command-field-0-uValueWm2K').boundingBox();
+  expect(uFieldBox?.width).toBeGreaterThan(80);
   await inputOf(page, 'command-field-0-uValueWm2K').fill('0.2');
   await page.getByTestId('create-scenario-button').click();
   await expect(page.locator('[data-testid^="scenario-row-"]')).toHaveCount(1);
