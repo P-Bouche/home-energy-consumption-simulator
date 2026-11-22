@@ -12,6 +12,10 @@ const fixture = path.join(
  * command catalog → simulate both → compare → the table shows the correct
  * deltas (verified against the API payload recomputed independently) and the
  * label improvement D → C for the wall-insulation scenario.
+ *
+ * Wave-2 E (US 10 / F7): the command-row editor is now the « Mode avancé » of
+ * the scenario form — this pre-existing test drives it through the advanced
+ * toggle, with every original data-testid and assertion unchanged.
  */
 
 /** MUI puts data-testid on the root element: text fields need the inner <input>, selects the combobox div. */
@@ -31,6 +35,10 @@ test('create 2 scenarios, compare, and the table shows correct deltas and the la
   // wave-1 A1: scenarios live in their own tab of the workspace
   await page.getByTestId('tab-scenarios').click();
   await expect(page.getByTestId('scenario-panel')).toBeVisible();
+
+  // wave-2 E: the raw command-row editor is reachable behind the « Mode avancé » toggle
+  await page.getByTestId('advanced-mode-toggle').click();
+  await expect(page.getByTestId('command-row-0')).toBeVisible();
 
   const buildingId = (await page.getByTestId('building-id').textContent())?.trim() ?? '';
   expect(buildingId).not.toBe('');
@@ -133,4 +141,74 @@ test('create 2 scenarios, compare, and the table shows correct deltas and the la
   await expect(page.getByTestId(`scenario-row-${wallScenario.id}`)).toBeVisible();
   const building = await page.request.get(`/api/buildings/${buildingId}`);
   expect(building.ok()).toBe(true);
+});
+
+/**
+ * Wave-2 E (UX US 10 / F7): work-first creation — two scenarios built from
+ * named works (« Isolation des murs », « Remplacement des fenêtres »), the
+ * target picked by plain name/location (« Mur nord — 54,25 m² »), the U via
+ * the guided field. The stored payloads must be byte-identical to the frozen
+ * command vocabulary (field by field), then both scenarios are simulated and
+ * compared through the UI.
+ */
+test('work-first flow: create 2 scenarios from named works, byte-identical payloads, compare', async ({ page }) => {
+  await page.goto('/');
+  await page.getByTestId('file-input').setInputFiles(fixture);
+  await expect(page.getByTestId('upload-success')).toContainText('Bâtiment importé');
+  await page.getByTestId('tab-scenarios').click();
+  await expect(page.getByTestId('scenario-panel')).toBeVisible();
+
+  const buildingId = (await page.getByTestId('building-id').textContent())?.trim() ?? '';
+  expect(buildingId).not.toBe('');
+
+  // work-first is the default mode of the form
+  await expect(page.getByTestId('work-row-0')).toBeVisible();
+
+  // --- scenario 1: « Isolation des murs » on « Mur nord — 54,25 m² », U = 0.2 ---
+  await inputOf(page, 'new-scenario-name').fill('Isolation des murs');
+  await inputOf(page, 'new-scenario-description').fill('Murs isolés (U = 0,2 W/m².K)');
+  await selectOption(page, 'work-type-0', /Isolation des murs/i);
+  await selectOption(page, 'work-target-0', /Mur nord — 54,25 m²/);
+  const uFieldBox = await inputOf(page, 'work-field-0-uValueWm2K').boundingBox();
+  expect(uFieldBox?.width).toBeGreaterThan(80);
+  await inputOf(page, 'work-field-0-uValueWm2K').fill('0.2');
+  await page.getByTestId('create-scenario-button').click();
+  await expect(page.locator('[data-testid^="scenario-row-"]')).toHaveCount(1);
+
+  // --- scenario 2: « Remplacement des fenêtres » on « Fenêtre ouest — 2,21 m² », Uw = 1.1 ---
+  await inputOf(page, 'new-scenario-name').fill('Remplacement des fenêtres');
+  await selectOption(page, 'work-type-0', /Remplacement des fenêtres/i);
+  await selectOption(page, 'work-target-0', /Fenêtre ouest — 2,21 m²/);
+  await inputOf(page, 'work-field-0-uValueWm2K').fill('1.1');
+  await page.getByTestId('create-scenario-button').click();
+  await expect(page.locator('[data-testid^="scenario-row-"]')).toHaveCount(2);
+
+  // --- byte-identity: the stored command lists match the frozen payload field by field ---
+  const list = await page.request.get(`/api/buildings/${buildingId}/scenarios`);
+  expect(list.ok()).toBe(true);
+  const scenarios = ((await list.json()) as { scenarios: { id: string; name: string; commands: unknown[] }[] }).scenarios;
+  expect(scenarios).toHaveLength(2);
+  const wallScenario = scenarios.find((s) => s.name === 'Isolation des murs')!;
+  const windowScenario = scenarios.find((s) => s.name === 'Remplacement des fenêtres')!;
+  expect(wallScenario.commands).toEqual([
+    { type: 'building.wall.update.v1', buildingId, wallId: 'wall-1', uValueWm2K: 0.2 }
+  ]);
+  expect(windowScenario.commands).toEqual([
+    { type: 'building.window.update.v1', buildingId, windowId: 'window-1', uValueWm2K: 1.1 }
+  ]);
+
+  // --- simulate both through the UI, then compare ---
+  await page.getByTestId(`simulate-scenario-${wallScenario.id}`).click();
+  await expect(page.getByTestId(`scenario-label-${wallScenario.id}`)).toBeVisible({ timeout: 30_000 });
+  await page.getByTestId(`simulate-scenario-${windowScenario.id}`).click();
+  await expect(page.getByTestId(`scenario-label-${windowScenario.id}`)).toBeVisible({ timeout: 30_000 });
+
+  await page.getByTestId('compare-button').click();
+  await expect(page.getByTestId('comparison-table')).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByTestId(`comparison-row-${wallScenario.id}`)).toBeVisible();
+  await expect(page.getByTestId(`comparison-row-${windowScenario.id}`)).toBeVisible();
+
+  // same comparison content as the advanced flow: label improvement D → C, rank 1 for the wall work
+  await expect(page.getByTestId(`label-change-${wallScenario.id}`)).toContainText('D → C');
+  await expect(page.getByTestId(`rank-${wallScenario.id}`)).toContainText('1');
 });
