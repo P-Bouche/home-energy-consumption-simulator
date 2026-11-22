@@ -27,4 +27,11 @@ describe('confidenceInWords', () => {
       expect(confidenceInWords({ source: 'inference:x', confidence })).toBe('estimé — à vérifier');
     }
   });
+
+  it('never labels a sub-1 confidence value "mesuré par le DPE", even with a dpe-xml source (review #35)', () => {
+    // building element ConfidenceJson values have no domain guarantee on the
+    // source of sub-1 scores — mission D reuses this helper on them
+    expect(confidenceInWords({ source: 'dpe-xml:dpe/logement/...', confidence: 0.7 })).toBe('estimé — à vérifier');
+    expect(confidenceInWords({ source: 'dpe-xml:dpe/logement/...', confidence: 1 })).toBe('mesuré par le DPE');
+  });
 });
