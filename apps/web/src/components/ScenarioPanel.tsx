@@ -128,7 +128,7 @@ export function ScenarioPanel({ buildingId }: { readonly buildingId: string }) {
   return (
     <Paper sx={{ p: 3, mt: 3 }} data-testid="scenario-panel">
       <Typography variant="h6" component="h2">
-        Scénarios de rénovation (P5)
+        Scénarios de rénovation
       </Typography>
       <Typography variant="body2" color="text.secondary">
         Chaque scénario est un ensemble de commandes déclaratives appliquées à une copie du bâtiment, simulées via
