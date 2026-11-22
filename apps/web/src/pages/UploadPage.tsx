@@ -3,6 +3,7 @@ import { Alert, Box, Button, Container, LinearProgress, Typography } from '@mui/
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { useImportStore } from '../store/import-store.ts';
 import { WorkspaceShell } from '../components/WorkspaceShell.tsx';
+import { BuildingLabel } from '../components/BuildingLabel.tsx';
 
 /**
  * Upload page: file picker → POST /api/imports/dpe → tabbed workspace
@@ -65,7 +66,7 @@ export function UploadPage() {
       {status === 'done' && report !== null && buildingId !== null && (
         <>
           <Alert severity="success" sx={{ mt: 2 }} data-testid="upload-success">
-            Bâtiment importé : {buildingId}
+            Bâtiment importé : <BuildingLabel buildingId={buildingId} dpeNumber={report.dpeNumber} />
           </Alert>
           <WorkspaceShell buildingId={buildingId} report={report} />
         </>

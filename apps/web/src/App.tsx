@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
-import { CssBaseline, ThemeProvider, createTheme } from '@mui/material';
+import { CssBaseline, ThemeProvider } from '@mui/material';
 import { UploadPage } from './pages/UploadPage.tsx';
 import { ViewerPage } from './pages/ViewerPage.tsx';
-
-const theme = createTheme({ palette: { mode: 'light' } });
+import { theme } from './theme.ts';
 
 function useHashRoute(): string {
   const [hash, setHash] = useState<string>(() => window.location.hash);

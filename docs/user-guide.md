@@ -17,9 +17,12 @@ TODO: add screenshots of the import page, editor panel and comparison table when
 
 ### Reading the import report
 
+The report is a list of collapsible sections, each showing only its count in the header: **« Champs lus (n) »**, **« Champs inférés (n) »**, **« n chemins non reconnus »** and **« Champs absents (n) »**.
+
 - Fields read directly from the DPE are **measured**.
-- **« Champs inférés »** are values the app had to assume (the DPE did not provide them). Each shows its `source`, `confidence` score and date, with a color: green ≥ 0.8, orange ≥ 0.5, red below. Inferred values are never presented as certain.
-- **Missing / unrecognized fields** are listed so you know what was not in the file.
+- **« Champs inférés (n) »** are values the app had to assume (the DPE did not provide them). This section is open by default: each inferred value is a card showing the value, its provenance in plain words (**« mesuré par le DPE »** or **« estimé — à vérifier »**), its `confiance` score with a color (green ≥ 0.8, orange ≥ 0.5, red below) and its import date. Inferred values are never presented as certain.
+- **« n chemins non reconnus »** folds the raw XML paths of the file into a count. Expand the section, then click **« Voir la liste des chemins »** to list them one by one, or **« Copier la liste »** / **« Télécharger le détail »** to keep the full list (copy or `.txt` file).
+- **« Champs absents (n) »** lists the missing fields with the reason why they are missing.
 
 ## 3. Run the energy simulation
 
