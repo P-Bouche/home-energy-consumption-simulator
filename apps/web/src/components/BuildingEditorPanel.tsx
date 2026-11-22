@@ -390,6 +390,7 @@ export function BuildingEditorPanel({ buildingId }: { readonly buildingId: strin
         label={f.label}
         type={f.numeric ? 'number' : 'text'}
         value={value}
+        fullWidth
         slotProps={{
           htmlInput: {
             'data-testid': `field-${f.field}`,
@@ -484,7 +485,15 @@ export function BuildingEditorPanel({ buildingId }: { readonly buildingId: strin
         <DialogTitle>
           {target !== null ? `Modifier — ${KINDS[target.kind].label} ${target.id}` : ''}
         </DialogTitle>
-        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
+        {/* Padding-top must be inline: sx/class paddings are overridden by the MUI rule
+            `.MuiDialogTitle-root + .MuiDialogContent-root { padding-top: 0 }` (two-class
+            specificity, see mui/material-ui#27851). The padding reserves room for the
+            outlined label of the first field, which straddles the field border and
+            would otherwise be clipped by the DialogContent scroll container. */}
+        <DialogContent
+          sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
+          style={{ paddingTop: 16 }}
+        >
           {target !== null && KINDS[target.kind].fields.map((f) => renderField(f))}
           {hasFieldErrors && (
             <Accordion data-testid="raw-error-details">
