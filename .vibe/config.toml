@@ -7,6 +7,10 @@
 # to your interactive sessions.
 default_agent = "ask"
 
+# Telemetry disabled for the PoC. (Global setting: must stay above the first
+# [table] header, otherwise TOML assigns it to that table)
+enable_telemetry = false
+
 # Approval policy (mistral-vibe 3.x: agents no longer decide this).
 # "ask" = any tool call not covered below by an "always" permission or an
 # allowlist entry needs human approval; in programmatic mode such calls are
@@ -53,6 +57,3 @@ allowlist = [
 # name = "devstral-2512"
 # provider = "mistral"
 # alias = "devstral-2"
-
-# Telemetry disabled for the PoC.
-enable_telemetry = false
