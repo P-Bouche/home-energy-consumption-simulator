@@ -11,6 +11,10 @@ workflow inside a single model call. As an activity it is free of sandbox
 restrictions and we control every guarantee: at most PLANNER_MAX_TURNS model
 calls, each capped at MODEL_CALL_TIMEOUT_S seconds, and any error stops the
 run immediately and is reported in the result (no exception, no retry loop).
+
+The chat completions client comes from get_mistral_client() (documented entry
+point, automatic auth + telemetry), NOT a root-level Mistral() constructor,
+which does not exist in the workflows image and crashed the worker.
 """
 
 from __future__ import annotations
@@ -21,9 +25,8 @@ import os
 
 import httpx
 
-from mistralai import Mistral
-
 import mistralai.workflows as workflows
+from mistralai.workflows.client import get_mistral_client
 
 from cloud_decision.github import decode_contents_entry
 
@@ -256,9 +259,9 @@ async def run_planner(
         },
     ]
     try:
-        client = Mistral()
+        client = get_mistral_client()
     except Exception as exc:
-        return {"error": f"cannot build Mistral client: {type(exc).__name__}: {exc}"[:1000]}
+        return {"error": f"cannot get Mistral client: {type(exc).__name__}: {exc}"[:1000]}
 
     async with httpx.AsyncClient(timeout=30) as gh:
         for turn in range(1, PLANNER_MAX_TURNS + 1):
