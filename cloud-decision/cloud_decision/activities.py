@@ -276,6 +276,15 @@ async def run_planner(
 
     async with httpx.AsyncClient(timeout=30) as gh:
         for turn in range(1, PLANNER_MAX_TURNS + 1):
+            # -- last turn: force the conclusion, no more exploration ------
+            if turn == PLANNER_MAX_TURNS:
+                messages.append({
+                    "role": "user",
+                    "content": (
+                        "Exploration budget exhausted. Give your final "
+                        "recommendation now, without calling any tools."
+                    ),
+                })
             # -- one bounded model call ------------------------------------
             try:
                 resp = await asyncio.wait_for(
