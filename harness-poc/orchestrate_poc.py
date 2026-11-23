@@ -7,6 +7,8 @@ mode. Every step is capped in price and in turns.
 
 Usage:
     uv run harness-poc/orchestrate_poc.py "Description of the task" [options]
+    uv run harness-poc/orchestrate_poc.py --issue 32                  # issue as task
+    uv run harness-poc/orchestrate_poc.py --issue 32 --decision-only  # recommendation only
 
 Important:
     - Run this script from the git repository root.
@@ -121,6 +123,56 @@ def ask(label: str, choices: str = "[y]es / [n]o") -> str:
     return input(f"{label} {choices} > ").strip().lower()
 
 
+def fetch_issue(number: int) -> tuple[str, str]:
+    """Fetch an issue's title and body via the gh CLI.
+
+    Returns (title, body). Falls back to the REST API (base repo of origin)
+    when gh is not installed. Raises SystemExit with a clear message on failure.
+    """
+    gh = shutil.which("gh")
+    if gh:
+        p = run([gh, "issue", "view", str(number), "--json", "title,body"])
+        if p.returncode == 0:
+            data = json.loads(p.stdout or "{}")
+            return data.get("title", ""), data.get("body", "")
+    # Fallback: REST API, unauthenticated first (public repos), token if any.
+    remote = git("remote", "get-url", "origin").stdout.strip()
+    m = re.match(r"(?:git@github\.com:|https://github\.com/)([^/]+)/([^/.]+?)(?:\.git)?$",
+                 remote)
+    if not m:
+        sys.exit("--issue: could not parse the origin remote to resolve the repo.")
+    repo = f"{m.group(1)}/{m.group(2)}"
+    headers = {"Accept": "application/vnd.github+json",
+               "X-GitHub-Api-Version": "2022-11-28",
+               "User-Agent": "harness-poc"}
+    token = github_token()
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    req = urllib.request.Request(
+        f"https://api.github.com/repos/{repo}/issues/{number}", headers=headers)
+    try:
+        with urllib.request.urlopen(req) as resp:
+            data = json.load(resp)
+    except urllib.error.HTTPError as e:
+        sys.exit(f"--issue: could not fetch issue #{number} "
+                 f"(HTTP {e.code}; is gh installed and authenticated?).")
+    return data.get("title", ""), data.get("body", "")
+
+
+DECISION_ONLY_TEMPLATE = """Issue #{number} (decision only - DO NOT IMPLEMENT): {title}
+
+{body}
+
+---
+This is a DECISION-ONLY run. Read the issue above (github_get_issue #{number}
+if you need the live version) and any documents it references, then produce:
+1. A feasibility analysis grounded in this codebase (cite the files you read).
+2. A single line: RECOMMENDATION: <choice> justified in the bullet points.
+3. The remaining decision points for the maintainer.
+
+Do not implement anything, do not modify any file."""
+
+
 def default_base_branch() -> str:
     p = git("symbolic-ref", "refs/remotes/origin/HEAD")
     if p.returncode == 0 and p.stdout.strip():
@@ -233,7 +285,16 @@ def npm_install(wt: Path) -> None:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description="Mistral multi-agent harness PoC via the vibe CLI.")
-    ap.add_argument("task", help="Description of the task to plan then implement.")
+    ap.add_argument("task", nargs="?", default=None,
+                    help="Description of the task to plan then implement. "
+                         "Optional when --issue is given.")
+    ap.add_argument("--issue", type=int, default=None, metavar="N",
+                    help="Use GitHub issue #N (fetched via gh) as the task: "
+                         "its title and body become the task description.")
+    ap.add_argument("--decision-only", action="store_true",
+                    help="Wrap the task in the decision-only template: the planner "
+                         "produces a recommendation, nothing is implemented. "
+                         "Stop the run at the plan gate (answer 'n').")
     ap.add_argument("--iterations", type=int, default=2,
                     help="Maximum coder->tester rounds (default 2).")
     ap.add_argument("--price-plan", type=float, default=1.00,
@@ -257,8 +318,29 @@ def main() -> None:
     if git("rev-parse", "--is-inside-work-tree").returncode != 0:
         sys.exit("Not inside a git repository. Run this script from the project root.")
 
-    slug = slugify(args.task)
-    header(f"Mistral harness PoC - task: {args.task}")
+    # -- Build the task from --issue / --decision-only / plain text -----------
+    if args.issue:
+        issue_title, issue_body = fetch_issue(args.issue)
+        base_task = f"[Issue #{args.issue}] {issue_title}\n\n{issue_body}"
+        if args.decision_only:
+            task = DECISION_ONLY_TEMPLATE.format(
+                number=args.issue, title=issue_title, body=issue_body)
+        else:
+            task = base_task
+        slug = slugify(f"issue-{args.issue}-{issue_title}")
+    else:
+        if not args.task:
+            sys.exit("Provide a task description, or --issue N (with the "
+                     "optional --decision-only flag). Try --help.")
+        raw_task = args.task
+        if args.decision_only:
+            task = DECISION_ONLY_TEMPLATE.format(number="<task>", title=raw_task,
+                                                 body=raw_task)
+            slug = slugify(raw_task)
+        else:
+            task = raw_task
+            slug = slugify(raw_task)
+    header(f"Mistral harness PoC - task: {task}")
     print(f"Per-step price caps: plan {args.price_plan} $ | code {args.price_code} $ | "
           f"test {args.price_test} $ | review {args.price_review} $")
     budget_total = (args.price_plan
@@ -275,7 +357,7 @@ def main() -> None:
     else:
         worktrees_root = Path.cwd().resolve() / ".poc-worktrees"
         workdir = setup_worktree(slug, worktrees_root)
-        if not args.skip_install:
+        if not args.skip_install and not args.decision_only:
             npm_install(workdir)
         print(f"\nWorktree ready: {workdir}")
         print("If the vibe CLI then reports an 'untrusted' folder, open an interactive "
@@ -288,14 +370,14 @@ def main() -> None:
     tasks_dir.mkdir(parents=True, exist_ok=True)
     task_file = tasks_dir / f"{slug}.md"
     task_file.write_text(
-        f"# Task (repo copy, {dt.date.today():%Y-%m-%d})\n\n{args.task}\n", encoding="utf-8")
+        f"# Task (repo copy, {dt.date.today():%Y-%m-%d})\n\n{task}\n", encoding="utf-8")
 
     # -- 1. PLANNING -----------------------------------------------------------
     header("Step 1: PLANNER (read-only)")
     code, plan_txt = run_vibe(
         workdir, "planner",
         f"Task to plan (also written in harness-poc/tasks/{slug}.md):\n\n"
-        f"{args.task}\n\n"
+        f"{task}\n\n"
         "Explore the codebase and produce the full plan, following your instructions.",
         args.price_plan, 25)
     if code != 0 or not plan_txt.strip():
@@ -311,6 +393,17 @@ def main() -> None:
         print("Run cancelled: nothing modified (the worktree can be removed).")
         return
 
+    if args.decision_only:
+        header("Decision-only run: plan delivered, nothing to implement")
+        print(f"Recommendation saved in: {plan_file}")
+        print("No implementation step in this mode; the worktree holds no change")
+        print("and can be removed:")
+        print(f"  git worktree remove '{workdir}'")
+        journal_append(
+            f"## {stamp()} - {slug} - decision-only run complete (plan approved). "
+            f"Plan: harness-poc/plans/{slug}.md")
+        return
+
     # -- 2/3. CODER -> TESTER LOOP ---------------------------------------------
     verdict = "FAIL"
     failure_report = ""
@@ -318,12 +411,12 @@ def main() -> None:
         header(f"Step 2 (round {round_no}/{args.iterations}): CODER")
         if round_no == 1:
             coder_prompt = (
-                f"Task: {args.task}\n"
+                f"Task: {task}\n"
                 f"The approved plan is in harness-poc/plans/{slug}.md: read it, then "
                 "implement it fully, following your instructions.")
         else:
             coder_prompt = (
-                f"Task: {args.task}\n"
+                f"Task: {task}\n"
                 f"The approved plan is in harness-poc/plans/{slug}.md.\n"
                 f"The tester reported failures in the previous round. Fix them, then "
                 f"verify with the allowlisted tests.\n\n--- Tester report ---\n{failure_report}")
@@ -335,7 +428,7 @@ def main() -> None:
         header(f"Step 3 (round {round_no}/{args.iterations}): TESTER")
         code, test_txt = run_vibe(
             workdir, "tester",
-            f"The following task was just implemented: {args.task}\n"
+            f"The following task was just implemented: {task}\n"
             "Run `npm test` (and `npm run test:e2e` if relevant), then give your verdict "
             "exactly in the required format.",
             args.price_test, 25)
@@ -362,7 +455,7 @@ def main() -> None:
         header("Step 4: REVIEWER (read-only)")
         code, review_txt = run_vibe(
             workdir, "reviewer",
-            f"Implemented task: {args.task}\n"
+            f"Implemented task: {task}\n"
             f"Plan: harness-poc/plans/{slug}.md. Tester verdict: {verdict}.\n"
             "Re-read the modified files (listed in the plan and in your prompt) and "
             "give your formatted recommendation.",
@@ -382,7 +475,7 @@ def main() -> None:
 
     p = git("-C", str(workdir), "add", "-A")
     p = git("-C", str(workdir), "commit", "-m",
-            f"poc({slug}): {args.task}\n\nGenerated by the PoC harness ({verdict} on tests).")
+            f"poc({slug}): {task}\n\nGenerated by the PoC harness ({verdict} on tests).")
     if p.returncode != 0:
         print((p.stderr or p.stdout or "commit failed").strip()[:500])
         sys.exit("Could not commit on the PoC branch.")
@@ -394,16 +487,16 @@ def main() -> None:
         header("Step 6: PULL REQUEST (push + open, gated by your approval above)")
         pr_url = open_pull_request(
             branch_final,
-            f"poc({slug}): {args.task}",
+            f"poc({slug}): {task}",
             f"Implemented by the multi-agent harness PoC "
             f"(planner -> coder -> tester{'' if args.skip_review else ' -> reviewer'} -> human approval).\n\n"
-            f"- Task: {args.task}\n"
+            f"- Task: {task}\n"
             f"- Test verdict: {verdict} (rounds: {args.iterations})\n"
             f"- Plan: harness-poc/plans/{slug}.md\n")
 
     journal_append(
         f"## {stamp()} - {slug}\n"
-        f"- Task: {args.task}\n"
+        f"- Task: {task}\n"
         f"- Test verdict: {verdict} (rounds: {args.iterations})\n"
         f"- Branch: {branch_final}\n"
         f"- PR: {pr_url or '(none: local only)'}\n"
