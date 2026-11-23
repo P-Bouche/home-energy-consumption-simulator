@@ -1,28 +1,10 @@
-# Vibe project configuration - multi-agent harness PoC (project level)
-# This file is read by the mistral-vibe CLI when the folder is trusted.
-# Open the full config with: /config   |  Schema: vibe config schema
-
-# Default agent: cautious. The orchestrator explicitly selects
-# planner / coder / tester on each call, so this value only applies
-# to your interactive sessions.
 default_agent = "ask"
-
-# Telemetry disabled for the PoC. (Global setting: must stay above the first
-# [table] header, otherwise TOML assigns it to that table)
 enable_telemetry = false
-
-# Approval policy (mistral-vibe 3.x: agents no longer decide this).
-# "ask" = any tool call not covered below by an "always" permission or an
-# allowlist entry needs human approval; in programmatic mode such calls are
-# simply denied and reported to the agent. The orchestrator passes
-# --approval-policy accept-edits on the coder step so that file edits run.
 default_approval_policy = "ask"
+applied_migrations = [
+    "bash_read_only_defaults_v1",
+]
 
-# ------------------------------------------------------------------
-# Tool permissions (project level, apply to every agent).
-# The bash allowlist is the single source of truth for which commands can
-# run without approval (planner and reviewer have bash disabled anyway).
-# ------------------------------------------------------------------
 [tools.read_file]
 permission = "always"
 
@@ -35,21 +17,51 @@ permission = "ask"
 [tools.bash]
 permission = "ask"
 allowlist = [
-  "npm test",
-  "npm run test:coverage",
-  "npm run test:e2e",
-  "npx vitest run",
-  "git status",
-  "git diff",
+    "basename",
+    "cat",
+    "comm",
+    "cut",
+    "date",
+    "diff",
+    "dirname",
+    "du",
+    "file",
+    "find",
+    "fmt",
+    "fold",
+    "git diff",
+    "git status",
+    "grep",
+    "head",
+    "join",
+    "less",
+    "ls",
+    "md5sum",
+    "more",
+    "nl",
+    "npm run test:coverage",
+    "npm run test:e2e",
+    "npm test",
+    "npx vitest run",
+    "od",
+    "paste",
+    "pwd",
+    "readlink",
+    "sha1sum",
+    "sha256sum",
+    "shasum",
+    "sort",
+    "stat",
+    "sum",
+    "tac",
+    "tail",
+    "tr",
+    "uname",
+    "uniq",
+    "wc",
+    "which",
 ]
 
-# ------------------------------------------------------------------
-# GitHub MCP server (added with: vibe mcp add github ...).
-# Read tools are allowed for the agents that need them (planner reads
-# issues, reviewer/tester have github_* disabled in their profile).
-# Write tools (pull requests, comments...) are NOT allowed here: the
-# orchestrator opens the PR itself via the REST API after the human gate.
-# ------------------------------------------------------------------
 [tools.github_get_issue]
 permission = "always"
 
@@ -59,22 +71,5 @@ permission = "always"
 [tools.github_get_pull_request]
 permission = "always"
 
-# The tester may open an issue when it finds a failure OUTSIDE the task's
-# scope (pre-existing regression, unrelated bug found while testing).
 [tools.github_create_issue]
 permission = "always"
-
-# ------------------------------------------------------------------
-# Active model. First check the built-in models in an interactive
-# session:   vibe   then   /model
-# The CLI is designed for Devstral: if Devstral 2 shows up in /model,
-# set it as active and delete the block below.
-# ------------------------------------------------------------------
-# active_model = "mistral-medium-latest"
-
-# Devstral 2 preset on La Plateforme (uncomment AFTER verifying the
-# exact model identifier in /model or on console.mistral.ai):
-# [[models]]
-# name = "devstral-2512"
-# provider = "mistral"
-# alias = "devstral-2"
