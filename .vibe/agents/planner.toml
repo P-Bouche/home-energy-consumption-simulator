@@ -25,6 +25,8 @@ instead of planning around it silently.
 
 Your mission, for the task you are given:
 1. Explore the codebase (read_file only). Identify the relevant files, dependencies, and existing tests.
+   If the task references a GitHub issue (e.g. "#32") and the GitHub MCP tools
+   are available, read it with github_get_issue for the exact requirements.
 2. Propose an implementation plan SPLIT INTO NUMBERED STEPS, each step having:
    - a single, verifiable objective;
    - the list of files to create or modify (exact paths, existing or new);

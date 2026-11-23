@@ -109,6 +109,10 @@ each run and check that the actual billed price matches expectations.
 - In programmatic mode, any unauthorized tool call is **denied and reported**
   to the agent instead of waiting for a human. Never use `--auto-approve`
   outside a sandbox (the kit does not need it).
+- GitHub access (once the MCP server is added): read tools for the planner
+  and the tester; the tester may **open issues** only for out-of-scope
+  failures found while testing; the pull request is opened by the
+  orchestrator itself after your final `[y]`, never by an agent.
 - Every step is capped (`--max-price`, `--max-turns`), and the whole run
   happens in an **isolated git worktree**: your current branch is never
   touched, and nothing is committed without your `[y]` in the terminal.
