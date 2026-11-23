@@ -1,0 +1,13 @@
+# Managed worker image for the cloud-decision workflow.
+# Requires mistralai-workflows >= 3.10 (service-account token support).
+FROM python:3.12-slim
+
+WORKDIR /app
+
+COPY pyproject.toml README.md ./
+COPY cloud_decision/ ./cloud_decision/
+COPY tests/ ./tests/
+
+RUN pip install --no-cache-dir .
+
+CMD ["python", "-m", "cloud_decision.worker"]
