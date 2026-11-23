@@ -1,0 +1,36 @@
+# Normalisation des fins de ligne pour cohabitation Windows / WSL-Linux.
+# Regle : le depot stocke en LF ; seuls les scripts natifs Windows
+# restent en CRLF. Ce fichier est la source de verite : il s'applique
+# a tous les clones (Windows, WSL, CI) sans dependre de core.autocrlf.
+
+* text=auto eol=lf
+
+# Scripts Windows natifs : CRLF requis
+*.ps1  text eol=crlf
+*.psm1 text eol=crlf
+*.bat  text eol=crlf
+*.cmd  text eol=crlf
+*.reg  text eol=crlf
+
+# Shell : LF explicite
+*.sh   text eol=lf
+
+# Binaires : jamais de conversion, jamais de diff texte
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.webp binary
+*.ico  binary
+*.pdf  binary
+*.zip  binary
+*.gz   binary
+*.exe  binary
+*.dll  binary
+*.glb  binary
+*.hdr  binary
+*.exr  binary
+*.mp3  binary
+*.mp4  binary
+*.woff  binary
+*.woff2 binary
