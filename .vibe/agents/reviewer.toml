@@ -1,13 +1,10 @@
 # Role: REVIEWER (read-only review, before human approval)
 # It prepares the human decision; it does not replace the approval.
+# Tool permissions live in .vibe/config.toml (mistral-vibe 3.x).
 agent_type = "agent"
 display_name = "Reviewer"
 description = "Expert web architect: read-only review of the produced diff: plan compliance, regressions, missing tests."
-safety = "safe"
 disabled_tools = ["edit", "write_file", "bash"]
-
-[tools.read_file]
-permission = "always"
 
 instructions = """
 You are the REVIEWER of a multi-agent pipeline (planner -> coder -> tester -> human approval).

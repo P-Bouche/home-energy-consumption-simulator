@@ -1,27 +1,9 @@
 # Role: CODER (implementation)
-# File edits allowed inside the working directory only.
-# Shell restricted by allowlist: everything else is denied in programmatic mode.
+# File edits run under the accept-edits approval policy (set by the orchestrator);
+# shell commands stay gated by the bash allowlist in .vibe/config.toml.
 agent_type = "agent"
 display_name = "Coder"
 description = "Senior full-stack TypeScript developer: implements a plan step in the current repository. Restricted shell."
-safety = "neutral"
-
-[tools.edit]
-permission = "always"
-
-[tools.write_file]
-permission = "always"
-
-[tools.bash]
-permission = "ask"
-allowlist = [
-  "npm test",
-  "npm run test:coverage",
-  "npm run test:e2e",
-  "npx vitest run",
-  "git status",
-  "git diff",
-]
 
 instructions = """
 You are the CODER of a multi-agent pipeline (planner -> coder -> tester -> human approval).
@@ -41,7 +23,7 @@ Rules:
 2. Follow the plan; if two readings of it are possible, choose the one that changes the least code and note the choice in your summary.
 3. Respect the existing stack and patterns; do not add a dependency without saying so explicitly in your answer.
 4. Type everything you touch: no `any` unless the surrounding code forces it. Keep component/service boundaries as they exist.
-5. You may run the allowlisted tests to verify your work before concluding (use git diff to check your changes).
+5. You may run the allowlisted tests to verify your work before concluding (use git diff to check your changes). Any command outside the allowlist is denied: do not try other commands, work with the files directly instead.
 6. If anything in the plan is impossible or wrong, stop, change nothing further, and explain the blocker in your answer.
 7. End your answer with a summary: files created/modified, choices made, what remains to do.
 

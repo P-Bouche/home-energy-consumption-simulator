@@ -8,11 +8,12 @@ reviewer agent), removing the copy-pasting of prompts between agents.
 
 ```
 .vibe/
-  config.toml              # Project configuration for the mistral-vibe CLI
+  config.toml              # Project config: bash allowlist, tool permissions,
+                           #   approval policy (all project-level since CLI 3.x)
   agents/
     planner.toml           # Strictly read-only, produces the plan
-    coder.toml             # File editing + restricted shell (allowlist)
-    tester.toml            # Shell limited to npm test / test:coverage / test:e2e
+    coder.toml             # File editing, runs under accept-edits policy
+    tester.toml            # Shell: only the allowlisted npm test commands
     reviewer.toml          # Read-only review, formatted recommendation
 harness-poc/
   orchestrate_poc.py       # The orchestrator (Python, no external dependency)
@@ -99,9 +100,12 @@ each run and check that the actual billed price matches expectations.
 
 ## 4. Security built into the kit
 
-- Each role is an **agent profile** with its own permissions, not a prompt
-  copied by hand: the tester can physically only run the commands in its
-  allowlist; the planner and the reviewer cannot modify anything.
+- Each role is an **agent profile** with a persona and a tool set, and what
+  may run without asking is decided project-level in `.vibe/config.toml`
+  (bash allowlist) plus the approval policy: the tester can physically only
+  run the allowlisted commands; the planner and the reviewer cannot modify
+  anything (edit/write_file/bash disabled). The coder runs its edits under
+  the accept-edits policy; its shell is still gated by the same allowlist.
 - In programmatic mode, any unauthorized tool call is **denied and reported**
   to the agent instead of waiting for a human. Never use `--auto-approve`
   outside a sandbox (the kit does not need it).
