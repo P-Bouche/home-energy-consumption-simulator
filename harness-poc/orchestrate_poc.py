@@ -9,6 +9,7 @@ Usage:
     uv run harness-poc/orchestrate_poc.py "Description of the task" [options]
     uv run harness-poc/orchestrate_poc.py --issue 32                  # issue as task
     uv run harness-poc/orchestrate_poc.py --issue 32 --decision-only  # recommendation only
+    uv run harness-poc/orchestrate_poc.py --issue 32 --decision-only --auto-approve-plan  # unattended
 
 Important:
     - Run this script from the git repository root.
@@ -339,6 +340,10 @@ def main() -> None:
                     help="Wrap the task in the decision-only template: the planner "
                          "produces a recommendation, nothing is implemented. "
                          "Stop the run at the plan gate (answer 'n').")
+    ap.add_argument("--auto-approve-plan", action="store_true",
+                    help="Decision-only runs only: automatically accept the plan "
+                         "gate so the run can finish unattended. Refused with a "
+                         "normal implementation task, where the gate stays human.")
     ap.add_argument("--iterations", type=int, default=2,
                     help="Maximum coder->tester rounds (default 2).")
     ap.add_argument("--price-plan", type=float, default=1.00,
@@ -358,6 +363,10 @@ def main() -> None:
     ap.add_argument("--no-pr", action="store_true",
                     help="Do not push/open a pull request after approval (local branch only).")
     args = ap.parse_args()
+
+    if args.auto_approve_plan and not args.decision_only:
+        sys.exit("--auto-approve-plan is only valid with --decision-only: "
+                 "implementation runs keep a human at the gates.")
 
     if git("rev-parse", "--is-inside-work-tree").returncode != 0:
         sys.exit("Not inside a git repository. Run this script from the project root.")
@@ -436,8 +445,13 @@ def main() -> None:
     plan_file.write_text(plan_txt, encoding="utf-8")
     print(f"\nPlan saved: {plan_file}")
 
-    gate = ask("\nApprove this plan? (otherwise the run stops without changing anything)",
-               "[y]es / [n]o")
+    if args.auto_approve_plan:
+        print("\n(--auto-approve-plan: plan gate auto-approved - decision-only run, "
+              "nothing to implement; the plan file is kept for later review)")
+        gate = "y"
+    else:
+        gate = ask("\nApprove this plan? (otherwise the run stops without changing anything)",
+                   "[y]es / [n]o")
     if not yes(gate):
         journal_append(f"## {stamp()} - {slug} - plan not approved by the human. Run cancelled.")
         reclaim_artifacts(repo_root, workdir)
@@ -453,7 +467,8 @@ def main() -> None:
         print("and can be removed:")
         print(f"  git worktree remove '{workdir}'")
         journal_append(
-            f"## {stamp()} - {slug} - decision-only run complete (plan approved). "
+            f"## {stamp()} - {slug} - decision-only run complete (plan "
+            f"{'auto-approved (--auto-approve-plan)' if args.auto_approve_plan else 'approved'}). "
             f"Plan: harness-poc/plans/{slug}.md")
         return
 
