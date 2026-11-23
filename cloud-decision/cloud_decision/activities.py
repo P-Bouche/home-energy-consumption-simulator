@@ -2,6 +2,7 @@
 
 This module performs network I/O (httpx) and is therefore imported from the
 workflow module under `workflow.unsafe.imports_passed_through()` only.
+Imports are absolute: the sandbox re-imports modules without package context.
 """
 
 from __future__ import annotations
@@ -12,7 +13,7 @@ import httpx
 
 import mistralai.workflows as workflows
 
-from ..github import decode_contents_entry
+from cloud_decision.github import decode_contents_entry
 
 GITHUB_API = "https://api.github.com"
 MAX_FILE_CHARS = 60_000

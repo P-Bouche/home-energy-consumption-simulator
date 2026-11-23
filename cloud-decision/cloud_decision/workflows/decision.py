@@ -2,8 +2,10 @@
 
 Sandbox rules: this module runs inside the workflow sandbox, so it must not
 import anything with side effects (httpx, network). The GitHub activities
-live in `..activities` and are imported under
+live in `cloud_decision.activities` and are imported under
 `workflow.unsafe.imports_passed_through()`, the documented escape hatch.
+Imports are absolute (not relative): the sandbox re-imports workflow modules
+without their package context.
 """
 
 from __future__ import annotations
@@ -13,14 +15,14 @@ from mistralai.workflows import workflow
 import mistralai.workflows.plugins.mistralai as workflows_mistralai
 from mistralai.client.models import TextChunk
 
-from ..github import (
+from cloud_decision.github import (
     PLANNER_INSTRUCTIONS,
     normalize_direct_input,
     target_from_webhook,
 )
 
 with workflow.unsafe.imports_passed_through():
-    from ..activities import (
+    from cloud_decision.activities import (
         fetch_issue,
         list_repo_dir,
         post_issue_comment,
