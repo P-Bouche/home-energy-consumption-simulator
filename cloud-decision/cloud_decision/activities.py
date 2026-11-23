@@ -215,10 +215,21 @@ _PLANNER_TOOLS = [
 
 async def _dispatch_tool(client: httpx.AsyncClient, owner: str, repo: str, name: str, args: dict) -> dict:
     path = str(args.get("path", "") or "")
-    if name == "read_file":
-        return await _read_file_raw(client, owner, repo, path, "main")
-    if name == "list_dir":
-        return await _list_dir_raw(client, owner, repo, path, "main")
+    try:
+        if name == "read_file":
+            return await _read_file_raw(client, owner, repo, path, "main")
+        if name == "list_dir":
+            return await _list_dir_raw(client, owner, repo, path, "main")
+    except httpx.HTTPStatusError as exc:
+        # A wrong path (404), a rate limit (403) etc. is a tool-use miss:
+        # hand it back to the model so it can correct itself within the turn
+        # cap, instead of aborting the whole analysis.
+        return {
+            "error": (
+                f"GitHub API {exc.response.status_code} for path {path!r}: "
+                f"{exc.response.text[:300]}"
+            )
+        }
     return {"error": f"unknown tool: {name}"}
 
 
