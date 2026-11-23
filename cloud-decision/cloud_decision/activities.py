@@ -233,6 +233,25 @@ async def _dispatch_tool(client: httpx.AsyncClient, owner: str, repo: str, name:
     return {"error": f"unknown tool: {name}"}
 
 
+def _content_to_text(content) -> str:
+    """Normalize a chat message content: str, list of chunks or None."""
+    if content is None:
+        return ""
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        parts = []
+        for p in content:
+            if isinstance(p, str):
+                parts.append(p)
+            elif isinstance(p, dict):
+                t = p.get("text")
+                if isinstance(t, str):
+                    parts.append(t)
+        return "".join(parts)
+    return str(content)
+
+
 @workflows.activity()
 async def run_planner(
     owner: str,
@@ -313,14 +332,14 @@ async def run_planner(
             # -- no tool call: the planner is done -------------------------
             if not tool_calls:
                 return {
-                    "recommendation": (msg.content or "").strip(),
+                    "recommendation": _content_to_text(msg.content).strip(),
                     "turns_used": turn,
                 }
 
             # -- follow-up: run the requested read-only tools --------------
             messages.append({
                 "role": "assistant",
-                "content": msg.content or "",
+                "content": _content_to_text(msg.content),
                 "tool_calls": [
                     {
                         "id": c.id,
