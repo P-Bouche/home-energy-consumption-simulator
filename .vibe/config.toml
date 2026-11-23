@@ -73,3 +73,15 @@ permission = "always"
 
 [tools.github_create_issue]
 permission = "always"
+
+# mistral-vibe 3.x names MCP tools as <server>.<tool>; the observed runtime
+# id is mcp_github.<tool> (see harness-poc run of 2026-11-23: issue_read was
+# denied because the blocks above do not match it). Both spellings are kept.
+[tools.mcp_github.issue_read]
+permission = "always"
+
+[tools.mcp_github.search_issues]
+permission = "always"
+
+[tools.mcp_github.pull_request_read]
+permission = "always"
