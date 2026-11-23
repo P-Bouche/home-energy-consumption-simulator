@@ -1,0 +1,26 @@
+# Configuration Vibe du projet - PoC harness multi-agents (niveau projet)
+# Ce fichier est lu par la CLI mistral-vibe quand le dossier est de confiance (trusted).
+# Ouvre la config complete avec: /config   |  Schema: vibe config schema
+
+# Agent par défaut: prudent. L'orchestrateur selectionne explicitement
+# planificateur / codeur / testeur a chaque appel, donc cette valeur ne sert
+# que pour tes sessions interactives.
+default_agent = "ask"
+
+# ------------------------------------------------------------------
+# Modele actif. Verifie d'abord les modeles construits dans une session
+# interactive:   vibe   puis   /model
+# Le CLI est concu pour Devstral: si Devstral 2 apparait dans /model,
+# passe-le en actif et supprime le bloc ci-dessous.
+# ------------------------------------------------------------------
+# active_model = "mistral-medium-latest"
+
+# Preset Devstral 2 sur La Plateforme (a decommenter APRES verification
+# de l'identifiant exact du modele dans /model ou sur console.mistral.ai):
+# [[models]]
+# name = "devstral-2512"
+# provider = "mistral"
+# alias = "devstral-2"
+
+# Telemetrie desactivee pour le PoC.
+enable_telemetry = false
