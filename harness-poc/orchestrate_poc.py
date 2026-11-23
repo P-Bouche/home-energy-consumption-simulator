@@ -196,7 +196,7 @@ def main() -> None:
     # -- 1. PLANIFICATION -----------------------------------------------------
     header("Étape 1 : PLANIFICATEUR (lecture seule)")
     code, plan_txt = run_vibe(
-        workdir, "planificateur",
+        workdir, "planner",
         f"Tâche à planifier (aussi écrite dans harness-poc/taches/{slug}.md) :\n\n"
         f"{args.tache}\n\n"
         "Explore la base de code et produis le plan complet, conformément à tes instructions.",
@@ -229,13 +229,13 @@ def main() -> None:
                 f"Le plan approuvé est dans harness-poc/plans/{slug}.md.\n"
                 f"Le testeur a relevé des échecs au tour précédent. Corrige-les, puis "
                 f"vérifie avec les tests allowlistés.\n\n--- Rapport du testeur ---\n{failure_report}")
-        code, _ = run_vibe(workdir, "codeur", coder_prompt, args.prix_code, 50)
+        code, _ = run_vibe(workdir, "coder", coder_prompt, args.prix_code, 50)
         if code != 0:
             print("Le codeur s'est arrêté avec un code d'erreur, mais on tente les tests.")
 
         header(f"Étape 3 (tour {tour}/{args.iterations}) : TESTEUR")
         code, test_txt = run_vibe(
-            workdir, "testeur",
+            workdir, "tester",
             f"La tâche suivante vient d'être implémentée : {args.tache}\n"
             "Exécute `npm test` (et `npm run test:e2e` si pertinent), puis rends ton verdict "
             "exactement dans le format prévu.",
@@ -262,7 +262,7 @@ def main() -> None:
     if not args.skip_review:
         header("Étape 4 : RÉVISEUR (lecture seule)")
         code, review_txt = run_vibe(
-            workdir, "reviseur",
+            workdir, "reviewer",
             f"Tâche implémentée : {args.tache}\n"
             f"Plan : harness-poc/plans/{slug}.md. Verdict du testeur : {verdict}.\n"
             "Relis les fichiers modifiés (indiqués dans le plan et dans ton prompt) et "
