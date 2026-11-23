@@ -10,7 +10,7 @@ import mistralai.workflows as workflows
 import mistralai.workflows.plugins.mistralai as workflows_mistralai
 from mistralai.client.models import TextChunk
 
-from .github import (
+from ..github import (
     PLANNER_INSTRUCTIONS,
     decode_contents_entry,
     normalize_direct_input,
