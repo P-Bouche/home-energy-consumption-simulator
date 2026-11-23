@@ -6,6 +6,9 @@
 # added for this (vibe mcp add github ...).
 agent_type = "agent"
 display_name = "Tester"
+# Model pinned per role (decision 2026-11-23): tester = a cheap Flash model;
+# the job is mostly running a fixed command and reading its output.
+active_model = "zai-glm-5-3-flash"
 description = "Senior QA engineer: runs the authorized test suite, analyses failures, returns a formatted verdict."
 enabled_tools = ["bash", "read_file", "github_get_issue", "github_search_issues", "github_create_issue"]
 
