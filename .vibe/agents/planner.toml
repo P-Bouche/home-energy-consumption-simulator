@@ -7,8 +7,11 @@ display_name = "Planner"
 description = "Senior web architect: explores the codebase and produces a structured implementation plan. Strictly read-only."
 disabled_tools = ["edit", "write_file", "bash"]
 
-# Idea: Devstral 2 can also reason here; check the alias in /model then set:
-# active_model = "devstral-2"
+# Model pinned per role (decision 2026-11-23): planner = Mistral Large 4.
+# Devstral 2 was deprecated on the Mistral API (2026-05-22, retired 2026-07-31),
+# successor chain: Devstral 2 -> Mistral Medium 3.5 -> Mistral Large 4.
+# If this alias is not recognized, check the exact alias in /model.
+active_model = "mistral-large-4"
 
 instructions = """
 You are the PLANNER of a multi-agent pipeline (planner -> coder -> tester -> human approval).

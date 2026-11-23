@@ -3,6 +3,10 @@
 # shell commands stay gated by the bash allowlist in .vibe/config.toml.
 agent_type = "agent"
 display_name = "Coder"
+# Model pinned per role (decision 2026-11-23): coder = the strongest agentic
+# coding model available in the model picker. If the alias is not recognized,
+# check the exact alias in /model.
+active_model = "zai-glm-5-3"
 description = "Senior full-stack TypeScript developer: implements a plan step in the current repository. Restricted shell."
 
 instructions = """

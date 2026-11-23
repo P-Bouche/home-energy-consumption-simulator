@@ -3,6 +3,9 @@
 # Tool permissions live in .vibe/config.toml (mistral-vibe 3.x).
 agent_type = "agent"
 display_name = "Reviewer"
+# Model pinned per role (decision 2026-11-23): reviewer = Mistral Large 4,
+# a second look from a model family DIFFERENT from the coder's.
+active_model = "mistral-large-4"
 description = "Expert web architect: read-only review of the produced diff: plan compliance, regressions, missing tests."
 disabled_tools = ["edit", "write_file", "bash", "github_*"]
 
