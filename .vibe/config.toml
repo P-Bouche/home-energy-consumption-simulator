@@ -44,6 +44,27 @@ allowlist = [
 ]
 
 # ------------------------------------------------------------------
+# GitHub MCP server (added with: vibe mcp add github ...).
+# Read tools are allowed for the agents that need them (planner reads
+# issues, reviewer/tester have github_* disabled in their profile).
+# Write tools (pull requests, comments...) are NOT allowed here: the
+# orchestrator opens the PR itself via the REST API after the human gate.
+# ------------------------------------------------------------------
+[tools.github_get_issue]
+permission = "always"
+
+[tools.github_search_issues]
+permission = "always"
+
+[tools.github_get_pull_request]
+permission = "always"
+
+# The tester may open an issue when it finds a failure OUTSIDE the task's
+# scope (pre-existing regression, unrelated bug found while testing).
+[tools.github_create_issue]
+permission = "always"
+
+# ------------------------------------------------------------------
 # Active model. First check the built-in models in an interactive
 # session:   vibe   then   /model
 # The CLI is designed for Devstral: if Devstral 2 shows up in /model,

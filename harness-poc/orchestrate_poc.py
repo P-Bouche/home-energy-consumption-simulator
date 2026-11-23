@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Multi-agent Mistral harness PoC - orchestrator.
 
-Chains planner -> coder -> tester -> (optional) reviewer -> human approval,
-driving the mistral-vibe CLI in programmatic mode. Every step is capped in
-price and in turns.
+Chains planner -> coder -> tester -> (optional) reviewer -> human approval
+-> (optional) push + pull request, driving the mistral-vibe CLI in programmatic
+mode. Every step is capped in price and in turns.
 
 Usage:
     uv run harness-poc/orchestrate_poc.py "Description of the task" [options]
@@ -20,12 +20,15 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import json
 import os
 import re
 import shutil
 import subprocess
 import sys
 import tempfile
+import urllib.error
+import urllib.request
 from pathlib import Path
 
 # --- Robust console output (accents in agent replies) ------------------------
@@ -118,6 +121,77 @@ def ask(label: str, choices: str = "[y]es / [n]o") -> str:
     return input(f"{label} {choices} > ").strip().lower()
 
 
+def default_base_branch() -> str:
+    p = git("symbolic-ref", "refs/remotes/origin/HEAD")
+    if p.returncode == 0 and p.stdout.strip():
+        return p.stdout.strip().rsplit("/", 1)[-1]
+    return "main"
+
+
+def github_token() -> str:
+    """Reuse the gh CLI credential when present, else the GITHUB_TOKEN env.
+
+    Preferred setup: `gh auth login` (device flow, no token handling at all).
+    The env var stays as a fallback for CI or machines without gh.
+    """
+    env_token = os.environ.get("GITHUB_TOKEN")
+    if env_token:
+        return env_token
+    gh = shutil.which("gh")
+    if gh:
+        p = run([gh, "auth", "token"])
+        tok = (p.stdout or "").strip()
+        if p.returncode == 0 and tok:
+            return tok
+    return ""
+
+
+def open_pull_request(branch: str, title: str, body: str) -> str:
+    """Push the branch and open a PR via the GitHub REST API (stdlib only).
+
+    Uses the gh CLI token by default (`gh auth login`), or GITHUB_TOKEN as a
+    fallback. Skips gracefully (branch kept locally) if no credential is
+    available or anything fails.
+    """
+    token = github_token()
+    if not token:
+        print("No GitHub credential (neither `gh auth login` nor GITHUB_TOKEN): "
+              "PR skipped (branch kept locally, open it by hand).")
+        return ""
+    remote = git("remote", "get-url", "origin").stdout.strip()
+    m = re.match(r"(?:git@github\.com:|https://github\.com/)([^/]+)/([^/.]+?)(?:\.git)?$",
+                 remote)
+    if not m:
+        print(f"Could not parse the origin remote ({remote}): PR skipped.")
+        return ""
+    repo = f"{m.group(1)}/{m.group(2)}"
+
+    p = git("push", "-u", "origin", branch)
+    if p.returncode != 0:
+        print((p.stderr or "")[:500])
+        print("Push failed: PR skipped (branch kept locally).")
+        return ""
+
+    data = json.dumps({"title": title, "head": branch,
+                       "base": default_base_branch(), "body": body}).encode()
+    req = urllib.request.Request(
+        f"https://api.github.com/repos/{repo}/pulls", data=data, method="POST",
+        headers={"Authorization": f"Bearer {token}",
+                 "Accept": "application/vnd.github+json",
+                 "X-GitHub-Api-Version": "2022-11-28",
+                 "User-Agent": "harness-poc"})
+    try:
+        with urllib.request.urlopen(req) as resp:
+            pr = json.load(resp)
+    except urllib.error.HTTPError as e:
+        print(f"PR creation failed: HTTP {e.code} - "
+              f"{e.read().decode('utf-8', 'replace')[:300]}")
+        return ""
+    url = pr.get("html_url", "")
+    print(f"\nPull request opened: {url}")
+    return url
+
+
 def yes(gate: str) -> bool:
     return gate in ("y", "yes", "o", "oui")
 
@@ -176,6 +250,8 @@ def main() -> None:
                     help="Skip the reviewer agent step.")
     ap.add_argument("--skip-install", action="store_true",
                     help="Skip npm install in the worktree (node_modules already present).")
+    ap.add_argument("--no-pr", action="store_true",
+                    help="Do not push/open a pull request after approval (local branch only).")
     args = ap.parse_args()
 
     if git("rev-parse", "--is-inside-work-tree").returncode != 0:
@@ -313,17 +389,34 @@ def main() -> None:
     branch_final = git("-C", str(workdir), "rev-parse", "--abbrev-ref", "HEAD").stdout.strip()
     print(f"\nCommitted on branch: {branch_final}")
 
+    pr_url = ""
+    if not args.no_pr:
+        header("Step 6: PULL REQUEST (push + open, gated by your approval above)")
+        pr_url = open_pull_request(
+            branch_final,
+            f"poc({slug}): {args.task}",
+            f"Implemented by the multi-agent harness PoC "
+            f"(planner -> coder -> tester{'' if args.skip_review else ' -> reviewer'} -> human approval).\n\n"
+            f"- Task: {args.task}\n"
+            f"- Test verdict: {verdict} (rounds: {args.iterations})\n"
+            f"- Plan: harness-poc/plans/{slug}.md\n")
+
     journal_append(
         f"## {stamp()} - {slug}\n"
         f"- Task: {args.task}\n"
         f"- Test verdict: {verdict} (rounds: {args.iterations})\n"
         f"- Branch: {branch_final}\n"
+        f"- PR: {pr_url or '(none: local only)'}\n"
         f"- Plan: harness-poc/plans/{slug}.md\n")
     header("Done")
-    print("Next manual actions (diff review / PR):")
-    print(f"  git -C '{workdir}' log -p --stat")
-    print(f"  then merge when you want: git merge {branch_final}  (and worktree removal: "
-          f"git worktree remove '{workdir}')")
+    if pr_url:
+        print(f"Pull request ready for review: {pr_url}")
+        print("Merge from GitHub when you are satisfied with the diff.")
+    else:
+        print("Next manual actions (diff review / merge / PR):")
+        print(f"  git -C '{workdir}' log -p --stat")
+        print(f"  then merge when you want: git merge {branch_final}  (and worktree removal: "
+              f"git worktree remove '{workdir}')")
 
 
 if __name__ == "__main__":
