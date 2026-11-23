@@ -85,15 +85,23 @@ class DecisionWorkflow:
         issue = await fetch_issue(owner=owner, repo=repo, issue_number=issue_number)
         agent = _build_planner(target)
         inputs = (
-            f"Issue #{issue_number} ({issue['title']}):\n\n{issue['body']}\n\n"
+            f"Issue #{issue_number} ({issue['title']}):
+
+{issue['body']}
+
+"
             "Analyze feasibility and give your recommendation."
         )
         outputs = await workflows_mistralai.Runner.run(
             agent=agent, inputs=inputs,
-            session=workflows_mistralai.RemoteSession(),
+            # LocalSession: the agent loop runs in the worker via the direct
+            # chat completions API. RemoteSession needs POST /v1/agents, which
+            # is disabled for this org (403, code 3000).
+            session=workflows_mistralai.LocalSession(),
             max_turns=MAX_TURNS,
         )
-        recommendation = "\n".join(
+        recommendation = "
+".join(
             o.text for o in outputs if isinstance(o, TextChunk)
         ).strip()
 
@@ -101,9 +109,14 @@ class DecisionWorkflow:
         posted = {"posted": False, "reason": "empty recommendation"}
         if recommendation:
             comment = (
-                f"**Decision-only analysis (cloud-decision workflow)**\n\n"
-                f"{recommendation}\n\n"
-                "---\nAutomated hosted planner ( mistral-large-latest)."
+                f"**Decision-only analysis (cloud-decision workflow)**
+
+"
+                f"{recommendation}
+
+"
+                "---
+Automated hosted planner ( mistral-large-latest)."
                 " No file was modified."
             )
             posted = await post_issue_comment(
