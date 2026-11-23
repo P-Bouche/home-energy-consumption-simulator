@@ -29,7 +29,10 @@ with workflow.unsafe.imports_passed_through():
         read_repo_file,
     )
 
-MAX_TURNS = 40
+# Bounded exploration budget: a decision needs a few tool calls, not an
+# endless repo walk. Lower cap also stops runaway loops before they burn
+# model budget. -1 (default) disables the cap; keep it explicit and small.
+MAX_TURNS = 15
 
 
 def _build_planner(target: dict) -> workflows_mistralai.Agent:
@@ -82,20 +85,42 @@ class DecisionWorkflow:
         issue_number = target["issue_number"]
 
         # -- Gather the issue (activity), then run the durable planner ------
-        issue = await fetch_issue(owner=owner, repo=repo, issue_number=issue_number)
+        try:
+            issue = await fetch_issue(
+                owner=owner, repo=repo, issue_number=issue_number
+            )
+        except Exception as exc:
+            # Do not let Temporal retry forever on unrecoverable errors
+            # (auth, rate limit, missing issue): fail fast with a report.
+            return {
+                "status": "error",
+                "stage": "fetch_issue",
+                "issue_number": issue_number,
+                "error": f"{type(exc).__name__}: {exc}"[:1000],
+            }
+
         agent = _build_planner(target)
         inputs = (
             f"Issue #{issue_number} ({issue['title']}):\n\n{issue['body']}\n\n"
             "Analyze feasibility and give your recommendation."
         )
-        outputs = await workflows_mistralai.Runner.run(
-            agent=agent, inputs=inputs,
-            # LocalSession: the agent loop runs in the worker via the direct
-            # chat completions API. RemoteSession needs POST /v1/agents, which
-            # is disabled for this org (403, code 3000).
-            session=workflows_mistralai.LocalSession(),
-            max_turns=MAX_TURNS,
-        )
+        try:
+            outputs = await workflows_mistralai.Runner.run(
+                agent=agent, inputs=inputs,
+                # LocalSession: the agent loop runs in the worker via the
+                # direct chat completions API. RemoteSession needs
+                # POST /v1/agents, which is disabled for this org (403).
+                session=workflows_mistralai.LocalSession(),
+                max_turns=MAX_TURNS,
+            )
+        except Exception as exc:
+            return {
+                "status": "error",
+                "stage": "planner",
+                "issue": issue["html_url"],
+                "error": f"{type(exc).__name__}: {exc}"[:1000],
+                "max_turns": MAX_TURNS,
+            }
         recommendation = "\n".join(
             o.text for o in outputs if isinstance(o, TextChunk)
         ).strip()
@@ -109,9 +134,16 @@ class DecisionWorkflow:
                 "---\nAutomated hosted planner ( mistral-large-latest)."
                 " No file was modified."
             )
-            posted = await post_issue_comment(
-                owner=owner, repo=repo, issue_number=issue_number, body=comment
-            )
+            try:
+                posted = await post_issue_comment(
+                    owner=owner, repo=repo, issue_number=issue_number,
+                    body=comment,
+                )
+            except Exception as exc:
+                posted = {
+                    "posted": False,
+                    "reason": f"{type(exc).__name__}: {exc}"[:1000],
+                }
 
         return {
             "status": "analyzed",
