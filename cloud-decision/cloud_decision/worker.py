@@ -4,7 +4,7 @@ import asyncio
 
 import mistralai.workflows as workflows
 
-from .workflows.decision import DecisionWorkflow
+from cloud_decision.workflows.decision import DecisionWorkflow
 
 
 async def main() -> None:
