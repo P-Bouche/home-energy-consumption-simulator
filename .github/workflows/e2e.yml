@@ -1,15 +1,10 @@
 name: E2E
 
 on:
+  # No `paths` filter on pull_request: a required status check that never runs
+  # (PR touching only docs/ or harness-poc/) shows as "Expected" and blocks the
+  # merge indefinitely. Every PR runs the ~1-2 min e2e instead.
   pull_request:
-    paths:
-      - 'apps/**'
-      - 'packages/**'
-      - 'tests/e2e/**'
-      - 'playwright.config.ts'
-      - 'package.json'
-      - 'package-lock.json'
-      - '.github/workflows/e2e.yml'
   push:
     branches: [main]
     paths:
