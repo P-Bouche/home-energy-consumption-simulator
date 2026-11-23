@@ -44,6 +44,7 @@ VIBE = shutil.which("vibe") or "vibe"
 JOURNAL = Path("harness-poc/JOURNAL.md")
 PLANS_DIR = Path("harness-poc/plans")
 TASKS_DIR = Path("harness-poc/tasks")
+RUNS_DIR = Path("harness-poc/runs")
 VERDICT_RE = re.compile(r"VERDICT:\s*(PASS|FAIL)", re.IGNORECASE)
 
 
@@ -75,12 +76,52 @@ def journal_append(text: str) -> None:
         f.write(text.rstrip() + "\n")
 
 
+def run_export_dir(workdir: Path, slug: str, label: str) -> Path:
+    """Per-step export directory (inside the worktree; reclaimed after the run)."""
+    d = workdir / RUNS_DIR / slug / label
+    d.mkdir(parents=True, exist_ok=True)
+    return d
+
+
+def read_export_stats(export_dir: Path) -> dict:
+    """Read vibe's export.json: token usage, cost_usd, steps (model calls)."""
+    try:
+        data = json.loads((export_dir / "export.json").read_text(encoding="utf-8"))
+        return {"usage": data.get("usage"), "cost_usd": data.get("cost_usd"),
+                "steps": data.get("steps")}
+    except Exception:
+        return {}
+
+
+def reclaim_artifacts(repo_root: Path, workdir: Path) -> None:
+    """Copy the run's durable deliverables from the worktree to the main repo.
+
+    Plans, task copies and per-step export.json files must survive the removal
+    of the worktree: this is what makes the GitHub-side history the source of
+    truth instead of an ephemeral scratch folder.
+    """
+    for rel in (PLANS_DIR, TASKS_DIR, RUNS_DIR):
+        src = workdir / rel
+        if not src.exists():
+            continue
+        dst = repo_root / rel
+        dst.mkdir(parents=True, exist_ok=True)
+        if src.is_dir():
+            shutil.copytree(src, dst, dirs_exist_ok=True)
+        elif src.is_file():
+            shutil.copy2(src, dst)
+
+
 def run_vibe(workdir: Path, agent: str, prompt: str, max_price: float,
-             max_turns: int, approval_policy: str = "ask") -> tuple[int, str]:
-    """Call the CLI in programmatic mode, return (exit code, final text).
+             max_turns: int, approval_policy: str = "ask",
+             export_dir: Path | None = None) -> tuple[int, str, dict]:
+    """Call the CLI in programmatic mode, return (exit code, final text, stats).
 
     The prompt goes through --prompt-file: immune to command-line argument
     length limits on Windows, and to embedded newlines.
+
+    export_dir: when given, passed as --output-dir so vibe writes export.json
+    there (token usage, cost_usd, steps); harvested into the returned stats.
 
     approval_policy: mistral-vibe 3.x decides what runs without asking via
     the approval policy, not via the agent file. All steps run under "ask"
@@ -101,6 +142,8 @@ def run_vibe(workdir: Path, agent: str, prompt: str, max_price: float,
             "--max-turns", str(max_turns),
             "--prompt-file", prompt_path,
         ]
+        if export_dir is not None:
+            cmd += ["--output-dir", str(export_dir)]
         print(f"\n$ vibe --workdir {workdir} --agent {agent} --approval-policy {approval_policy} "
               f"--max-price {max_price:.2f} --max-turns {max_turns} --prompt-file <{len(prompt)} chars>",
               flush=True)
@@ -111,7 +154,8 @@ def run_vibe(workdir: Path, agent: str, prompt: str, max_price: float,
         print(p.stdout)
     if p.returncode != 0 and p.stderr:
         print(f"[stderr] {p.stderr[:2000]}", file=sys.stderr)
-    return p.returncode, p.stdout or ""
+    stats = read_export_stats(export_dir) if export_dir is not None else {}
+    return p.returncode, p.stdout or "", stats
 
 
 def parse_verdict(text: str) -> str | None:
@@ -318,6 +362,9 @@ def main() -> None:
     if git("rev-parse", "--is-inside-work-tree").returncode != 0:
         sys.exit("Not inside a git repository. Run this script from the project root.")
 
+    repo_root = Path.cwd().resolve()  # main repo, before any worktree is created
+    run_stats: list[tuple[str, dict]] = []
+
     # -- Build the task from --issue / --decision-only / plain text -----------
     if args.issue:
         issue_title, issue_body = fetch_issue(args.issue)
@@ -374,12 +421,15 @@ def main() -> None:
 
     # -- 1. PLANNING -----------------------------------------------------------
     header("Step 1: PLANNER (read-only)")
-    code, plan_txt = run_vibe(
+    code, plan_txt, step_stats = run_vibe(
         workdir, "planner",
         f"Task to plan (also written in harness-poc/tasks/{slug}.md):\n\n"
         f"{task}\n\n"
         "Explore the codebase and produce the full plan, following your instructions.",
-        args.price_plan, 25)
+        args.price_plan, 25, export_dir=run_export_dir(workdir, slug, "planner"))
+    run_stats.append(("planner", step_stats))
+    if step_stats:
+        print(f"[step stats] planner: {step_stats}")
     if code != 0 or not plan_txt.strip():
         journal_append(f"## {stamp()} - {slug} - FAILED planning (exit {code})")
         sys.exit("Planning failed (see output above). Run cancelled, nothing was modified.")
@@ -390,12 +440,15 @@ def main() -> None:
                "[y]es / [n]o")
     if not yes(gate):
         journal_append(f"## {stamp()} - {slug} - plan not approved by the human. Run cancelled.")
-        print("Run cancelled: nothing modified (the worktree can be removed).")
+        reclaim_artifacts(repo_root, workdir)
+        print("Run cancelled: nothing modified (the worktree can be removed; "
+              "plans/exports reclaimed to the main repo).")
         return
 
     if args.decision_only:
         header("Decision-only run: plan delivered, nothing to implement")
-        print(f"Recommendation saved in: {plan_file}")
+        reclaim_artifacts(repo_root, workdir)
+        print(f"Recommendation saved in: {plan_file} (also reclaimed to the main repo)")
         print("No implementation step in this mode; the worktree holds no change")
         print("and can be removed:")
         print(f"  git worktree remove '{workdir}'")
@@ -420,18 +473,27 @@ def main() -> None:
                 f"The approved plan is in harness-poc/plans/{slug}.md.\n"
                 f"The tester reported failures in the previous round. Fix them, then "
                 f"verify with the allowlisted tests.\n\n--- Tester report ---\n{failure_report}")
-        code, _ = run_vibe(workdir, "coder", coder_prompt, args.price_code, 50,
-                           approval_policy="accept-edits")
+        code, _, step_stats = run_vibe(workdir, "coder", coder_prompt, args.price_code, 50,
+                                       approval_policy="accept-edits",
+                                       export_dir=run_export_dir(workdir, slug,
+                                                                 f"coder-r{round_no}"))
+        run_stats.append((f"coder-r{round_no}", step_stats))
+        if step_stats:
+            print(f"[step stats] coder-r{round_no}: {step_stats}")
         if code != 0:
             print("The coder exited with an error code, but we still run the tests.")
 
         header(f"Step 3 (round {round_no}/{args.iterations}): TESTER")
-        code, test_txt = run_vibe(
+        code, test_txt, step_stats = run_vibe(
             workdir, "tester",
             f"The following task was just implemented: {task}\n"
             "Run `npm test` (and `npm run test:e2e` if relevant), then give your verdict "
             "exactly in the required format.",
-            args.price_test, 25)
+            args.price_test, 25, export_dir=run_export_dir(workdir, slug,
+                                                           f"tester-r{round_no}"))
+        run_stats.append((f"tester-r{round_no}", step_stats))
+        if step_stats:
+            print(f"[step stats] tester-r{round_no}: {step_stats}")
         verdict = parse_verdict(test_txt) or "FAIL"
         if verdict == "FAIL" and not test_txt.strip():
             print("Empty or unreadable tester response.")
@@ -443,23 +505,28 @@ def main() -> None:
 
     if verdict != "PASS":
         gate = ask("Coder->tester rounds exhausted without green tests.\n"
-                   "Still continue up to the review step?", "[y]es / [n]o (abort)")
+                  "Still continue up to the review step?", "[y]es / [n]o (abort)")
         if not yes(gate):
             journal_append(f"## {stamp()} - {slug} - FAILED: tests not passing after "
                            f"{args.iterations} rounds. Worktree kept for inspection.")
-            print("Run aborted. The worktree (and its code) is kept for inspection.")
+            reclaim_artifacts(repo_root, workdir)
+            print("Run aborted. The worktree (and its code) is kept for inspection "
+                  "(plans/exports reclaimed to the main repo).")
             return
 
     # -- 4. REVIEW (optional) ----------------------------------------------------
     if not args.skip_review:
         header("Step 4: REVIEWER (read-only)")
-        code, review_txt = run_vibe(
+        code, review_txt, step_stats = run_vibe(
             workdir, "reviewer",
             f"Implemented task: {task}\n"
             f"Plan: harness-poc/plans/{slug}.md. Tester verdict: {verdict}.\n"
             "Re-read the modified files (listed in the plan and in your prompt) and "
             "give your formatted recommendation.",
-            args.price_review, 30)
+            args.price_review, 30, export_dir=run_export_dir(workdir, slug, "reviewer"))
+        run_stats.append(("reviewer", step_stats))
+        if step_stats:
+            print(f"[step stats] reviewer: {step_stats}")
         print(review_txt or "(no output)")
 
     # -- 5. HUMAN APPROVAL --------------------------------------------------------
@@ -470,7 +537,9 @@ def main() -> None:
     if not yes(gate):
         journal_append(f"## {stamp()} - {slug} - NOT APPROVED by the human at the final gate. "
                       f"Test verdict: {verdict}. Worktree kept.")
-        print("Changes not committed; worktree kept for inspection.")
+        reclaim_artifacts(repo_root, workdir)
+        print("Changes not committed; worktree kept for inspection "
+              "(plans/exports reclaimed to the main repo).")
         return
 
     p = git("-C", str(workdir), "add", "-A")
@@ -500,7 +569,10 @@ def main() -> None:
         f"- Test verdict: {verdict} (rounds: {args.iterations})\n"
         f"- Branch: {branch_final}\n"
         f"- PR: {pr_url or '(none: local only)'}\n"
-        f"- Plan: harness-poc/plans/{slug}.md\n")
+        f"- Plan: harness-poc/plans/{slug}.md\n"
+        + "".join(f"- Step {label}: {json.dumps(s, ensure_ascii=False)}\n"
+                  for label, s in run_stats))
+    reclaim_artifacts(repo_root, workdir)
     header("Done")
     if pr_url:
         print(f"Pull request ready for review: {pr_url}")
