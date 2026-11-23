@@ -10,10 +10,10 @@ assistée d'un réviseur) en supprimant le copier-coller de prompts entre agents
 .vibe/
   config.toml              # Configuration du projet pour la CLI mistral-vibe
   agents/
-    planificateur.toml     # Lecture seule stricte, produit le plan
-    codeur.toml            # Edition de fichiers + shell restreint (allowlist)
-    testeur.toml           # Shell limite a npm test / test:coverage / test:e2e
-    reviseur.toml          # Revue lecture seule, recommandation formatée
+    planner.toml           # Strictement lecture seule, produit le plan
+    coder.toml             # Edition de fichiers + shell restreint (allowlist)
+    tester.toml            # Shell limite a npm test / test:coverage / test:e2e
+    reviewer.toml          # Revue lecture seule, recommandation formatee
 harness-poc/
   orchestrate_poc.py       # L'orchestrateur (Python, aucune dependance externe)
   README-PoC.md            # Ce fichier
@@ -59,7 +59,7 @@ modeles disponibles se listent avec `/model` dans la session interactive.
 3. **Test du role testeur seul** (teste le PoC sans orchestrateur) :
 
    ```bash
-   vibe --agent testeur --prompt "Execute npm test et rends ton verdict." --max-price 1
+   vibe --agent tester --prompt "Run npm test and give your verdict." --max-price 1
    ```
 
    Le testeur doit executer les tests et repondre `VERDICT: PASS` ou
