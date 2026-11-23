@@ -6,3 +6,6 @@ coverage/
 .env
 playwright-report/
 test-results/
+
+# Harness PoC : worktrees isoles des runs orchestres
+.poc-worktrees/
