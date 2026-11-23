@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
-"""Orchestrateur PoC du harness Mistral multi-agents.
+"""Multi-agent Mistral harness PoC - orchestrator.
 
-Enchaîne planificateur -> codeur -> testeur -> (optionnel) réviseur -> approbation humaine,
-via la CLI mistral-vibe en mode programme. Chaque étape est plafonnée en prix et en tours.
+Chains planner -> coder -> tester -> (optional) reviewer -> human approval,
+driving the mistral-vibe CLI in programmatic mode. Every step is capped in
+price and in turns.
 
-Usage :
-    uv run harness-poc/orchestrate_poc.py "Description de la tâche à réaliser" [options]
+Usage:
+    uv run harness-poc/orchestrate_poc.py "Description of the task" [options]
 
-Important :
-    - Place-toi à la racine du dépôt git du projet.
-    - La CLI `vibe` doit être installée et authentifiée (voir harness-poc/README-PoC.md).
-    - Appels shell restreints : aucune commande hors allowlist ne passe au codeur
-      ni au testeur (profils .vibe/agents/), les autres appels sont refusés
-      en mode programme.
+Important:
+    - Run this script from the git repository root.
+    - The `vibe` CLI must be installed and authenticated (see harness-poc/README.md).
+    - Restricted shell: no command outside the allowlists of the agent profiles
+      (.vibe/agents/) can run; anything else is denied in programmatic mode.
 """
 
 from __future__ import annotations
@@ -27,7 +27,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-# --- Console robuste (accents dans les sorties agents) ------------------------
+# --- Robust console output (accents in agent replies) ------------------------
 try:
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     sys.stderr.reconfigure(encoding="utf-8", errors="replace")
@@ -37,6 +37,7 @@ except Exception:
 VIBE = shutil.which("vibe") or "vibe"
 JOURNAL = Path("harness-poc/JOURNAL.md")
 PLANS_DIR = Path("harness-poc/plans")
+TASKS_DIR = Path("harness-poc/tasks")
 VERDICT_RE = re.compile(r"VERDICT:\s*(PASS|FAIL)", re.IGNORECASE)
 
 
@@ -46,7 +47,7 @@ def stamp() -> str:
 
 def slugify(text: str, maxlen: int = 24) -> str:
     s = re.sub(r"[^a-zA-Z0-9]+", "-", text.lower()).strip("-")
-    return (s[:maxlen].rstrip("-")) or "tache"
+    return (s[:maxlen].rstrip("-")) or "task"
 
 
 def header(msg: str) -> None:
@@ -70,10 +71,10 @@ def journal_append(text: str) -> None:
 
 def run_vibe(workdir: Path, agent: str, prompt: str, max_price: float,
              max_turns: int) -> tuple[int, str]:
-    """Appelle la CLI en mode programme et renvoie (code retour, texte final).
+    """Call the CLI in programmatic mode, return (exit code, final text).
 
-    Le prompt passe par --prompt-file : immune a la limite de longueur des
-    arguments de ligne de commande, et aux retours a la ligne.
+    The prompt goes through --prompt-file: immune to command-line argument
+    length limits on Windows, and to embedded newlines.
     """
     fd, prompt_path = tempfile.mkstemp(suffix=".md", prefix="harness-poc-")
     try:
@@ -88,7 +89,7 @@ def run_vibe(workdir: Path, agent: str, prompt: str, max_price: float,
             "--prompt-file", prompt_path,
         ]
         print(f"\n$ vibe --workdir {workdir} --agent {agent} --max-price {max_price:.2f} "
-              f"--max-turns {max_turns} --prompt-file <{len(prompt)} caracteres>", flush=True)
+              f"--max-turns {max_turns} --prompt-file <{len(prompt)} chars>", flush=True)
         p = run(cmd)
     finally:
         os.unlink(prompt_path)
@@ -104,20 +105,24 @@ def parse_verdict(text: str) -> str | None:
     return matches[-1].upper() if matches else None
 
 
-def ask(label: str, choices: str = "[o]ui / [n]on") -> str:
+def ask(label: str, choices: str = "[y]es / [n]o") -> str:
     return input(f"{label} {choices} > ").strip().lower()
 
 
+def yes(gate: str) -> bool:
+    return gate in ("y", "yes", "o", "oui")
+
+
 def commit_kit_once() -> None:
-    """Le kit (.vibe, harness-poc) doit être suivi par git pour exister dans un worktree."""
+    """The kit (.vibe, harness-poc) must be tracked by git to exist in a worktree."""
     s = git("status", "--porcelain", "--", ".vibe", "harness-poc")
     if s.stdout.strip():
-        header("Étape 0 : commit du kit harness (première exécution)")
+        header("Step 0: commit harness kit (first run)")
         git("add", ".vibe", "harness-poc")
-        p = git("commit", "-m", "chore(harness-poc): kit orchestration multi-agents Mistral")
+        p = git("commit", "-m", "chore(harness-poc): multi-agent Mistral orchestration kit")
         print((p.stdout or p.stderr or "").strip()[:500])
         if p.returncode != 0:
-            sys.exit("Commit du kit impossible (dépôt propre et à jour ?). Abandon.")
+            sys.exit("Could not commit the kit (clean, up-to-date repo?). Aborting.")
 
 
 def setup_worktree(slug: str, worktrees_root: Path) -> Path:
@@ -125,50 +130,56 @@ def setup_worktree(slug: str, worktrees_root: Path) -> Path:
     wt = worktrees_root / f"{branch}"
     wt.parent.mkdir(parents=True, exist_ok=True)
     if wt.exists():
-        sys.exit(f"Worktree déjà existant : {wt}. Supprime-le ou relance plus tard.")
+        sys.exit(f"Worktree already exists: {wt}. Remove it or retry later.")
     p = git("worktree", "add", "-b", branch, str(wt))
     if p.returncode != 0:
         print((p.stderr or "").strip()[:500])
-        sys.exit("Création du worktree impossible. Relance avec --no-worktree pour travailler en place.")
+        sys.exit("Could not create the worktree. Retry with --no-worktree to work in place.")
     return wt
 
 
 def npm_install(wt: Path) -> None:
-    header("Installation des dépendances du worktree (npm install)")
-    print("Cette étape peut durer quelques minutes...", flush=True)
+    header("Installing worktree dependencies (npm install)")
+    print("This step can take a few minutes...", flush=True)
     p = run(["npm", "install"], cwd=str(wt), shell=True)
     print(p.stdout or "", end="")
     if p.returncode != 0:
         print(p.stderr or "", end="", file=sys.stderr)
-        sys.exit("npm install a échoué dans le worktree. Abandon.")
+        sys.exit("npm install failed in the worktree. Aborting.")
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser(description="PoC harness Mistral multi-agents via CLI vibe.")
-    ap.add_argument("tache", help="Description de la tâche à planifier puis implémenter.")
+    ap = argparse.ArgumentParser(description="Mistral multi-agent harness PoC via the vibe CLI.")
+    ap.add_argument("task", help="Description of the task to plan then implement.")
     ap.add_argument("--iterations", type=int, default=2,
-                    help="Nombre maximal de tours codeur->testeur (défaut 2).")
-    ap.add_argument("--prix-plan", type=float, default=1.00)
-    ap.add_argument("--prix-code", type=float, default=2.00)
-    ap.add_argument("--prix-test", type=float, default=0.75)
-    ap.add_argument("--prix-revue", type=float, default=0.75)
+                    help="Maximum coder->tester rounds (default 2).")
+    ap.add_argument("--price-plan", type=float, default=1.00,
+                    help="Price cap in dollars for the planner step.")
+    ap.add_argument("--price-code", type=float, default=2.00,
+                    help="Price cap in dollars per coder round.")
+    ap.add_argument("--price-test", type=float, default=0.75,
+                    help="Price cap in dollars per tester round.")
+    ap.add_argument("--price-review", type=float, default=0.75,
+                    help="Price cap in dollars for the reviewer step.")
     ap.add_argument("--no-worktree", action="store_true",
-                    help="Travaille sur une branche à la place du dossier courant (moins isolé).")
+                    help="Work on a branch in place instead of a worktree (less isolated).")
     ap.add_argument("--skip-review", action="store_true",
-                    help="Passe l'étape de revue par l'agent réviseur.")
+                    help="Skip the reviewer agent step.")
     ap.add_argument("--skip-install", action="store_true",
-                    help="Ne lance pas npm install dans le worktree (si node_modules déjà présent).")
+                    help="Skip npm install in the worktree (node_modules already present).")
     args = ap.parse_args()
 
     if git("rev-parse", "--is-inside-work-tree").returncode != 0:
-        sys.exit("Pas dans un dépôt git. Lance ce script depuis la racine du projet.")
+        sys.exit("Not inside a git repository. Run this script from the project root.")
 
-    slug = slugify(args.tache)
-    header(f"PoC harness Mistral - tâche : {args.tache}")
-    print(f"Budgets max par étape : plan {args.prix_plan} $ | code {args.prix_code} $ | "
-          f"test {args.prix_test} $ | revue {args.prix_revue} $")
-    budget_total = args.prix_plan + args.iterations * (args.prix_code + args.prix_test) + args.prix_revue
-    print(f"Budget théorique maximal du run : {budget_total:.2f} $")
+    slug = slugify(args.task)
+    header(f"Mistral harness PoC - task: {args.task}")
+    print(f"Per-step price caps: plan {args.price_plan} $ | code {args.price_code} $ | "
+          f"test {args.price_test} $ | review {args.price_review} $")
+    budget_total = (args.price_plan
+                    + args.iterations * (args.price_code + args.price_test)
+                    + args.price_review)
+    print(f"Theoretical maximum budget for this run: {budget_total:.2f} $")
 
     commit_kit_once()
 
@@ -181,126 +192,127 @@ def main() -> None:
         workdir = setup_worktree(slug, worktrees_root)
         if not args.skip_install:
             npm_install(workdir)
-        print(f"\nWorktree prêt : {workdir}")
-        print("Si la CLI vibe signale ensuite un dossier 'non trusted', ouvre une session "
-              "interactive `vibe --workdir` sur ce dossier une seule fois, accepte, puis relance.")
+        print(f"\nWorktree ready: {workdir}")
+        print("If the vibe CLI then reports an 'untrusted' folder, open an interactive "
+              "session once with `vibe --workdir` on it, accept, then relaunch.")
 
     plans_dir = workdir / PLANS_DIR
     plans_dir.mkdir(parents=True, exist_ok=True)
     plan_file = plans_dir / f"{slug}.md"
-    task_file = workdir / "harness-poc" / "taches" / f"{slug}.md"
-    task_file.parent.mkdir(parents=True, exist_ok=True)
+    tasks_dir = workdir / TASKS_DIR
+    tasks_dir.mkdir(parents=True, exist_ok=True)
+    task_file = tasks_dir / f"{slug}.md"
     task_file.write_text(
-        f"# Tâche (dépôt le {dt.date.today():%Y-%m-%d})\n\n{args.tache}\n", encoding="utf-8")
+        f"# Task (repo copy, {dt.date.today():%Y-%m-%d})\n\n{args.task}\n", encoding="utf-8")
 
-    # -- 1. PLANIFICATION -----------------------------------------------------
-    header("Étape 1 : PLANIFICATEUR (lecture seule)")
+    # -- 1. PLANNING -----------------------------------------------------------
+    header("Step 1: PLANNER (read-only)")
     code, plan_txt = run_vibe(
         workdir, "planner",
-        f"Tâche à planifier (aussi écrite dans harness-poc/taches/{slug}.md) :\n\n"
-        f"{args.tache}\n\n"
-        "Explore la base de code et produis le plan complet, conformément à tes instructions.",
-        args.prix_plan, 25)
+        f"Task to plan (also written in harness-poc/tasks/{slug}.md):\n\n"
+        f"{args.task}\n\n"
+        "Explore the codebase and produce the full plan, following your instructions.",
+        args.price_plan, 25)
     if code != 0 or not plan_txt.strip():
-        journal_append(f"## {stamp()} - {slug} - ECHEC planification (exit {code})")
-        sys.exit("Planification échouée (voir sortie ci-dessus). Run annulé, rien n'a été modifié.")
+        journal_append(f"## {stamp()} - {slug} - FAILED planning (exit {code})")
+        sys.exit("Planning failed (see output above). Run cancelled, nothing was modified.")
     plan_file.write_text(plan_txt, encoding="utf-8")
-    print(f"\nPlan sauvegardé : {plan_file}")
+    print(f"\nPlan saved: {plan_file}")
 
-    gate = ask("\nValider ce plan ? (sinon le run s'arrête sans rien modifier)", "[o]ui / [n]on")
-    if gate not in ("o", "oui", "y"):
-        journal_append(f"## {stamp()} - {slug} - plan non approuvé par l'humain. Run annulé.")
-        print("Run annulé : aucun fichier modifié (le worktree peut être supprimé).")
+    gate = ask("\nApprove this plan? (otherwise the run stops without changing anything)",
+               "[y]es / [n]o")
+    if not yes(gate):
+        journal_append(f"## {stamp()} - {slug} - plan not approved by the human. Run cancelled.")
+        print("Run cancelled: nothing modified (the worktree can be removed).")
         return
 
-    # -- 2/3. BOUCLE CODEUR -> TESTEUR ---------------------------------------
+    # -- 2/3. CODER -> TESTER LOOP ---------------------------------------------
     verdict = "FAIL"
     failure_report = ""
-    for tour in range(1, args.iterations + 1):
-        header(f"Étape 2 (tour {tour}/{args.iterations}) : CODEUR")
-        if tour == 1:
+    for round_no in range(1, args.iterations + 1):
+        header(f"Step 2 (round {round_no}/{args.iterations}): CODER")
+        if round_no == 1:
             coder_prompt = (
-                f"Tâche : {args.tache}\n"
-                f"Le plan approuvé est dans harness-poc/plans/{slug}.md : lis-le, puis "
-                "implémente-le intégralement, conformément à tes instructions.")
+                f"Task: {args.task}\n"
+                f"The approved plan is in harness-poc/plans/{slug}.md: read it, then "
+                "implement it fully, following your instructions.")
         else:
             coder_prompt = (
-                f"Tâche : {args.tache}\n"
-                f"Le plan approuvé est dans harness-poc/plans/{slug}.md.\n"
-                f"Le testeur a relevé des échecs au tour précédent. Corrige-les, puis "
-                f"vérifie avec les tests allowlistés.\n\n--- Rapport du testeur ---\n{failure_report}")
-        code, _ = run_vibe(workdir, "coder", coder_prompt, args.prix_code, 50)
+                f"Task: {args.task}\n"
+                f"The approved plan is in harness-poc/plans/{slug}.md.\n"
+                f"The tester reported failures in the previous round. Fix them, then "
+                f"verify with the allowlisted tests.\n\n--- Tester report ---\n{failure_report}")
+        code, _ = run_vibe(workdir, "coder", coder_prompt, args.price_code, 50)
         if code != 0:
-            print("Le codeur s'est arrêté avec un code d'erreur, mais on tente les tests.")
+            print("The coder exited with an error code, but we still run the tests.")
 
-        header(f"Étape 3 (tour {tour}/{args.iterations}) : TESTEUR")
+        header(f"Step 3 (round {round_no}/{args.iterations}): TESTER")
         code, test_txt = run_vibe(
             workdir, "tester",
-            f"La tâche suivante vient d'être implémentée : {args.tache}\n"
-            "Exécute `npm test` (et `npm run test:e2e` si pertinent), puis rends ton verdict "
-            "exactement dans le format prévu.",
-            args.prix_test, 25)
+            f"The following task was just implemented: {args.task}\n"
+            "Run `npm test` (and `npm run test:e2e` if relevant), then give your verdict "
+            "exactly in the required format.",
+            args.price_test, 25)
         verdict = parse_verdict(test_txt) or "FAIL"
         if verdict == "FAIL" and not test_txt.strip():
-            print("Réponse du testeur vide ou illisible.")
-        print(f"\n>>> VERDICT retenu : {verdict}")
+            print("Empty or unreadable tester response.")
+        print(f"\n>>> Verdict retained: {verdict}")
         if verdict == "PASS":
             break
-        if tour < args.iterations:
+        if round_no < args.iterations:
             failure_report = test_txt[-4000:]
 
     if verdict != "PASS":
-        gate = ask("Budget de tours codeur->testeur épuisé sans test au vert.\n"
-                   "Continuer quand même jusqu'à la revue ?", "[o]ui / [n]on (abandon)")
-        if gate not in ("o", "oui", "y"):
-            journal_append(f"## {stamp()} - {slug} - ECHEC : tests non passants après "
-                           f"{args.iterations} tours. Worktree conservé pour inspection.")
-            print("Run abandonné. Le worktree (et son code) est conservé pour inspection.")
+        gate = ask("Coder->tester rounds exhausted without green tests.\n"
+                   "Still continue up to the review step?", "[y]es / [n]o (abort)")
+        if not yes(gate):
+            journal_append(f"## {stamp()} - {slug} - FAILED: tests not passing after "
+                           f"{args.iterations} rounds. Worktree kept for inspection.")
+            print("Run aborted. The worktree (and its code) is kept for inspection.")
             return
 
-    # -- 4. REVUE (optionnelle) ------------------------------------------------
+    # -- 4. REVIEW (optional) ----------------------------------------------------
     if not args.skip_review:
-        header("Étape 4 : RÉVISEUR (lecture seule)")
+        header("Step 4: REVIEWER (read-only)")
         code, review_txt = run_vibe(
             workdir, "reviewer",
-            f"Tâche implémentée : {args.tache}\n"
-            f"Plan : harness-poc/plans/{slug}.md. Verdict du testeur : {verdict}.\n"
-            "Relis les fichiers modifiés (indiqués dans le plan et dans ton prompt) et "
-            "rends ta recommandation formatée.",
-            args.prix_revue, 30)
-        print(review_txt or "(aucune sortie)")
+            f"Implemented task: {args.task}\n"
+            f"Plan: harness-poc/plans/{slug}.md. Tester verdict: {verdict}.\n"
+            "Re-read the modified files (listed in the plan and in your prompt) and "
+            "give your formatted recommendation.",
+            args.price_review, 30)
+        print(review_txt or "(no output)")
 
-    # -- 5. APPROBATION HUMAINE ----------------------------------------------
-    header("Étape 5 : APPROBATION HUMAINE")
+    # -- 5. HUMAN APPROVAL --------------------------------------------------------
+    header("Step 5: HUMAN APPROVAL")
     diff = git("-C", str(workdir), "diff", "--stat")
-    print(diff.stdout or "(git diff --stat vide : vérifie que des fichiers ont bien changé)")
-    gate = ask("\nApprouver et committer ces changements sur la branche PoC ?",
-               "[o]ui / [n]on")
-    if gate not in ("o", "oui", "y"):
-        journal_append(f"## {stamp()} - {slug} - NON APPROUVÉ par l'humain à l'étape finale. "
-                      f"Verdict tests : {verdict}. Worktree conservé.")
-        print("Changements non committés ; worktree conservé pour inspection.")
+    print(diff.stdout or "(git diff --stat empty: check that files actually changed)")
+    gate = ask("\nApprove and commit these changes on the PoC branch?", "[y]es / [n]o")
+    if not yes(gate):
+        journal_append(f"## {stamp()} - {slug} - NOT APPROVED by the human at the final gate. "
+                      f"Test verdict: {verdict}. Worktree kept.")
+        print("Changes not committed; worktree kept for inspection.")
         return
 
     p = git("-C", str(workdir), "add", "-A")
     p = git("-C", str(workdir), "commit", "-m",
-            f"poc({slug}): {args.tache}\n\nGénéré par le harness PoC ({verdict} aux tests).")
+            f"poc({slug}): {args.task}\n\nGenerated by the PoC harness ({verdict} on tests).")
     if p.returncode != 0:
-        print((p.stderr or p.stdout or "commit impossible").strip()[:500])
-        sys.exit("Commit impossible sur la branche PoC.")
+        print((p.stderr or p.stdout or "commit failed").strip()[:500])
+        sys.exit("Could not commit on the PoC branch.")
     branch_final = git("-C", str(workdir), "rev-parse", "--abbrev-ref", "HEAD").stdout.strip()
-    print(f"\nCommitted sur la branche : {branch_final}")
+    print(f"\nCommitted on branch: {branch_final}")
 
     journal_append(
         f"## {stamp()} - {slug}\n"
-        f"- Tâche : {args.tache}\n"
-        f"- Verdict tests : {verdict} (tours : {args.iterations})\n"
-        f"- Branche : {branch_final}\n"
-        f"- Plan : harness-poc/plans/{slug}.md\n")
-    header("Terminé")
-    print(f"Prochaines actions manuelles (revue diff/PR) :")
+        f"- Task: {args.task}\n"
+        f"- Test verdict: {verdict} (rounds: {args.iterations})\n"
+        f"- Branch: {branch_final}\n"
+        f"- Plan: harness-poc/plans/{slug}.md\n")
+    header("Done")
+    print("Next manual actions (diff review / PR):")
     print(f"  git -C '{workdir}' log -p --stat")
-    print(f"  puis merge quand tu veux : git merge {branch_final}  (et suppression du worktree : "
+    print(f"  then merge when you want: git merge {branch_final}  (and worktree removal: "
           f"git worktree remove '{workdir}')")
 
 
@@ -308,7 +320,7 @@ if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        print("\nInterrompu par l'utilisateur.")
+        print("\nInterrupted by the user.")
         sys.exit(130)
     except FileNotFoundError as e:
-        sys.exit(f"Commande introuvable : {e}. Vérifie l'installation (voir README-PoC.md).")
+        sys.exit(f"Command not found: {e}. Check the installation (see harness-poc/README.md).")
