@@ -11,8 +11,9 @@ Usage:
 Important:
     - Run this script from the git repository root.
     - The `vibe` CLI must be installed and authenticated (see harness-poc/README.md).
-    - Restricted shell: no command outside the allowlists of the agent profiles
-      (.vibe/agents/) can run; anything else is denied in programmatic mode.
+    - Restricted shell: no command outside the bash allowlist in .vibe/config.toml
+      can run; anything else is denied in programmatic mode. The coder step runs
+      under the accept-edits approval policy; every other step under ask.
 """
 
 from __future__ import annotations
@@ -70,12 +71,18 @@ def journal_append(text: str) -> None:
 
 
 def run_vibe(workdir: Path, agent: str, prompt: str, max_price: float,
-             max_turns: int) -> tuple[int, str]:
+             max_turns: int, approval_policy: str = "ask") -> tuple[int, str]:
     """Call the CLI in programmatic mode, return (exit code, final text).
 
     The prompt goes through --prompt-file: immune to command-line argument
     length limits on Windows, and to embedded newlines.
+
+    approval_policy: mistral-vibe 3.x decides what runs without asking via
+    the approval policy, not via the agent file. All steps run under "ask"
+    (only allowlisted bash commands pass); the coder step runs under
+    "accept-edits" so its file edits execute without a human at the wheel.
     """
+
     fd, prompt_path = tempfile.mkstemp(suffix=".md", prefix="harness-poc-")
     try:
         with os.fdopen(fd, "w", encoding="utf-8") as f:
@@ -83,13 +90,15 @@ def run_vibe(workdir: Path, agent: str, prompt: str, max_price: float,
         cmd = [
             VIBE, "--workdir", str(workdir),
             "--agent", agent,
+            "--approval-policy", approval_policy,
             "--output", "text",
             "--max-price", f"{max_price:.2f}",
             "--max-turns", str(max_turns),
             "--prompt-file", prompt_path,
         ]
-        print(f"\n$ vibe --workdir {workdir} --agent {agent} --max-price {max_price:.2f} "
-              f"--max-turns {max_turns} --prompt-file <{len(prompt)} chars>", flush=True)
+        print(f"\n$ vibe --workdir {workdir} --agent {agent} --approval-policy {approval_policy} "
+              f"--max-price {max_price:.2f} --max-turns {max_turns} --prompt-file <{len(prompt)} chars>",
+              flush=True)
         p = run(cmd)
     finally:
         os.unlink(prompt_path)
@@ -242,7 +251,8 @@ def main() -> None:
                 f"The approved plan is in harness-poc/plans/{slug}.md.\n"
                 f"The tester reported failures in the previous round. Fix them, then "
                 f"verify with the allowlisted tests.\n\n--- Tester report ---\n{failure_report}")
-        code, _ = run_vibe(workdir, "coder", coder_prompt, args.price_code, 50)
+        code, _ = run_vibe(workdir, "coder", coder_prompt, args.price_code, 50,
+                           approval_policy="accept-edits")
         if code != 0:
             print("The coder exited with an error code, but we still run the tests.")
 

@@ -7,6 +7,38 @@
 # to your interactive sessions.
 default_agent = "ask"
 
+# Approval policy (mistral-vibe 3.x: agents no longer decide this).
+# "ask" = any tool call not covered below by an "always" permission or an
+# allowlist entry needs human approval; in programmatic mode such calls are
+# simply denied and reported to the agent. The orchestrator passes
+# --approval-policy accept-edits on the coder step so that file edits run.
+default_approval_policy = "ask"
+
+# ------------------------------------------------------------------
+# Tool permissions (project level, apply to every agent).
+# The bash allowlist is the single source of truth for which commands can
+# run without approval (planner and reviewer have bash disabled anyway).
+# ------------------------------------------------------------------
+[tools.read_file]
+permission = "always"
+
+[tools.edit]
+permission = "ask"
+
+[tools.write_file]
+permission = "ask"
+
+[tools.bash]
+permission = "ask"
+allowlist = [
+  "npm test",
+  "npm run test:coverage",
+  "npm run test:e2e",
+  "npx vitest run",
+  "git status",
+  "git diff",
+]
+
 # ------------------------------------------------------------------
 # Active model. First check the built-in models in an interactive
 # session:   vibe   then   /model
