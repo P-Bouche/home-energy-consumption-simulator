@@ -333,8 +333,20 @@ async def run_planner(
             # -- no tool call: the planner is done -------------------------
             if not tool_calls:
                 text = _content_to_text(msg.content).strip()
-                if text or turn == PLANNER_MAX_TURNS:
+                if text:
                     return {"recommendation": text, "turns_used": turn}
+                if turn == PLANNER_MAX_TURNS:
+                    # Final answer empty: report a diagnosis, not a silent
+                    # "empty recommendation", so the message-content shape
+                    # can be identified from the execution result.
+                    return {
+                        "error": (
+                            "final answer empty. finish_reason="
+                            f"{getattr(resp.choices[0], 'finish_reason', None)!r}; "
+                            f"content={msg.content!r}"[:1000]
+                        ),
+                        "turn": turn,
+                    }
                 # Empty answer before the final turn: nudge and retry.
                 messages.append({"role": "assistant", "content": ""})
                 messages.append({
