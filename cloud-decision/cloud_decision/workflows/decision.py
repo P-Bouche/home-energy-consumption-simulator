@@ -11,6 +11,15 @@ v3 (bounded): the planner agent loop no longer runs here through the durable
 agent (Runner.run + LocalSession), which hung the workflow inside a single
 model call. It is delegated to the "run_planner" activity, which enforces
 a turn cap, per-call timeouts and fail-fast error handling.
+
+v4 (trigger envelope): Mistral triggers pass the whole HTTP request as the
+workflow input ("nothing is mapped or templated"): {method, path, headers,
+query_params, body, raw_body}. The registered input schema is built from the
+entrypoint signature with additionalProperties=false, so the entrypoint must
+declare those envelope fields as parameters. A single 'payload' parameter
+rejected the envelope at the root and every trigger launch failed with a
+permanent execution_error (4xx, no execution record). 'payload' is kept for
+direct manual runs and legacy envelope-shaped inputs.
 """
 
 from __future__ import annotations
@@ -35,16 +44,37 @@ with workflow.unsafe.imports_passed_through():
 @workflows.workflow.define(name="decision-request")
 class DecisionWorkflow:
     @workflows.workflow.entrypoint
-    async def run(self, payload: dict | None = None) -> dict:
-        # -- Resolve the target: webhook payload or direct manual input ------
-        if payload is None:
-            return {"status": "ignored", "reason": "no input"}
-        target = target_from_webhook(payload)
-        if target is None and "owner" in payload:
-            target = normalize_direct_input(
-                payload.get("owner", ""), payload.get("repo", ""),
-                payload.get("issue_number", 0) or 0,
-            )
+    async def run(
+        self,
+        payload: dict | None = None,
+        method: str | None = None,
+        path: str | None = None,
+        headers: dict | None = None,
+        query_params: dict | None = None,
+        body: dict | None = None,
+        raw_body: str | None = None,
+    ) -> dict:
+        # -- Resolve the target: trigger envelope, webhook payload or
+        # direct manual input ----------------------------------------------
+        target = None
+        if body is not None or method is not None:
+            # Trigger path: the input is the whole HTTP request.
+            event = {
+                "method": method or "POST",
+                "path": path or "/",
+                "headers": headers or {},
+                "query_params": query_params or {},
+                "body": body,
+                "raw_body": raw_body or "",
+            }
+            target = target_from_webhook(event)
+        elif payload is not None:
+            target = target_from_webhook(payload)
+            if target is None and "owner" in payload:
+                target = normalize_direct_input(
+                    payload.get("owner", ""), payload.get("repo", ""),
+                    payload.get("issue_number", 0) or 0,
+                )
         if target is None:
             return {"status": "ignored"}
 
@@ -101,8 +131,8 @@ class DecisionWorkflow:
                 owner=owner, repo=repo, issue_number=issue_number,
                 body=(
                     "**Decision-only analysis (cloud-decision workflow)**\n\n"
-                    f"{recommendation}\n\n"
-                    "---\nAutomated hosted planner"
+                    + recommendation + "\n\n"
+                    + "---\nAutomated hosted planner"
                     " (mistral-large-latest). No file was modified."
                 ),
             )

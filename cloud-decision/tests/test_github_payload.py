@@ -36,6 +36,49 @@ def test_labeled_with_target_label_is_a_target():
     }
 
 
+def test_full_trigger_envelope_is_a_target():
+    """Regression: Mistral triggers send the whole HTTP request as input.
+
+    The envelope is {method, path, headers, query_params, body, raw_body};
+    decision.run() rebuilds it and passes it to target_from_webhook.
+    """
+    event = {
+        "method": "POST",
+        "path": "/",
+        "headers": {"content-type": "application/json", "x-github-event": "issues"},
+        "query_params": {},
+        "body": {
+            "action": "labeled",
+            "label": {"name": "decision-request"},
+            "issue": {"number": 48, "labels": [{"name": "decision-request"}]},
+            "repository": {"full_name": "P-Bouche/home-energy-consumption-simulator"},
+        },
+        "raw_body": "{}",
+    }
+    assert target_from_webhook(event) == {
+        "owner": "P-Bouche",
+        "repo": "home-energy-consumption-simulator",
+        "issue_number": 48,
+    }
+
+
+def test_unlabeled_envelope_is_ignored():
+    event = {
+        "method": "POST",
+        "path": "/",
+        "headers": {},
+        "query_params": {},
+        "body": {
+            "action": "unlabeled",
+            "label": {"name": "decision-request"},
+            "issue": {"number": 48, "labels": []},
+            "repository": {"full_name": "P-Bouche/home-energy-consumption-simulator"},
+        },
+        "raw_body": "{}",
+    }
+    assert target_from_webhook(event) is None
+
+
 def test_labeled_with_another_label_is_ignored():
     event = {
         "body": {
