@@ -33,7 +33,7 @@ import { useEditorStore } from '../store/editor-store.ts';
 import { useSimulationStore } from '../store/simulation-store.ts';
 import { useEnumLabels } from '../hooks/use-enum-labels.ts';
 import { ENUM_KINDS, enumOptions, resolveEnumLabel, type EnumLabelKind } from '../services/enum-labels.ts';
-import { describeU } from '../services/u-reading.ts';
+import { describeQ4pa, describeSw, describeU } from '../services/u-reading.ts';
 import { translateFieldError } from '../services/error-messages.ts';
 import { previousResult } from '../services/edit-impact.ts';
 import { ConfidenceBadge } from './ConfidenceBadge.tsx';
@@ -64,6 +64,8 @@ interface FieldDef {
   readonly helper?: string;
   /** noun + gender for the plain-language reading of the U value */
   readonly uNoun?: { readonly noun: string; readonly gender: 'm' | 'f' };
+  /** plain-language reading for non-U numeric fields (Sw, q4pa) */
+  readonly reading?: 'sw' | 'q4pa';
 }
 
 interface KindDef {
@@ -97,7 +99,7 @@ const KINDS: Record<EditableKind, KindDef> = {
       { field: 'description', label: 'Description', numeric: false },
       { field: 'orientation', label: 'Orientation', numeric: false, enumKind: 'orientation' },
       { field: 'count', label: 'Nombre', numeric: true },
-      { field: 'solarFactorSw', label: 'Facteur solaire Sw', numeric: true },
+      { field: 'solarFactorSw', label: 'Facteur solaire Sw', numeric: true, reading: 'sw' },
       { field: 'glazingType', label: 'Vitrage', numeric: false, enumKind: 'glazingType' },
       { field: 'frameMaterial', label: 'Menuiserie', numeric: false, enumKind: 'frameMaterial' }
     ]
@@ -144,7 +146,7 @@ const KINDS: Record<EditableKind, KindDef> = {
       { field: 'description', label: 'Description', numeric: false },
       { field: 'ventilationType', label: 'Type de ventilation', numeric: false, enumKind: 'ventilationType' },
       { field: 'ventilatedAreaM2', label: 'Surface ventilée (m²)', numeric: true },
-      { field: 'q4paConv', label: 'q4pa conv (m³/h.m²)', numeric: true }
+      { field: 'q4paConv', label: 'q4pa conv (m³/h.m²)', numeric: true, reading: 'q4pa' }
     ]
   }
 };
@@ -237,11 +239,16 @@ export function BuildingEditorPanel({ buildingId }: { readonly buildingId: strin
       const raw = (form[f.field] ?? '').trim();
       if (raw === '') continue;
       if (f.numeric) {
-        const num = Number(raw);
+        let num = Number(raw);
         if (Number.isNaN(num)) {
           setFormError(`${f.label} doit être un nombre`);
           return;
         }
+        // Clamp the upper bound only: manual input must not bypass the slider
+        // max (issue #48 finding 1: Uw typed above 4). The lower bound stays
+        // domain-enforced — invalid values are sent raw and rejected with a
+        // field-level 400 (AC-P4-02 frozen contract).
+        if (f.max !== undefined && num > f.max) num = f.max;
         command[f.field] = num;
       } else {
         command[f.field] = raw;
@@ -378,11 +385,18 @@ export function BuildingEditorPanel({ buildingId }: { readonly buildingId: strin
     const typedNum = value.trim() === '' ? Number.NaN : Number(value);
     const currentRaw = target?.element[f.field] as ConfidenceJson<unknown> | null | undefined;
     const current = currentRaw === null || currentRaw === undefined ? '' : String(currentRaw.value);
-    const effective = Number.isFinite(typedNum) && typedNum > 0 ? typedNum : Number(current);
+    // Empty field -> reading of the current stored value; typed value -> reading
+    // of exactly what was typed (typing 0 must not fall back to the old value).
+    const effective = value.trim() === '' ? Number(current) : typedNum;
+    const uKind = target?.kind === 'window' ? 'window' : 'wall';
     const reading =
       f.uNoun !== undefined && Number.isFinite(effective) && effective > 0
-        ? describeU(effective, f.uNoun.noun, f.uNoun.gender)
-        : '';
+        ? describeU(effective, f.uNoun.noun, f.uNoun.gender, uKind)
+        : f.reading === 'sw' && Number.isFinite(effective)
+          ? describeSw(effective)
+          : f.reading === 'q4pa' && Number.isFinite(effective)
+            ? describeQ4pa(effective)
+            : '';
     const helperText = rawErrors.length > 0 ? frenchErrors.join(' ; ') : [reading, f.helper].filter((p) => p !== '').join(' · ') || ' ';
     return (
       <TextField
