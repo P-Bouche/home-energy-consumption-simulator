@@ -12,20 +12,26 @@ agent (Runner.run + LocalSession), which hung the workflow inside a single
 model call. It is delegated to the "run_planner" activity, which enforces
 a turn cap, per-call timeouts and fail-fast error handling.
 
-v4 (trigger envelope): Mistral triggers pass the whole HTTP request as the
-workflow input ("nothing is mapped or templated"): {method, path, headers,
-query_params, body, raw_body}. The registered input schema is built from the
-entrypoint signature with additionalProperties=false, so the entrypoint must
-declare those envelope fields as parameters. A single 'payload' parameter
-rejected the envelope at the root and every trigger launch failed with a
-permanent execution_error (4xx, no execution record). 'payload' is kept for
-direct manual runs and legacy envelope-shaped inputs.
+v4 -> v5 (trigger input): a Mistral trigger hands the workflow the webhook
+request as a TriggerEvent (mistralai-workflows-plugins-triggers package):
+{method, headers, query_params, body, raw_body}. The API validates trigger
+inputs against the registered input schema BEFORE starting the workflow,
+and a mismatch is a permanent failure with no execution to inspect
+(TRIGGER_FAILED / execution_error). Entrypoint kwargs generate a schema with
+additionalProperties=false, which rejects the trigger envelope (extra root
+keys the API may add). The typed TriggerEvent parameter registers the
+permissive schema (extra ignored) designed for exactly this path, so v5
+uses a single 'event' parameter. Manual runs pass the same envelope in
+'event.body'; direct input passes {owner, repo, issue_number} in 'event.body'.
 """
 
 from __future__ import annotations
 
 import mistralai.workflows as workflows
 from mistralai.workflows import workflow
+
+with workflow.unsafe.imports_passed_through():
+    from mistralai.workflows.plugins.triggers import TriggerEvent
 
 from cloud_decision.github import (
     PLANNER_INSTRUCTIONS,
@@ -44,36 +50,24 @@ with workflow.unsafe.imports_passed_through():
 @workflows.workflow.define(name="decision-request")
 class DecisionWorkflow:
     @workflows.workflow.entrypoint
-    async def run(
-        self,
-        payload: dict | None = None,
-        method: str | None = None,
-        path: str | None = None,
-        headers: dict | None = None,
-        query_params: dict | None = None,
-        body: dict | None = None,
-        raw_body: str | None = None,
-    ) -> dict:
-        # -- Resolve the target: trigger envelope, webhook payload or
-        # direct manual input ----------------------------------------------
+    async def run(self, event: TriggerEvent | None = None) -> dict:
+        # -- Resolve the target: trigger envelope or direct manual input ---
+        if event is None:
+            return {"status": "ignored", "reason": "no input"}
+        # The sandbox re-serializes inputs; accept the model or a plain dict.
+        data = (
+            event.model_dump() if hasattr(event, "model_dump") else dict(event)
+        )
         target = None
-        if body is not None or method is not None:
-            # Trigger path: the input is the whole HTTP request.
-            event = {
-                "method": method or "POST",
-                "path": path or "/",
-                "headers": headers or {},
-                "query_params": query_params or {},
-                "body": body,
-                "raw_body": raw_body or "",
-            }
-            target = target_from_webhook(event)
-        elif payload is not None:
-            target = target_from_webhook(payload)
-            if target is None and "owner" in payload:
+        body = data.get("body")
+        if isinstance(body, dict):
+            # Trigger path: body is the GitHub event payload.
+            target = target_from_webhook(data)
+            if target is None and "owner" in body:
+                # Manual path: direct {owner, repo, issue_number} input.
                 target = normalize_direct_input(
-                    payload.get("owner", ""), payload.get("repo", ""),
-                    payload.get("issue_number", 0) or 0,
+                    body.get("owner", ""), body.get("repo", ""),
+                    body.get("issue_number", 0) or 0,
                 )
         if target is None:
             return {"status": "ignored"}
