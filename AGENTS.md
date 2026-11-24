@@ -88,3 +88,17 @@ For non-trivial tasks, structure the answer as:
 9. Limitations
 
 If information is missing, **state assumptions and confidence levels explicitly** instead of inventing data.
+
+## Agent skills
+
+### Issue tracker
+
+Issues are tracked as GitHub issues in this repo (via the `gh` CLI). See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Five canonical labels: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context layout: one root `GLOSSARY.md` plus ADRs in `docs/decisions/`. See `docs/agents/domain.md`.
