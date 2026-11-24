@@ -233,8 +233,13 @@ async def _dispatch_tool(client: httpx.AsyncClient, owner: str, repo: str, name:
     return {"error": f"unknown tool: {name}"}
 
 
-def _content_to_text(content) -> str:
-    """Normalize a chat message content: str, list of chunks or None."""
+def _content_to_text(content, _include_thinking: bool = False) -> str:
+    """Normalize a chat message content: str, None, list of chunks/objects.
+
+    The chat API returns message.content either as a plain string or as a
+    list of typed chunks (TextChunk with .text, ThinkChunk with .thinking).
+    Only the text chunks carry the answer; thinking chunks are skipped.
+    """
     if content is None:
         return ""
     if isinstance(content, str):
@@ -248,6 +253,18 @@ def _content_to_text(content) -> str:
                 t = p.get("text")
                 if isinstance(t, str):
                     parts.append(t)
+            else:
+                t = getattr(p, "text", None)
+                if isinstance(t, str):
+                    parts.append(t)
+                elif _include_thinking:
+                    thinking = getattr(p, "thinking", None) or []
+                    if not isinstance(thinking, list):
+                        thinking = [thinking]
+                    for c in thinking:
+                        ct = getattr(c, "text", None) or (c.get("text") if isinstance(c, dict) else None)
+                        if isinstance(ct, str):
+                            parts.append(ct)
         return "".join(parts)
     return str(content)
 
