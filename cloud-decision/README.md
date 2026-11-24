@@ -28,15 +28,50 @@ ever modified; the human gate stays with the maintainer.
    `GITHUB_TOKEN` secret is bound; otherwise it stays in the execution result
    (readable in Studio) and the result says so.
 
-Direct manual input is also accepted for a one-off analysis:
+Direct manual input is also accepted for a one-off analysis (same envelope
+the trigger sends, as an `event` — see the gotcha below):
 
 ```json
-{"owner": "P-Bouche", "repo": "home-energy-consumption-simulator", "issue_number": 47}
+{"event": {"method": "POST", "headers": {}, "query_params": {},
+           "body": {"owner": "P-Bouche",
+                    "repo": "home-energy-consumption-simulator",
+                    "issue_number": 48}}}
 ```
+
+## Trigger input contract (gotcha: `TriggerEvent`)
+
+The entrypoint takes a single typed parameter: `run(self,
+event: TriggerEvent | None)` from the `mistralai-workflows-plugins-triggers`
+package (added to `pyproject.toml`). This is not cosmetic:
+
+- When a trigger fires, the Workflows API hands the workflow the webhook
+  request wrapped as a **TriggerEvent**: `{method, headers, query_params,
+  body, raw_body}` (credential headers stripped). `body` is the GitHub
+  event payload.
+- The API **validates this input against the registered input schema
+  before starting the workflow.** A mismatch is a permanent failure with
+  no execution to inspect: the trigger event shows `TRIGGER_FAILED` /
+  `execution_error`, retries never happen, and `list_executions` stays
+  empty. This exact symptom cost a morning of debugging.
+- Entrypoint **kwargs** (e.g. `run(self, payload: dict)` or even
+  `run(self, method: str, headers: dict, ...)`) generate a schema with
+  `additionalProperties: false` at the root, which rejects the envelope’s
+  root keys — and any root field the API may add later.
+- The triggers plugin exists precisely for this: a parameter typed as
+  `TriggerEvent` (or a provider subtype like `github.Event`) registers the
+  **permissive schema** (`extra="ignore"`) that the API expects on the
+  trigger path. Do not type the entrypoint with bare dicts if the workflow
+  is ever started by a trigger.
+
+Diagnostics used: `GET /v1/triggers/{trigger_id}/events` (`status` +
+`detail` per event; an empty list means the payload never passed ingest) and
+`mistral_mcp.list_workflow_registrations` (`include_definition: true` shows
+the effective input schema).
 
 ## Repository layout
 
-- `cloud_decision/workflows/decision.py` — workflow entrypoint, fail-fast wrappers
+- `cloud_decision/workflows/decision.py` — workflow entrypoint (single
+  `event: TriggerEvent` parameter), fail-fast wrappers
 - `cloud_decision/activities.py` — GitHub REST activities + the bounded planner loop
 - `cloud_decision/github.py` — pure helpers (webhook parsing, content decoding, planner instructions)
 - `cloud_decision/worker.py` — worker entrypoint (`run_worker([DecisionWorkflow])`)
@@ -71,21 +106,30 @@ deployment = client.workflows.deployments.create_deployment(
 ```
 
 5. **Create the webhook + trigger**: webhook `provider: "github"` with a
-   signing secret, trigger bound to workflow identifier `decision-request`,
-   then on GitHub side add a repository webhook (events: `issues`) with the
-   same secret pointing at the Studio webhook URL.
+   signing secret, trigger bound to workflow identifier `decision-request`
+   (the workflow **name**, not its ID), then on GitHub side add a repository
+   webhook (events: `issues`) with the same secret pointing at the Studio
+   webhook URL. Note: the signing secret cannot be changed after creation —
+   rotating it means recreating the webhook and its triggers. And keep
+   exactly one active deployment serving the workflow, or trigger launches
+   fail.
 
 ## Verification
 
 - `python -m py_compile` on all modules; AST check: 5 activities, 1 workflow.
-- Payload parsing: 6 unit tests, all passing (SDK-free, run with plain
+- Payload parsing: 9 unit tests, all passing (SDK-free, run with plain
   python; see `tests/test_github_payload.py`).
-- End-to-end verified on issue #47: analysis + comment posted in ~34 s,
-  planner reading the upstream Open3CL engine through its cross-repo tool.
+- End-to-end verified on issue #47 by direct execution: analysis + comment
+  in ~34 s, planner reading the upstream Open3CL engine through its
+  cross-repo tool.
+- End-to-end verified **through the trigger** on issue #48: label
+  `decision-request` re-added → workflow started automatically (the
+  `unlabeled` delivery was ignored in 1.7 s), planner bounded at 10 turns,
+  comment posted on the issue, run completed in 78 s.
 
 ## Cost shape
 
 One analysis = issue fetch (REST, free) + a bounded planner run capped at
 10 model calls of 90 s on `mistral-large-latest` (PAYG); observed complete
-runs use ~10 model calls and finish in well under a minute. Ignored events
-cost nothing: the workflow exits before any model call.
+runs use ~10 model calls and finish in well under two minutes. Ignored
+events cost nothing: the workflow exits before any model call.
