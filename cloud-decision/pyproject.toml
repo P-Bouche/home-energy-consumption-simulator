@@ -5,6 +5,7 @@ description = "Hosted decision-only planner: analyzes an issue on label and post
 requires-python = ">=3.12"
 dependencies = [
     "mistralai-workflows[mistralai]>=3.10",
+    "mistralai-workflows-plugins-triggers>=0.1.0",
     "httpx>=0.27",
 ]
 
