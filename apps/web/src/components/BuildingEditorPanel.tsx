@@ -178,6 +178,21 @@ function formatChange(change: FieldChangeJson): string {
 }
 
 /**
+ * Plain-language reading of one field's effective value: the U reading for
+ * U fields (per element kind), the Sw / q4pa reading for those fields, and
+ * an empty string when there is nothing valid to say.
+ */
+function fieldReading(f: FieldDef, effective: number, kind: EditableKind | undefined): string {
+  if (!Number.isFinite(effective)) return '';
+  if (f.uNoun !== undefined) {
+    return effective > 0 ? describeU(effective, f.uNoun.noun, f.uNoun.gender, kind === 'window' ? 'window' : 'wall') : '';
+  }
+  if (f.reading === 'sw') return describeSw(effective);
+  if (f.reading === 'q4pa') return describeQ4pa(effective);
+  return '';
+}
+
+/**
  * P4 2D editor panel: element list → edit form (MUI dialog) → save → the
  * store re-runs the P2 simulation; plus undo and the audit view.
  * Presentation only: all flow lives in the editor store.
@@ -388,15 +403,7 @@ export function BuildingEditorPanel({ buildingId }: { readonly buildingId: strin
     // Empty field -> reading of the current stored value; typed value -> reading
     // of exactly what was typed (typing 0 must not fall back to the old value).
     const effective = value.trim() === '' ? Number(current) : typedNum;
-    const uKind = target?.kind === 'window' ? 'window' : 'wall';
-    const reading =
-      f.uNoun !== undefined && Number.isFinite(effective) && effective > 0
-        ? describeU(effective, f.uNoun.noun, f.uNoun.gender, uKind)
-        : f.reading === 'sw' && Number.isFinite(effective)
-          ? describeSw(effective)
-          : f.reading === 'q4pa' && Number.isFinite(effective)
-            ? describeQ4pa(effective)
-            : '';
+    const reading = fieldReading(f, effective, target?.kind);
     const helperText = rawErrors.length > 0 ? frenchErrors.join(' ; ') : [reading, f.helper].filter((p) => p !== '').join(' · ') || ' ';
     return (
       <TextField
