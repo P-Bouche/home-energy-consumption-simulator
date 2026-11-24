@@ -310,7 +310,8 @@ async def run_planner(
                     client.chat.complete_async(
                         model=PLANNER_MODEL,
                         messages=messages,
-                        tools=_PLANNER_TOOLS,
+                        # Final turn: no tools left, only the conclusion.
+                        tools=(None if turn == PLANNER_MAX_TURNS else _PLANNER_TOOLS),
                     ),
                     timeout=MODEL_CALL_TIMEOUT_S,
                 )
@@ -331,10 +332,16 @@ async def run_planner(
 
             # -- no tool call: the planner is done -------------------------
             if not tool_calls:
-                return {
-                    "recommendation": _content_to_text(msg.content).strip(),
-                    "turns_used": turn,
-                }
+                text = _content_to_text(msg.content).strip()
+                if text or turn == PLANNER_MAX_TURNS:
+                    return {"recommendation": text, "turns_used": turn}
+                # Empty answer before the final turn: nudge and retry.
+                messages.append({"role": "assistant", "content": ""})
+                messages.append({
+                    "role": "user",
+                    "content": "Your answer was empty. Provide your analysis and recommendation now.",
+                })
+                continue
 
             # -- follow-up: run the requested read-only tools --------------
             messages.append({
