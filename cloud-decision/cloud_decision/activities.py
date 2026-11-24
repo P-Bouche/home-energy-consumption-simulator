@@ -15,13 +15,24 @@ run immediately and is reported in the result (no exception, no retry loop).
 The chat completions client comes from get_mistral_client() (documented entry
 point, automatic auth + telemetry), NOT a root-level Mistral() constructor,
 which does not exist in the workflows image and crashed the worker.
+
+v4 (context reach): the planner tools are no longer limited to the target
+repository. read_file / list_dir accept an optional "repo" ("owner/name"),
+so any public repository (e.g. upstream/engine forks) can be inspected, and
+three new read-only tools extend discovery beyond GitHub: search_npm,
+search_github and fetch_url (hardened: https-only, public hosts only,
+text/json responses only, size-capped). A planner asked about a feature that
+needs an external library can now verify it exists instead of guessing.
 """
 
 from __future__ import annotations
 
 import asyncio
+import ipaddress
 import json
 import os
+import re
+from urllib.parse import urlparse
 
 import httpx
 
@@ -33,13 +44,16 @@ from cloud_decision.github import decode_contents_entry
 GITHUB_API = "https://api.github.com"
 MAX_FILE_CHARS = 60_000
 TOOL_RESULT_CHARS = 24_000
+FETCH_MAX_CHARS = 30_000
 
 # Hard loop bounds: a decision needs a few tool calls, not an endless repo
 # walk. Total worst-case planner time is about
-# PLANNER_MAX_TURNS * MODEL_CALL_TIMEOUT_S = 8 * 120s = 16 minutes.
-PLANNER_MAX_TURNS = 8
-MODEL_CALL_TIMEOUT_S = 120
+# PLANNER_MAX_TURNS * MODEL_CALL_TIMEOUT_S = 10 * 90s = 15 minutes.
+PLANNER_MAX_TURNS = 10
+MODEL_CALL_TIMEOUT_S = 90
 PLANNER_MODEL = "mistral-large-latest"
+
+_REPO_SLUG_RE = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 
 
 def _gh_headers(token: str) -> dict[str, str]:
@@ -60,6 +74,23 @@ def _github_token() -> str:
         if v:
             return v.strip()
     return ""
+
+
+def _resolve_repo(args: dict, owner: str, repo: str) -> tuple[str, str] | dict:
+    """Resolve the repository targeted by a planner tool call.
+
+    Default: the workflow's target repository. The model may pass
+    {"repo": "owner/name"} to read any other repository (forks, upstream
+    libraries...). Anything malformed stays a tool error, not a crash.
+    """
+    slug = args.get("repo")
+    if not slug:
+        return owner, repo
+    slug = str(slug).strip()
+    if not _REPO_SLUG_RE.match(slug):
+        return {"error": f"invalid repo (expected 'owner/name'): {slug!r}"}
+    o, _, r = slug.partition("/")
+    return o, r
 
 
 @workflows.activity()
@@ -172,19 +203,133 @@ async def post_issue_comment(owner: str, repo: str, issue_number: int, body: str
     return {"posted": True, "html_url": r.json().get("html_url", "")}
 
 
+# -- Planner-native read tools beyond GitHub ------------------------------
+
+def _validate_public_https_url(url: str) -> str | None:
+    """Accept only public https URLs; refuse private/loopback/link-local hosts.
+
+    The planner model builds the URLs; this guard keeps fetch_url from being
+    redirected to internal endpoints of the worker deployment.
+    """
+    try:
+        u = urlparse(url)
+    except Exception:
+        return None
+    if u.scheme != "https" or not u.hostname:
+        return None
+    host = u.hostname.lower().rstrip(".")
+    if host == "localhost" or host.endswith((".local", ".internal", ".localhost", ".home.arpa")):
+        return None
+    try:
+        ip = ipaddress.ip_address(host)
+    except ValueError:
+        ip = None
+    if ip is not None and (ip.is_private or ip.is_loopback or ip.is_link_local
+                          or ip.is_reserved or ip.is_multicast or ip.is_unspecified):
+        return None
+    return url
+
+
+async def _fetch_url_raw(client: httpx.AsyncClient, url: str) -> dict:
+    ok_url = _validate_public_https_url(url)
+    if ok_url is None:
+        return {"error": f"refused (https + public host required): {url[:200]}"}
+    r = await client.get(
+        ok_url, timeout=20, follow_redirects=True,
+        headers={"User-Agent": "cloud-decision-workflow"},
+    )
+    # Re-validate the final URL after redirects.
+    if _validate_public_https_url(str(r.url)) is None:
+        return {"error": "refused: redirected to a private or non-https host"}
+    ctype = (r.headers.get("content-type") or "").split(";")[0].strip().lower()
+    if not (ctype.startswith("text/") or ctype in ("application/json", "application/xml")
+            or ctype.endswith("+json") or ctype.endswith("+xml")):
+        return {"error": f"unsupported content-type: {ctype}"}
+    text = r.text
+    return {
+        "url": str(r.url),
+        "status": r.status_code,
+        "content_type": ctype,
+        "text": text[:FETCH_MAX_CHARS],
+        "truncated": len(text) > FETCH_MAX_CHARS,
+    }
+
+
+async def _search_npm_raw(client: httpx.AsyncClient, query: str, size: int) -> dict:
+    r = await client.get(
+        "https://registry.npmjs.org/-/v1/search",
+        params={"text": query, "size": size},
+        headers={"User-Agent": "cloud-decision-workflow"},
+        timeout=20,
+    )
+    r.raise_for_status()
+    data = r.json()
+    objects = data.get("objects", [])
+    return {
+        "query": query,
+        "total": data.get("total"),
+        "results": [
+            {
+                "name": (o.get("package") or {}).get("name"),
+                "version": (o.get("package") or {}).get("version"),
+                "description": (o.get("package") or {}).get("description"),
+                "links": (o.get("package") or {}).get("links"),
+            }
+            for o in objects
+        ],
+    }
+
+
+async def _search_github_raw(client: httpx.AsyncClient, query: str, per_page: int) -> dict:
+    r = await client.get(
+        f"{GITHUB_API}/search/repositories",
+        params={"q": query, "per_page": per_page, "sort": "stars"},
+        headers=_gh_headers(_github_token()),
+        timeout=20,
+    )
+    r.raise_for_status()
+    items = r.json().get("items", [])
+    return {
+        "query": query,
+        "total": r.json().get("total_count"),
+        "results": [
+            {
+                "full_name": i.get("full_name"),
+                "description": i.get("description"),
+                "stars": i.get("stargazers_count"),
+                "language": i.get("language"),
+                "url": i.get("html_url"),
+                "updated_at": i.get("updated_at"),
+            }
+            for i in items
+        ],
+    }
+
+
+# -- Planner tool schemas -------------------------------------------------
+
 _PLANNER_TOOLS = [
     {
         "type": "function",
         "function": {
             "name": "read_file",
-            "description": "Read a repository file on the main branch.",
+            "description": (
+                "Read a file from GitHub. Defaults to the issue's repository, "
+                "main branch. Pass 'repo' ('owner/name') to read another public "
+                "repository, e.g. a fork or an upstream library."
+            ),
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "path": {
+                    "path": {"type": "string", "description": "file path in the repository"},
+                    "repo": {
                         "type": "string",
-                        "description": "file path in the repository",
-                    }
+                        "description": "optional 'owner/name'; default: the issue's repository",
+                    },
+                    "ref": {
+                        "type": "string",
+                        "description": "optional branch, tag or commit; default: main",
+                    },
                 },
                 "required": ["path"],
             },
@@ -195,8 +340,9 @@ _PLANNER_TOOLS = [
         "function": {
             "name": "list_dir",
             "description": (
-                "List a repository directory on the main branch "
-                "('' for the repository root)."
+                "List a GitHub repository directory. Defaults to the issue's "
+                "repository, main branch. Pass 'repo' ('owner/name') for another "
+                "public repository, and '' as path for its root."
             ),
             "parameters": {
                 "type": "object",
@@ -204,33 +350,73 @@ _PLANNER_TOOLS = [
                     "path": {
                         "type": "string",
                         "description": "directory path, '' for the repository root",
-                    }
+                    },
+                    "repo": {
+                        "type": "string",
+                        "description": "optional 'owner/name'; default: the issue's repository",
+                    },
+                    "ref": {"type": "string", "description": "optional ref; default: main"},
                 },
                 "required": ["path"],
             },
         },
     },
+    {
+        "type": "function",
+        "function": {
+            "name": "search_npm",
+            "description": (
+                "Search the npm registry for packages. Use it to verify that an "
+                "external library the feature may need actually exists, before "
+                "recommending it."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {"type": "string", "description": "search keywords, e.g. 'dpe france 3cl'"},
+                    "size": {"type": "integer", "description": "max results, 1-10; default 5"},
+                },
+                "required": ["query"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "search_github",
+            "description": (
+                "Search GitHub repositories by keywords, sorted by stars. Use it "
+                "to discover or verify the maintenance status of a project "
+                "(last update date, stars, language)."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {"type": "string", "description": "search keywords, GitHub search syntax"},
+                    "per_page": {"type": "integer", "description": "max results, 1-10; default 5"},
+                },
+                "required": ["query"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "fetch_url",
+            "description": (
+                "Fetch a public https page (or JSON) for documentation or "
+                "technical details. Text and JSON bodies only, size-capped."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "url": {"type": "string", "description": "public https URL"},
+                },
+                "required": ["url"],
+            },
+        },
+    },
 ]
-
-
-async def _dispatch_tool(client: httpx.AsyncClient, owner: str, repo: str, name: str, args: dict) -> dict:
-    path = str(args.get("path", "") or "")
-    try:
-        if name == "read_file":
-            return await _read_file_raw(client, owner, repo, path, "main")
-        if name == "list_dir":
-            return await _list_dir_raw(client, owner, repo, path, "main")
-    except httpx.HTTPStatusError as exc:
-        # A wrong path (404), a rate limit (403) etc. is a tool-use miss:
-        # hand it back to the model so it can correct itself within the turn
-        # cap, instead of aborting the whole analysis.
-        return {
-            "error": (
-                f"GitHub API {exc.response.status_code} for path {path!r}: "
-                f"{exc.response.text[:300]}"
-            )
-        }
-    return {"error": f"unknown tool: {name}"}
 
 
 def _content_to_text(content, _include_thinking: bool = False) -> str:
@@ -269,6 +455,59 @@ def _content_to_text(content, _include_thinking: bool = False) -> str:
     return str(content)
 
 
+async def _dispatch_tool(client: httpx.AsyncClient, owner: str, repo: str, name: str, args: dict) -> dict:
+    try:
+        if name == "read_file":
+            rr = _resolve_repo(args, owner, repo)
+            if isinstance(rr, dict):
+                return rr
+            o, r = rr
+            path = str(args.get("path", "") or "")
+            ref = str(args.get("ref") or "main")
+            return await _read_file_raw(client, o, r, path, ref)
+        if name == "list_dir":
+            rr = _resolve_repo(args, owner, repo)
+            if isinstance(rr, dict):
+                return rr
+            o, r = rr
+            path = str(args.get("path", "") or "")
+            ref = str(args.get("ref") or "main")
+            return await _list_dir_raw(client, o, r, path, ref)
+        if name == "search_npm":
+            query = str(args.get("query", "") or "").strip()
+            if not query:
+                return {"error": "query is required"}
+            size = args.get("size") or 5
+            try:
+                size = max(1, min(10, int(size)))
+            except (TypeError, ValueError):
+                size = 5
+            return await _search_npm_raw(client, query, size)
+        if name == "search_github":
+            query = str(args.get("query", "") or "").strip()
+            if not query:
+                return {"error": "query is required"}
+            per_page = args.get("per_page") or 5
+            try:
+                per_page = max(1, min(10, int(per_page)))
+            except (TypeError, ValueError):
+                per_page = 5
+            return await _search_github_raw(client, query, per_page)
+        if name == "fetch_url":
+            url = str(args.get("url", "") or "").strip()
+            return await _fetch_url_raw(client, url)
+    except httpx.HTTPStatusError as exc:
+        # A wrong path (404), a rate limit (403) etc. is a tool-use miss:
+        # hand it back to the model so it can correct itself within the turn
+        # cap, instead of aborting the whole analysis.
+        try:
+            detail = exc.response.text[:300]
+        except Exception:
+            detail = ""
+        return {"error": f"HTTP {exc.response.status_code}: {detail}"}
+    return {"error": f"unknown tool: {name}"}
+
+
 @workflows.activity()
 async def run_planner(
     owner: str,
@@ -283,7 +522,8 @@ async def run_planner(
     Guarantees (fail fast, no retry):
       - at most PLANNER_MAX_TURNS model calls, each with a hard
         MODEL_CALL_TIMEOUT_S timeout;
-      - the only tools are read_file / list_dir on the main branch;
+      - read-only tools: GitHub reads on any public repository,
+        npm / GitHub search and public web fetches;
       - any error (timeout, API error, bad tool call) stops the loop and is
         returned as {"error": ...} instead of raising or retrying.
 
