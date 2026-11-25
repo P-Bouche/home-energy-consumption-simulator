@@ -55,11 +55,14 @@ interface FieldDef {
   readonly enumKind?: EnumLabelKind;
   /**
    * Min/max shown on numeric inputs. Presentation data only — mirrors the
-   * domain invariants `U_VALUE_MAX` etc.; the domain remains the enforcing
-   * layer (400 fieldErrors). U range is (0, 4] W/m².K: 0 is exclusive.
+   * domain invariants `U_VALUE_MAX` / `WINDOW_U_VALUE_MAX` etc.; the domain
+   * remains the enforcing layer (400 fieldErrors). U range is (0, max]
+   * W/m².K (0 exclusive); windows (Uw) allow up to 6 (single glazing).
    */
   readonly min?: number;
   readonly max?: number;
+  /** step of the number input spinners (issue #48: 1-unit steps hide most values) */
+  readonly step?: number;
   /** plain-language example promoted from the catalog description into helper text */
   readonly helper?: string;
   /** noun + gender for the plain-language reading of the U value */
@@ -81,8 +84,8 @@ const KINDS: Record<EditableKind, KindDef> = {
     idField: 'wallId',
     label: 'Mur',
     fields: [
-      { field: 'uValueWm2K', label: 'U (W/m².K)', numeric: true, min: 0, max: 4, helper: 'ex. 0,2 pour une isolation par l’extérieur', uNoun: { noun: 'mur', gender: 'm' } },
-      { field: 'areaM2', label: 'Surface (m²)', numeric: true },
+      { field: 'uValueWm2K', label: 'U (W/m².K)', numeric: true, min: 0, max: 4, step: 0.1, helper: 'ex. 0,2 pour une isolation par l’extérieur', uNoun: { noun: 'mur', gender: 'm' } },
+      { field: 'areaM2', label: 'Surface (m²)', numeric: true, step: 0.1 },
       { field: 'description', label: 'Description', numeric: false },
       { field: 'orientation', label: 'Orientation', numeric: false, enumKind: 'orientation' },
       { field: 'wallType', label: 'Type de mur', numeric: false, enumKind: 'wallType' },
@@ -94,12 +97,12 @@ const KINDS: Record<EditableKind, KindDef> = {
     idField: 'windowId',
     label: 'Fenêtre',
     fields: [
-      { field: 'uValueWm2K', label: 'Uw (W/m².K)', numeric: true, min: 0, max: 4, helper: 'ex. 1,1 pour du double vitrage récent', uNoun: { noun: 'baie vitrée', gender: 'f' } },
-      { field: 'areaM2', label: 'Surface (m²)', numeric: true },
+      { field: 'uValueWm2K', label: 'Uw (W/m².K)', numeric: true, min: 0, max: 6, step: 0.1, helper: 'ex. 1,1 pour du double vitrage récent ; jusqu’à 6 pour du simple vitrage', uNoun: { noun: 'baie vitrée', gender: 'f' } },
+      { field: 'areaM2', label: 'Surface (m²)', numeric: true, step: 0.1 },
       { field: 'description', label: 'Description', numeric: false },
       { field: 'orientation', label: 'Orientation', numeric: false, enumKind: 'orientation' },
-      { field: 'count', label: 'Nombre', numeric: true },
-      { field: 'solarFactorSw', label: 'Facteur solaire Sw', numeric: true, reading: 'sw' },
+      { field: 'count', label: 'Nombre', numeric: true, step: 1 },
+      { field: 'solarFactorSw', label: 'Apports solaires (Sw)', numeric: true, step: 0.05, reading: 'sw', helper: '0 = aucun soleil ne passe, 1 = tout le soleil passe' },
       { field: 'glazingType', label: 'Vitrage', numeric: false, enumKind: 'glazingType' },
       { field: 'frameMaterial', label: 'Menuiserie', numeric: false, enumKind: 'frameMaterial' }
     ]
@@ -109,8 +112,8 @@ const KINDS: Record<EditableKind, KindDef> = {
     idField: 'roofId',
     label: 'Toiture / plancher haut',
     fields: [
-      { field: 'uValueWm2K', label: 'U (W/m².K)', numeric: true, min: 0, max: 4, uNoun: { noun: 'toiture', gender: 'f' } },
-      { field: 'areaM2', label: 'Surface (m²)', numeric: true },
+      { field: 'uValueWm2K', label: 'U (W/m².K)', numeric: true, min: 0, max: 4, step: 0.1, uNoun: { noun: 'toiture', gender: 'f' } },
+      { field: 'areaM2', label: 'Surface (m²)', numeric: true, step: 0.1 },
       { field: 'description', label: 'Description', numeric: false },
       { field: 'roofType', label: 'Type de toiture', numeric: false, enumKind: 'roofType' },
       { field: 'adjacencyType', label: 'Adjacence', numeric: false, enumKind: 'adjacencyType' }
@@ -121,8 +124,8 @@ const KINDS: Record<EditableKind, KindDef> = {
     idField: 'floorId',
     label: 'Plancher bas',
     fields: [
-      { field: 'uValueWm2K', label: 'U (W/m².K)', numeric: true, min: 0, max: 4, uNoun: { noun: 'plancher', gender: 'm' } },
-      { field: 'areaM2', label: 'Surface (m²)', numeric: true },
+      { field: 'uValueWm2K', label: 'U (W/m².K)', numeric: true, min: 0, max: 4, step: 0.1, uNoun: { noun: 'plancher', gender: 'm' } },
+      { field: 'areaM2', label: 'Surface (m²)', numeric: true, step: 0.1 },
       { field: 'description', label: 'Description', numeric: false },
       { field: 'floorType', label: 'Type de plancher', numeric: false, enumKind: 'floorType' },
       { field: 'adjacencyType', label: 'Adjacence', numeric: false, enumKind: 'adjacencyType' }
@@ -135,7 +138,7 @@ const KINDS: Record<EditableKind, KindDef> = {
     fields: [
       { field: 'description', label: 'Description', numeric: false },
       { field: 'installationType', label: 'Type d’installation', numeric: false, enumKind: 'installationType' },
-      { field: 'heatedAreaM2', label: 'Surface chauffée (m²)', numeric: true }
+      { field: 'heatedAreaM2', label: 'Surface chauffée (m²)', numeric: true, step: 0.1 }
     ]
   },
   'ventilation-system': {
@@ -145,8 +148,8 @@ const KINDS: Record<EditableKind, KindDef> = {
     fields: [
       { field: 'description', label: 'Description', numeric: false },
       { field: 'ventilationType', label: 'Type de ventilation', numeric: false, enumKind: 'ventilationType' },
-      { field: 'ventilatedAreaM2', label: 'Surface ventilée (m²)', numeric: true },
-      { field: 'q4paConv', label: 'q4pa conv (m³/h.m²)', numeric: true, reading: 'q4pa' }
+      { field: 'ventilatedAreaM2', label: 'Surface ventilée (m²)', numeric: true, step: 0.1 },
+      { field: 'q4paConv', label: 'Étanchéité à l’air (q4pa conv, m³/h.m²)', numeric: true, step: 0.1, reading: 'q4pa', helper: '0,6 et moins = excellente ; au-delà de 1,5 = très fuyant' }
     ]
   }
 };
@@ -254,16 +257,15 @@ export function BuildingEditorPanel({ buildingId }: { readonly buildingId: strin
       const raw = (form[f.field] ?? '').trim();
       if (raw === '') continue;
       if (f.numeric) {
-        let num = Number(raw);
+        const num = Number(raw);
         if (Number.isNaN(num)) {
           setFormError(`${f.label} doit être un nombre`);
           return;
         }
-        // Clamp the upper bound only: manual input must not bypass the slider
-        // max (issue #48 finding 1: Uw typed above 4). The lower bound stays
-        // domain-enforced — invalid values are sent raw and rejected with a
-        // field-level 400 (AC-P4-02 frozen contract).
-        if (f.max !== undefined && num > f.max) num = f.max;
+        // Sent raw, no client clamp: out-of-range values are rejected by the
+        // domain with a field-level 400 shown in red on the field (same path
+        // as q4pa conv). AC-P4-02 frozen contract: the raw value must reach
+        // the API unchanged. Live red feedback happens in renderField.
         command[f.field] = num;
       } else {
         command[f.field] = raw;
@@ -404,7 +406,17 @@ export function BuildingEditorPanel({ buildingId }: { readonly buildingId: strin
     // of exactly what was typed (typing 0 must not fall back to the old value).
     const effective = value.trim() === '' ? Number(current) : typedNum;
     const reading = fieldReading(f, effective, target?.kind);
-    const helperText = rawErrors.length > 0 ? frenchErrors.join(' ; ') : [reading, f.helper].filter((p) => p !== '').join(' · ') || ' ';
+    // Live range feedback while typing (issue #48 rework): the typed value is
+    // flagged in red as soon as it leaves the declared range, without blocking
+    // save — the raw value still goes to the domain, which enforces (AC-P4-02).
+    const liveError =
+      f.numeric && f.max !== undefined && Number.isFinite(typedNum) && (typedNum <= (f.min ?? 0) || typedNum > f.max)
+        ? translateFieldError(f.field, `must be in (${f.min ?? 0}, ${f.max}] W/m².K`, fieldSubject(f)).french
+        : null;
+    const helperText =
+      rawErrors.length > 0
+        ? frenchErrors.join(' ; ')
+        : liveError ?? ([reading, f.helper].filter((p) => p !== '').join(' · ') || ' ');
     return (
       <TextField
         key={f.field}
@@ -416,10 +428,11 @@ export function BuildingEditorPanel({ buildingId }: { readonly buildingId: strin
           htmlInput: {
             'data-testid': `field-${f.field}`,
             ...(f.min !== undefined ? { min: f.min } : {}),
-            ...(f.max !== undefined ? { max: f.max } : {})
+            ...(f.max !== undefined ? { max: f.max } : {}),
+            ...(f.step !== undefined ? { step: f.step } : {})
           }
         }}
-        error={rawErrors.length > 0}
+        error={rawErrors.length > 0 || liveError !== null}
         helperText={helperText}
         onChange={(e) => setForm((prev) => ({ ...prev, [f.field]: e.target.value }))}
       />
