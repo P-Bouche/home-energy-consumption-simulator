@@ -191,6 +191,135 @@ describe('command vocabulary (P4 contract with P5)', () => {
     expect(isLeft(parseBuildingCommand({ type: 'building.heating-system.update.v1', buildingId: BUILDING_ID, systemId: 'heating-1', generatorType: '97' }))).toBe(true);
   });
 
+  it('parses heating create (no systemId, description required) and delete (ADR-0006)', () => {
+    const create = parseBuildingCommand({
+      type: 'building.heating-system.create.v1',
+      buildingId: BUILDING_ID,
+      description: 'Poêle à bois',
+      generatorType: '22'
+    });
+    expect(isRight(create)).toBe(true);
+    // create without description is invalid
+    expect(validateCommandFields({ type: 'building.heating-system.create.v1', buildingId: BUILDING_ID } as never).some((e) => e.field === 'description')).toBe(true);
+    // create rejects a client-supplied systemId (ids are minted, ADR-0003)
+    expect(isLeft(parseBuildingCommand({ type: 'building.heating-system.create.v1', buildingId: BUILDING_ID, systemId: 'heating-9', description: 'x' }))).toBe(true);
+    const del = parseBuildingCommand({ type: 'building.heating-system.delete.v1', buildingId: BUILDING_ID, systemId: 'heating-1' });
+    expect(isRight(del)).toBe(true);
+  });
+
+  it('applies create (append-only id) and delete (removable, restorable) on heating systems (ADR-0006)', () => {
+    const building = makeBuilding();
+    const created = building.apply(
+      { type: 'building.heating-system.create.v1', buildingId: BUILDING_ID, description: 'Poêle à bois', generatorType: '22', heatedAreaM2: 40 },
+      editCtx
+    );
+    expect(created.ok).toBe(true);
+    if (!created.ok) return;
+    const systems = created.value.heatingSystems;
+    expect(systems.map((s) => s.id)).toEqual(['heating-1', 'heating-2']);
+    expect(systems[1]?.description.value).toBe('Poêle à bois');
+    expect(systems[1]?.description.source).toBe('user');
+    expect(systems[1]?.generatorType?.value).toBe('22');
+
+    const deleted = created.value.apply(
+      { type: 'building.heating-system.delete.v1', buildingId: BUILDING_ID, systemId: 'heating-1' },
+      editCtx
+    );
+    expect(deleted.ok).toBe(true);
+    if (!deleted.ok) return;
+    expect(deleted.value.heatingSystems.map((s) => s.id)).toEqual(['heating-2']);
+
+    // deleting an unknown id fails and leaves the aggregate unchanged
+    const bad = deleted.value.apply(
+      { type: 'building.heating-system.delete.v1', buildingId: BUILDING_ID, systemId: 'heating-99' },
+      editCtx
+    );
+    expect(isLeft(bad)).toBe(true);
+  });
+
+  it('undo of a heating delete restores the system with its original id (ADR-0006)', () => {
+    const building = makeBuilding();
+    const created = building.apply(
+      { type: 'building.heating-system.create.v1', buildingId: BUILDING_ID, description: 'Poêle à bois', generatorType: '42', heatedAreaM2: 40 },
+      editCtx
+    );
+    expect(created.ok).toBe(true);
+    if (!created.ok) return;
+    const deleted = created.value.apply(
+      { type: 'building.heating-system.delete.v1', buildingId: BUILDING_ID, systemId: 'heating-1' },
+      editCtx
+    );
+    expect(deleted.ok).toBe(true);
+    if (!deleted.ok) return;
+    expect(deleted.value.heatingSystems.map((s) => s.id)).toEqual(['heating-2']);
+    const event = deleted.value.pullDomainEvents().find((e) => e instanceof BuildingUpdated);
+    if (!(event instanceof BuildingUpdated)) throw new Error('expected BuildingUpdated');
+    const entry = auditEntryFromEvent('entry-1', event);
+    const restored = deleted.value.applyRestoration(entry, editCtx);
+    expect(isRight(restored)).toBe(true);
+    if (!isRight(restored)) return;
+    expect(restored.value.heatingSystems.map((s) => s.id)).toEqual(['heating-1', 'heating-2']);
+    expect(restored.value.heatingSystems[0]?.description.source).toBe('dpe-xml:x');
+  });
+
+  it('never reuses a heating id after delete (persisted high-water mark, ADR-0006)', () => {
+    const building = makeBuilding();
+    const created = building.apply(
+      { type: 'building.heating-system.create.v1', buildingId: BUILDING_ID, description: 'Poêle', generatorType: '42', heatedAreaM2: 40 },
+      editCtx
+    );
+    expect(created.ok && created.value.heatingSystems.map((s) => s.id)).toEqual(['heating-1', 'heating-2']);
+    if (!created.ok) return;
+    const deleted = created.value.apply(
+      { type: 'building.heating-system.delete.v1', buildingId: BUILDING_ID, systemId: 'heating-2' },
+      editCtx
+    );
+    expect(deleted.ok).toBe(true);
+    if (!deleted.ok) return;
+    // recreate: must mint heating-3, NOT reuse heating-2 (audit rows reference it)
+    const recreated = deleted.value.apply(
+      { type: 'building.heating-system.create.v1', buildingId: BUILDING_ID, description: 'Radiateurs électriques', generatorType: '98', heatedAreaM2: 80 },
+      editCtx
+    );
+    expect(recreated.ok).toBe(true);
+    if (!recreated.ok) return;
+    expect(recreated.value.heatingSystems.map((s) => s.id)).toEqual(['heating-1', 'heating-3']);
+    // the high-water mark survives a JSON round-trip
+    const revived = Building.fromJson(recreated.value.toJson(), recreated.value.version);
+    expect(revived.heatingSystemSeq).toBe(3);
+  });
+
+  it('undo of a heating create deletes the minted id (ADR-0006)', () => {
+    const building = makeBuilding();
+    const created = building.apply(
+      { type: 'building.heating-system.create.v1', buildingId: BUILDING_ID, description: 'Poêle', generatorType: '42', heatedAreaM2: 40 },
+      editCtx
+    );
+    expect(created.ok).toBe(true);
+    if (!created.ok) return;
+    const event = created.value.pullDomainEvents().find((e) => e instanceof BuildingUpdated);
+    if (!(event instanceof BuildingUpdated)) throw new Error('expected BuildingUpdated');
+    const entry = auditEntryFromEvent('entry-1', event);
+    const restored = created.value.applyRestoration(entry, editCtx);
+    expect(isRight(restored)).toBe(true);
+    if (!isRight(restored)) return;
+    expect(restored.value.heatingSystems.map((s) => s.id)).toEqual(['heating-1']);
+  });
+
+  it('rejects an un-simulable heating state: create without generator/surface, delete of the last system (ADR-0006)', () => {
+    // create requires description + generatorType + heatedAreaM2 (engine needs them for ep_conso_5_usages)
+    const noGen = validateCommandFields({ type: 'building.heating-system.create.v1', buildingId: BUILDING_ID, description: 'Poêle', heatedAreaM2: 40 } as never);
+    expect(noGen.some((e) => e.field === 'generatorType')).toBe(true);
+    const noArea = validateCommandFields({ type: 'building.heating-system.create.v1', buildingId: BUILDING_ID, description: 'Poêle', generatorType: '42' } as never);
+    expect(noArea.some((e) => e.field === 'heatedAreaM2')).toBe(true);
+    // deleting the only heating system is refused (aggregate left unchanged)
+    const building = makeBuilding();
+    expect(building.heatingSystems).toHaveLength(1);
+    const del = building.apply({ type: 'building.heating-system.delete.v1', buildingId: BUILDING_ID, systemId: 'heating-1' }, editCtx);
+    expect(isLeft(del)).toBe(true);
+    if (isLeft(del)) expect(del.error.message ?? '').toMatch(/at least one heating system/);
+  });
+
   it('accepts every v1 tag', () => {
     const commands: unknown[] = [
       { type: 'building.wall.update.v1', buildingId: BUILDING_ID, wallId: 'wall-1' },

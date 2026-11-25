@@ -122,6 +122,27 @@ export const BUILDING_COMMAND_SCHEMA = {
     },
     {
       type: 'object',
+      required: ['type', 'buildingId', 'description', 'generatorType', 'heatedAreaM2'],
+      properties: {
+        type: { type: 'string', enum: ['building.heating-system.create.v1'] },
+        buildingId: { type: 'string', format: 'uuid' },
+        description: { type: 'string' },
+        installationType: { type: 'string', nullable: true },
+        generatorType: { type: 'string' },
+        heatedAreaM2: { type: 'number' }
+      }
+    },
+    {
+      type: 'object',
+      required: ['type', 'buildingId', 'systemId'],
+      properties: {
+        type: { type: 'string', enum: ['building.heating-system.delete.v1'] },
+        buildingId: { type: 'string', format: 'uuid' },
+        systemId: { type: 'string' }
+      }
+    },
+    {
+      type: 'object',
       required: ['type', 'buildingId', 'systemId'],
       properties: {
         type: { type: 'string', enum: ['building.ventilation-system.update.v1'] },

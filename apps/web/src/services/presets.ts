@@ -51,6 +51,7 @@ export const HEATING_PRESETS: readonly HeatingPreset[] = [
   { label: 'Pompe à chaleur air/eau', generatorType: '7' },
   { label: 'Chaudière gaz à condensation', generatorType: '97' },
   { label: 'Chaudière gaz standard', generatorType: '89' },
+  { label: 'Poêle à bois (label Flamme Verte)', generatorType: '42' },
   { label: 'Convecteur électrique', generatorType: '98' }
 ];
 

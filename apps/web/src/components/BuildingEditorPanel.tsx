@@ -221,6 +221,8 @@ export function BuildingEditorPanel({
   const simStatus = useSimulationStore((s) => s.status);
 
   const [target, setTarget] = useState<EditTarget | null>(null);
+  const [creating, setCreating] = useState(false); // ADR-0006: create mode for heating
+  const [deleting, setDeleting] = useState<string | null>(null);
   const [form, setForm] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [showTechnical, setShowTechnical] = useState(false);
@@ -238,6 +240,19 @@ export function BuildingEditorPanel({
       initial[f.field] = raw === null || raw === undefined ? '' : String(raw.value);
     }
     setTarget({ kind, id, element });
+    setCreating(false);
+    setForm(initial);
+    setFormError(null);
+    setShowTechnical(false);
+  };
+
+  /** ADR-0006: open the dialog in create mode (new heating installation) */
+  const openCreate = (): void => {
+    const def = KINDS['heating-system'];
+    const initial: Record<string, string> = {};
+    for (const f of def.fields) initial[f.field] = '';
+    setTarget({ kind: 'heating-system', id: '', element: {} });
+    setCreating(true);
     setForm(initial);
     setFormError(null);
     setShowTechnical(false);
@@ -245,14 +260,43 @@ export function BuildingEditorPanel({
 
   const closeEditor = (): void => {
     setTarget(null);
+    setCreating(false);
     setForm({});
     setFormError(null);
     setShowTechnical(false);
   };
 
   const onSave = async (): Promise<void> => {
-    if (target === null || building === null) return;
+    if (building === null) return;
+    // ADR-0006: delete path (confirm dialog)
+    if (deleting !== null) {
+      const ok = await save({
+        type: 'building.heating-system.delete.v1',
+        buildingId: building.id,
+        systemId: deleting
+      } as unknown as BuildingCommandJson);
+      if (ok) setDeleting(null);
+      return;
+    }
+    if (target === null) return;
     const def = KINDS[target.kind];
+    // ADR-0006: create mode sends the create tag (id minted domain-side)
+    if (creating) {
+      if ((form['description'] ?? '').trim() === '') {
+        setFormError('La description est requise pour ajouter un chauffage');
+        return;
+      }
+      const command: Record<string, unknown> = { type: 'building.heating-system.create.v1', buildingId: building.id };
+      for (const f of def.fields) {
+        const raw = (form[f.field] ?? '').trim();
+        if (raw === '') continue;
+        command[f.field] = f.numeric ? Number(raw) : raw;
+      }
+      setFormError(null);
+      const ok = await save(command as unknown as BuildingCommandJson);
+      if (ok) closeEditor();
+      return;
+    }
     // Level M (issue #32): a generator preset is sent via the v2 command (ADR-0004)
     const tag =
       target.kind === 'heating-system' && (form['generatorType'] ?? '').trim() !== ''
@@ -297,9 +341,16 @@ export function BuildingEditorPanel({
       <ListItem
         key={`${kind}-${id}`}
         secondaryAction={
-          <Button size="small" startIcon={<EditIcon />} data-testid={`edit-${kind}-${id}`} onClick={() => openEditor(kind, id, element)}>
-            Modifier
-          </Button>
+          <Box sx={{ display: 'flex', gap: 0.5 }}>
+            {kind === 'heating-system' && (
+              <Button size="small" color="error" data-testid={`delete-${kind}-${id}`} onClick={() => setDeleting(id)}>
+                Supprimer
+              </Button>
+            )}
+            <Button size="small" startIcon={<EditIcon />} data-testid={`edit-${kind}-${id}`} onClick={() => openEditor(kind, id, element)}>
+              Modifier
+            </Button>
+          </Box>
         }
       >
         <ListItemText
@@ -560,7 +611,14 @@ export function BuildingEditorPanel({
       {building !== null &&
         groups.map((group) => (
           <Box key={group.title} sx={{ mt: 2 }}>
-            <Typography variant="subtitle1">{group.title}</Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography variant="subtitle1">{group.title}</Typography>
+              {group.title === 'Chauffage' && (
+                <Button size="small" variant="outlined" data-testid="add-heating" onClick={openCreate}>
+                  Ajouter un chauffage
+                </Button>
+              )}
+            </Box>
             <List dense data-testid={`element-list-${group.title}`}>
               {group.items}
             </List>
@@ -589,7 +647,7 @@ export function BuildingEditorPanel({
 
       <Dialog open={target !== null} onClose={closeEditor} fullWidth maxWidth="sm">
         <DialogTitle>
-          {target !== null ? `Modifier — ${KINDS[target.kind].label} ${target.id}` : ''}
+          {target !== null ? (creating ? 'Ajouter un chauffage' : `Modifier — ${KINDS[target.kind].label} ${target.id}`) : ''}
         </DialogTitle>
         {/* Padding-top must be inline: sx/class paddings are overridden by the MUI rule
             `.MuiDialogTitle-root + .MuiDialogContent-root { padding-top: 0 }` (two-class
@@ -654,6 +712,30 @@ export function BuildingEditorPanel({
           <Button onClick={closeEditor}>Annuler</Button>
           <Button variant="contained" data-testid="save-edit" disabled={status === 'saving'} onClick={() => void onSave()}>
             Enregistrer
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* ADR-0006: confirm deleting a heating installation */}
+      <Dialog open={deleting !== null} onClose={() => setDeleting(null)}>
+        <DialogTitle>Supprimer ce chauffage ?</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2">
+            L’installation {deleting} sera retirée du bâtiment (elle reste dans la piste d’audit et peut être annulée).
+          </Typography>
+          {/* domain rejection (e.g. last heating system) shown right where the delete is attempted */}
+          {hasFieldErrors && (
+            <Alert severity="error" sx={{ mt: 2 }} data-testid="delete-error">
+              {Object.entries(fieldErrors).flatMap(([field, messages]) =>
+                messages.map((m) => translateFieldError(field, m).french)
+              ).join(' ; ')}
+            </Alert>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleting(null)}>Annuler</Button>
+          <Button variant="contained" color="error" data-testid="confirm-delete" disabled={status === 'saving'} onClick={() => void onSave()}>
+            Supprimer
           </Button>
         </DialogActions>
       </Dialog>

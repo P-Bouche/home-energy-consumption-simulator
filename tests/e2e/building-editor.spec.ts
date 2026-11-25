@@ -281,3 +281,56 @@ test('level M (issue #32): preset cards fill the raw value — U preset on a wal
   expect(sys[0]?.generatorType.value).toBe('97');
   expect(sys[0]?.generatorType.source).toBe('user');
 });
+
+test('issue #61 (ADR-0006): add a heating system (create command) then delete one — building and audit stay consistent', async ({ page }) => {
+  const buildingId = await importFixtureAndOpenEditor(page);
+
+  // add a wood stove as a second (mixed) heating system
+  await page.getByTestId('add-heating').click();
+  await page.getByTestId('field-description').fill('Poêle à bois');
+  await page.getByTestId('preset-generatorType-42').click();
+  await page.getByTestId('field-heatedAreaM2').fill('40');
+  const createReq = page.waitForRequest((r) => r.url().includes(`/api/buildings/${buildingId}`) && r.method() === 'PATCH');
+  await page.getByTestId('save-edit').click();
+  expect(await (await createReq).postDataJSON()).toMatchObject({
+    type: 'building.heating-system.create.v1',
+    description: 'Poêle à bois',
+    generatorType: '42',
+    heatedAreaM2: 40
+  });
+  await expect(page.getByTestId('building-version')).toContainText('version 1');
+
+  let building = await page.request.get(`/api/buildings/${buildingId}`);
+  let systems = (await building.json()).building.heatingSystems as { id: string; description: { value: string; source: string } }[];
+  expect(systems.map((s) => s.id)).toEqual(['heating-1', 'heating-2']);
+  expect(systems[1]?.description).toMatchObject({ value: 'Poêle à bois', source: 'user' });
+
+  // delete the original gas boiler
+  await page.getByTestId('delete-heating-system-heating-1').click();
+  await page.getByTestId('confirm-delete').click();
+  await expect(page.getByTestId('building-version')).toContainText('version 2');
+  building = await page.request.get(`/api/buildings/${buildingId}`);
+  systems = (await building.json()).building.heatingSystems as { id: string }[];
+  expect(systems.map((s) => s.id)).toEqual(['heating-2']);
+
+  // undo restores the deleted system with its original id
+  await page.getByTestId('undo-button').click();
+  await expect(page.getByTestId('building-version')).toContainText('version 3');
+  building = await page.request.get(`/api/buildings/${buildingId}`);
+  systems = (await building.json()).building.heatingSystems as { id: string }[];
+  expect(systems.map((s) => s.id)).toEqual(['heating-1', 'heating-2']);
+});
+
+test('issue #61: deleting the last heating system is rejected and the error shows inside the confirm dialog', async ({ page }) => {
+  const buildingId = await importFixtureAndOpenEditor(page);
+
+  // the fixture has a single heating system: deleting it must be refused
+  await page.getByTestId('delete-heating-system-heating-1').click();
+  await page.getByTestId('confirm-delete').click();
+  await expect(page.getByTestId('delete-error')).toBeVisible();
+  await expect(page.getByTestId('delete-error')).toContainText('au moins une installation de chauffage');
+  // nothing persisted
+  await expect(page.getByTestId('building-version')).toContainText('version 0');
+  const building = await page.request.get(`/api/buildings/${buildingId}`);
+  expect((await building.json()).building.heatingSystems).toHaveLength(1);
+});

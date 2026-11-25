@@ -22,6 +22,8 @@ export type CommandTypeTag =
   | 'building.floor.update.v1'
   | 'building.heating-system.update.v1'
   | 'building.heating-system.update.v2'
+  | 'building.heating-system.create.v1'
+  | 'building.heating-system.delete.v1'
   | 'building.ventilation-system.update.v1';
 
 /**
@@ -116,6 +118,29 @@ export interface UpdateHeatingSystemV2Command extends CommandBase {
 }
 
 /**
+ * Creates a heating installation (DPE `installation_chauffage`), e.g. to model
+ * mixed heating in a renovation (ADR-0006, issue #61). No `systemId`: the
+ * domain mints `heating-<max+1>` (append-only, never reused — ADR-0003).
+ * `description` is required so a new installation is always named.
+ */
+export interface CreateHeatingSystemCommand extends CommandBase {
+  readonly type: 'building.heating-system.create.v1';
+  readonly description: string;
+  readonly installationType?: string | null;
+  readonly generatorType?: string | null;
+  readonly heatedAreaM2?: number | null;
+}
+
+/**
+ * Deletes a heating installation by id (ADR-0006, issue #61). Undo restores
+ * the element at its original position with its original id.
+ */
+export interface DeleteHeatingSystemCommand extends CommandBase {
+  readonly type: 'building.heating-system.delete.v1';
+  readonly systemId: SystemId;
+}
+
+/**
  * Edits a ventilation installation (DPE `ventilation`).
  */
 export interface UpdateVentilationSystemCommand extends CommandBase {
@@ -137,6 +162,8 @@ export type BuildingCommand =
   | UpdateFloorCommand
   | UpdateHeatingSystemCommand
   | UpdateHeatingSystemV2Command
+  | CreateHeatingSystemCommand
+  | DeleteHeatingSystemCommand
   | UpdateVentilationSystemCommand;
 
 /**
@@ -150,6 +177,8 @@ export const COMMAND_ELEMENT: Record<CommandTypeTag, { idField: string; kind: st
   'building.floor.update.v1': { idField: 'floorId', kind: 'floor' },
   'building.heating-system.update.v1': { idField: 'systemId', kind: 'heating-system' },
   'building.heating-system.update.v2': { idField: 'systemId', kind: 'heating-system' },
+  'building.heating-system.create.v1': { idField: 'systemId', kind: 'heating-system' },
+  'building.heating-system.delete.v1': { idField: 'systemId', kind: 'heating-system' },
   'building.ventilation-system.update.v1': { idField: 'systemId', kind: 'ventilation-system' }
 };
 
@@ -201,6 +230,13 @@ export const COMMAND_EDITABLE_FIELDS: Record<CommandTypeTag, Readonly<Record<str
     generatorType: 'string',
     heatedAreaM2: 'number'
   },
+  'building.heating-system.create.v1': {
+    description: 'string',
+    installationType: 'string',
+    generatorType: 'string',
+    heatedAreaM2: 'number'
+  },
+  'building.heating-system.delete.v1': {},
   'building.ventilation-system.update.v1': {
     description: 'string',
     ventilationType: 'string',
@@ -232,6 +268,16 @@ export function validateCommandFields(command: BuildingCommand): FieldError[] {
   const errors: FieldError[] = [];
   const fields = COMMAND_EDITABLE_FIELDS[command.type];
   const rec = command as unknown as Record<string, unknown>;
+  // a created installation must be simulable (ADR-0006): named, with a generator
+  // type and a heated surface — the engine cannot compute 5-usages consumption
+  // without them (it then omits logement.sortie.ep_conso.ep_conso_5_usages)
+  if (command.type === 'building.heating-system.create.v1') {
+    for (const required of ['description', 'generatorType', 'heatedAreaM2'] as const) {
+      if (rec[required] === undefined || rec[required] === null) {
+        errors.push({ field: required, message: `${required} is required when creating a heating system` });
+      }
+    }
+  }
   for (const [field, kind] of Object.entries(fields)) {
     const value = rec[field];
     if (value === undefined) continue;
@@ -294,13 +340,15 @@ export function parseBuildingCommand(json: unknown): Either<InvalidCommandError,
   }
   const tag = type as CommandTypeTag;
   const { idField } = COMMAND_ELEMENT[tag];
+  // create mints the id itself (append-only, ADR-0006) — no id field required
+  const isCreate = tag === 'building.heating-system.create.v1';
   if (typeof rec['buildingId'] !== 'string' || (rec['buildingId'] as string).length === 0) {
     issues.push('buildingId must be a non-empty string');
   }
-  if (typeof rec[idField] !== 'string' || (rec[idField] as string).length === 0) {
+  if (!isCreate && (typeof rec[idField] !== 'string' || (rec[idField] as string).length === 0)) {
     issues.push(`${idField} must be a non-empty string`);
   }
-  const allowed = new Set(['type', 'buildingId', idField, ...Object.keys(COMMAND_EDITABLE_FIELDS[tag])]);
+  const allowed = new Set(['type', 'buildingId', ...(isCreate ? [] : [idField]), ...Object.keys(COMMAND_EDITABLE_FIELDS[tag])]);
   for (const key of Object.keys(rec)) {
     if (!allowed.has(key)) {
       issues.push(`unknown field "${key}" for command ${tag}`);
@@ -338,6 +386,47 @@ export function inverseOfCommand(
 ): Either<InvalidCommandError, BuildingCommand> {
   const { idField } = COMMAND_ELEMENT[command.type];
   const rec = command as unknown as Record<string, unknown>;
+  // create inverts to a delete of the minted id (recorded in the changes)
+  if (command.type === 'building.heating-system.create.v1') {
+    const minted = (changes.find((c) => c.field === 'id') as { field: string; oldValue: unknown; newValue?: unknown } | undefined)?.newValue;
+    const systemId =
+      typeof minted === 'string'
+        ? minted
+        : minted !== null && typeof minted === 'object' && 'value' in (minted as Record<string, unknown>)
+          ? String((minted as { value: unknown }).value)
+          : undefined;
+    if (systemId === undefined) {
+      return left(new InvalidCommandError(['cannot invert a create without a minted id']));
+    }
+    return parseBuildingCommand({
+      type: 'building.heating-system.delete.v1',
+      buildingId: command.buildingId,
+      systemId
+    });
+  }
+  // delete inverts to a create carrying the removed element's old fields
+  // (the exact id/position restore happens via the restoration path, ADR-0006)
+  if (command.type === 'building.heating-system.delete.v1') {
+    const removed = changes.find((c) => c.field === '__removed')?.oldValue;
+    const old = removed !== null && typeof removed === 'object' && 'value' in (removed as Record<string, unknown>)
+      ? (removed as { value: Record<string, unknown> }).value
+      : null;
+    const inverse: Record<string, unknown> = {
+      type: 'building.heating-system.create.v1',
+      buildingId: command.buildingId
+    };
+    if (old !== null) {
+      for (const [k, v] of Object.entries(old)) {
+        if (k === 'id' || k === 'buildingId') continue;
+        // stored values are ConfidenceJson wrappers — unwrap to the raw value
+        inverse[k] =
+          v !== null && typeof v === 'object' && 'value' in (v as Record<string, unknown>)
+            ? (v as { value: unknown }).value
+            : null;
+      }
+    }
+    return parseBuildingCommand(inverse);
+  }
   const inverse: Record<string, unknown> = {
     type: command.type,
     buildingId: command.buildingId,
