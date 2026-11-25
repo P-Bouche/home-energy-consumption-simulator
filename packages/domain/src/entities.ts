@@ -118,6 +118,8 @@ export interface HeatingSystem {
   readonly buildingId: BuildingId;
   readonly description: Confidence<string>;
   readonly installationType: Confidence<string> | null;
+  /** DPE `enum_type_generateur_ch_id` (generator type, ADR-0004) */
+  readonly generatorType: Confidence<string> | null;
   readonly heatedAreaM2: Confidence<number> | null;
 }
 

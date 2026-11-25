@@ -62,7 +62,8 @@ describe('enum-labels service (web)', () => {
       'glazingType',
       'frameMaterial',
       'installationType',
-      'ventilationType'
+      'ventilationType',
+      'generatorType'
     ]);
   });
 

@@ -85,7 +85,8 @@ export const COMMAND_CATALOG: readonly CommandCatalogEntry[] = [
     targetKind: 'heatingSystems',
     targetIdField: 'systemId',
     fields: [
-      { key: 'installationType', label: 'Type d’installation', input: 'text', placeholder: '4', enumKind: 'installationType' }
+      { key: 'installationType', label: 'Type d’installation', input: 'text', placeholder: '4', enumKind: 'installationType' },
+      { key: 'generatorType', label: 'Type de générateur', input: 'text', placeholder: '97', enumKind: 'generatorType' }
     ]
   },
   {

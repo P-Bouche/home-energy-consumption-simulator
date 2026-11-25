@@ -234,3 +234,50 @@ test('stale If-Match is rejected with 409 and the UI reloads the current version
   const building = await page.request.get(`/api/buildings/${buildingId}`);
   expect((await building.json()).version).toBe(1);
 });
+
+test('level M (issue #32): preset cards fill the raw value — U preset on a wall, generator preset sends the v2 command', async ({ page }) => {
+  const buildingId = await importFixtureAndOpenEditor(page);
+
+  // U preset card on a wall: fills uValueWm2K with the band's representative value
+  await page.getByTestId('edit-wall-wall-1').click();
+  await page.getByTestId('preset-uValueWm2K-0.18').click();
+  await expect(page.getByTestId('field-uValueWm2K')).toHaveValue('0.18');
+  const wallPatch = page.waitForRequest((r) => r.url().includes(`/api/buildings/${buildingId}`) && r.method() === 'PATCH');
+  await page.getByTestId('save-edit').click();
+  expect(await (await wallPatch).postDataJSON()).toMatchObject({
+    type: 'building.wall.update.v1',
+    wallId: 'wall-1',
+    uValueWm2K: 0.18
+  });
+
+  // window preset fills the whole coherent group: Uw + glazingType + Sw in one v1 command
+  await page.getByTestId('edit-window-window-1').click();
+  await page.getByTestId('preset-uValueWm2K-2.4').click();
+  await expect(page.getByTestId('field-uValueWm2K')).toHaveValue('2.4');
+  const winPatch = page.waitForRequest((r) => r.url().includes(`/api/buildings/${buildingId}`) && r.method() === 'PATCH');
+  await page.getByTestId('save-edit').click();
+  expect(await (await winPatch).postDataJSON()).toMatchObject({
+    type: 'building.window.update.v1',
+    windowId: 'window-1',
+    uValueWm2K: 2.4,
+    glazingType: '2',
+    solarFactorSw: 0.52
+  });
+
+  // heating generator preset: the command switches to the v2 tag (ADR-0004)
+  await page.getByTestId('edit-heating-system-heating-1').click();
+  await page.getByTestId('preset-generatorType-97').click();
+  const heatPatch = page.waitForRequest((r) => r.url().includes(`/api/buildings/${buildingId}`) && r.method() === 'PATCH');
+  await page.getByTestId('save-edit').click();
+  expect(await (await heatPatch).postDataJSON()).toMatchObject({
+    type: 'building.heating-system.update.v2',
+    systemId: 'heating-1',
+    generatorType: '97'
+  });
+
+  // the edit is persisted with user provenance and visible in the audit
+  const building = await page.request.get(`/api/buildings/${buildingId}`);
+  const sys = (await building.json()).building.heatingSystems as { generatorType: { value: string; source: string } }[];
+  expect(sys[0]?.generatorType.value).toBe('97');
+  expect(sys[0]?.generatorType.source).toBe('user');
+});

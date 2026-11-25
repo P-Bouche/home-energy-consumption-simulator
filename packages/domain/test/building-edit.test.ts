@@ -113,6 +113,7 @@ function baseInput(overrides: Partial<BuildingInput> = {}): BuildingInput {
         buildingId: BUILDING_ID,
         description: measured('Chaudière gaz', 'dpe-xml:x', date),
         installationType: measured('1', 'dpe-xml:x', date),
+        generatorType: measured('88', 'dpe-xml:x', date),
         heatedAreaM2: measured(80.84, 'dpe-xml:x', date)
       }
     ],
@@ -169,6 +170,25 @@ describe('command vocabulary (P4 contract with P5)', () => {
     expect(isLeft(parseBuildingCommand({ ...wallCommand, uValueWm2K: '0.2' }))).toBe(true);
     expect(isLeft(parseBuildingCommand({ type: 'building.wall.update.v1' }))).toBe(true);
     expect(isLeft(parseBuildingCommand('not an object'))).toBe(true);
+  });
+
+  it('accepts the heating v2 tag with generatorType (ADR-0004)', () => {
+    const v2 = {
+      type: 'building.heating-system.update.v2',
+      buildingId: BUILDING_ID,
+      systemId: 'heating-1',
+      generatorType: '97'
+    };
+    const parsed = parseBuildingCommand(v2);
+    expect(isRight(parsed)).toBe(true);
+    if (isRight(parsed)) {
+      expect(parsed.value.type).toBe('building.heating-system.update.v2');
+      expect(validateCommandFields(parsed.value)).toHaveLength(0);
+    }
+    // generatorType must be a string enum id, not a number
+    expect(isLeft(parseBuildingCommand({ ...v2, generatorType: 97 }))).toBe(true);
+    // v1 tag still rejects the unknown generatorType field
+    expect(isLeft(parseBuildingCommand({ type: 'building.heating-system.update.v1', buildingId: BUILDING_ID, systemId: 'heating-1', generatorType: '97' }))).toBe(true);
   });
 
   it('accepts every v1 tag', () => {

@@ -187,6 +187,7 @@ export interface HeatingSystemJson {
   readonly buildingId: string;
   readonly description: ConfidenceJson<string>;
   readonly installationType: ConfidenceJson<string> | null;
+  readonly generatorType: ConfidenceJson<string> | null;
   readonly heatedAreaM2: ConfidenceJson<number> | null;
 }
 
