@@ -10,3 +10,4 @@ test-results/
 # Harness PoC : worktrees isoles des runs orchestres
 .poc-worktrees/
 __pycache__/
+.dev-pids
