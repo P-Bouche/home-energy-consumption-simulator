@@ -194,6 +194,19 @@ describe('validateCommandFields', () => {
     }
   });
 
+  it('uses a higher U ceiling for windows (Uw up to 6, single glazing) — issue #48 rework', () => {
+    const win: UpdateWindowCommand = { type: 'building.window.update.v1', buildingId: BUILDING_ID, windowId: 'window-1' };
+    for (const uw of [5.4, 6]) {
+      expect(validateCommandFields({ ...win, uValueWm2K: uw }), `uw=${String(uw)}`).toHaveLength(0);
+    }
+    for (const uw of [-1, 0, 6.5]) {
+      expect(validateCommandFields({ ...win, uValueWm2K: uw }).some((e) => e.field === 'uValueWm2K'), `uw=${String(uw)}`).toBe(true);
+    }
+    // opaque elements keep the (0, 4] ceiling
+    expect(validateCommandFields({ ...wallCommand, uValueWm2K: 5 }).some((e) => e.field === 'uValueWm2K')).toBe(true);
+    expect(validateCommandFields({ ...wallCommand, uValueWm2K: 4 })).toHaveLength(0);
+  });
+
   it('rejects invalid areas, counts, solar factors and q4pa', () => {
     expect(validateCommandFields({ ...wallCommand, areaM2: -5 }).some((e) => e.field === 'areaM2')).toBe(true);
     const win: UpdateWindowCommand = { type: 'building.window.update.v1', buildingId: BUILDING_ID, windowId: 'window-1', count: 0 };

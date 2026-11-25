@@ -192,6 +192,8 @@ export const COMMAND_EDITABLE_FIELDS: Record<CommandTypeTag, Readonly<Record<str
  * Open3CL engine can simulate — an un-simulable state is never persisted.
  */
 const U_VALUE_MAX = 4;
+/** Windows (Uw) have their own ceiling: single glazing reaches ~6 W/m².K (issue #48). */
+const WINDOW_U_VALUE_MAX = 6;
 const AREA_MAX_M2 = 10_000;
 const Q4PA_MAX = 3;
 
@@ -224,8 +226,11 @@ export function validateCommandFields(command: BuildingCommand): FieldError[] {
       continue;
     }
     if (typeof value !== 'number') continue;
-    if (field === 'uValueWm2K' && (value <= 0 || value > U_VALUE_MAX)) {
-      errors.push({ field, message: `must be in (0, ${U_VALUE_MAX}] W/m².K` });
+    if (field === 'uValueWm2K') {
+      const max = command.type === 'building.window.update.v1' ? WINDOW_U_VALUE_MAX : U_VALUE_MAX;
+      if (value <= 0 || value > max) {
+        errors.push({ field, message: `must be in (0, ${max}] W/m².K` });
+      }
     }
     if ((field === 'areaM2' || field === 'heatedAreaM2' || field === 'ventilatedAreaM2') && (value <= 0 || value > AREA_MAX_M2)) {
       errors.push({ field, message: `must be in (0, ${AREA_MAX_M2}] m²` });
