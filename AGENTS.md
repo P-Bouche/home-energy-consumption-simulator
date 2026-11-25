@@ -60,6 +60,7 @@ Before implementing any feature:
 7. Validate results.
 
 - Work on short-lived branches (`feature/<scope>-<slug>`, `vibe/<slug>-<id>`). **Never push directly to `main`.**
+- **Issue-linked branches:** when a branch implements issue #N, name it `feature/issue-<N>-<slug>` and put `Closes #N` in the PR body, so GitHub auto-closes the issue on merge (see GLOSSARY.md, « Issue-linked branch »).
 - Conventional Commits (`feat:`, `fix:`, `docs:`, `refactor:`, ...).
 - Open a pull request with a complete description; keep PRs small and reviewable.
 
