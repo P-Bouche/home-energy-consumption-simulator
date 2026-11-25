@@ -111,3 +111,33 @@ _Avoid_: diff, ranking (alone)
 **3D reconstruction**:
 The reconstructed 3D model of the building from the imported data, in meters, with pickable geometry elements that carry their envelope-element id.
 _Avoid_: mesh (alone), scene
+
+### Interface and workflow
+
+**Building correction** (« Corriger le bâtiment » tab):
+The editor that modifies the real imported building, element by element; every save re-simulates. Distinct from testing a renovation.
+_Avoid_: editor (alone), modification mode
+
+**Renovation scenario tab** (« Scénarios de rénovation »):
+The workspace tab where scenarios are created, simulated and compared — the way to test works without touching the real building.
+_Avoid_: editor, works tab
+
+**Preset card**:
+A plain-language choice in the building correction form (e.g. « Double vitrage ») that fills the related raw command fields in one click. The raw values stay editable.
+_Avoid_: button, option, shortcut
+
+**CTA** (call-to-action):
+A prominent button whose label names the next step (« Tester une rénovation »).
+_Avoid_: link (alone), hint
+
+**Banner** (bandeau):
+A short informational strip at the top of a panel, optionally clickable (« Comparer des travaux ? → Scénarios »).
+_Avoid_: alert (a banner may carry one), notification
+
+**Next-steps card** (« Par où commencer ? »):
+The dismissible post-import card proposing the three entry points; once dismissed it stays hidden on the device.
+_Avoid_: tutorial, onboarding modal
+
+**Issue-linked branch**:
+A feature branch named `feature/issue-<N>-<slug>` whose pull request body contains `Closes #<N>`, so GitHub closes the issue automatically on merge.
+_Avoid_: topic branch (without the issue link)
