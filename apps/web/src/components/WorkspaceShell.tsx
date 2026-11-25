@@ -10,12 +10,13 @@ import { BuildingEditorPanel } from './BuildingEditorPanel.tsx';
 import { ScenarioPanel } from './ScenarioPanel.tsx';
 import { SynthesePanel } from './SynthesePanel.tsx';
 
-type WorkspaceTab = 'synthese' | 'report' | 'editor' | 'scenarios';
+export type WorkspaceTab = 'synthese' | 'report' | 'editor' | 'scenarios';
 
 const TABS: readonly { id: WorkspaceTab; label: string; testId: string }[] = [
   { id: 'synthese', label: 'Synthèse', testId: 'tab-synthese' },
   { id: 'report', label: "Rapport d'import", testId: 'tab-report' },
-  { id: 'editor', label: 'Éditeur du bâtiment', testId: 'tab-editor' },
+  // discoverability (#62): the editor corrects the real building — the label says so
+  { id: 'editor', label: 'Corriger le bâtiment', testId: 'tab-editor' },
   { id: 'scenarios', label: 'Scénarios de rénovation', testId: 'tab-scenarios' }
 ];
 
@@ -116,7 +117,7 @@ export function WorkspaceShell({
         aria-labelledby="workspace-tab-synthese"
         data-testid="panel-synthese"
       >
-        <SynthesePanel report={report} />
+        <SynthesePanel report={report} onGoToScenarios={() => setTab('scenarios')} />
         <SimulationPanel buildingId={buildingId} />
       </Box>
       <Box
@@ -135,7 +136,7 @@ export function WorkspaceShell({
         aria-labelledby="workspace-tab-editor"
         data-testid="panel-editor"
       >
-        <BuildingEditorPanel buildingId={buildingId} />
+        <BuildingEditorPanel buildingId={buildingId} onGoToScenarios={() => setTab('scenarios')} />
       </Box>
       <Box
         role="tabpanel"

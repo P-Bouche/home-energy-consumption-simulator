@@ -101,3 +101,33 @@ test('mobile viewport: workspace tabs are scrollable, not clipped (issue #42)', 
     await expect(page.getByTestId(id)).toBeAttached();
   }
 });
+
+test('discoverability (#62): next-steps card, CTA to Scénarios, editor banner, renamed editor tab', async ({ page }) => {
+  await page.goto('/');
+  await page.getByTestId('file-input').setInputFiles(fixture);
+  await expect(page.getByTestId('upload-success')).toContainText('Bâtiment importé');
+
+  // editor tab renamed to make the "correct the real building" semantics explicit
+  await expect(page.getByTestId('tab-editor')).toContainText('Corriger le bâtiment');
+
+  // post-import landing: dismissible next-steps card + CTA to the Scénarios tab
+  await expect(page.getByTestId('next-steps-card')).toBeVisible();
+  await page.getByTestId('cta-test-renovation').click();
+  await expect(page.getByTestId('scenario-panel')).toBeVisible();
+  await expect(page.getByTestId('panel-synthese')).toBeHidden();
+
+  // editor banner points to Scénarios for comparisons
+  await page.getByTestId('tab-editor').click();
+  await expect(page.getByTestId('banner-go-scenarios')).toContainText('Comparer des travaux ?');
+  await page.getByTestId('banner-go-scenarios').click();
+  await expect(page.getByTestId('scenario-panel')).toBeVisible();
+
+  // dismissing the card persists for the device (localStorage) — navigating away and back keeps it hidden
+  await page.getByTestId('tab-synthese').click();
+  await page.getByTestId('next-steps-card').locator('button[aria-label]').click();
+  await expect(page.getByTestId('next-steps-card')).toBeHidden();
+  expect(await page.evaluate(() => localStorage.getItem('hes.next-steps-dismissed'))).toBe('1');
+  await page.getByTestId('tab-editor').click();
+  await page.getByTestId('tab-synthese').click();
+  await expect(page.getByTestId('next-steps-card')).toBeHidden();
+});

@@ -202,7 +202,10 @@ function fieldReading(f: FieldDef, effective: number, kind: EditableKind | undef
  * store re-runs the P2 simulation; plus undo and the audit view.
  * Presentation only: all flow lives in the editor store.
  */
-export function BuildingEditorPanel({ buildingId }: { readonly buildingId: string }) {
+export function BuildingEditorPanel({
+  buildingId,
+  onGoToScenarios
+}: Readonly<{ buildingId: string; onGoToScenarios: () => void }>) {
   const building = useEditorStore((s) => s.building);
   const version = useEditorStore((s) => s.version);
   const audit = useEditorStore((s) => s.audit);
@@ -513,9 +516,13 @@ export function BuildingEditorPanel({ buildingId }: { readonly buildingId: strin
     <Paper variant="outlined" sx={{ p: 2, mt: 3 }} data-testid="editor-panel">
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
         <Typography variant="h6" component="h2">
-          Éditeur du bâtiment (2D)
+          Corriger le bâtiment (2D)
         </Typography>
         <Chip label={`version ${version}`} data-testid="building-version" color="primary" variant="outlined" />
+        {/* discoverability (#62): this tab edits the real building — point to Scénarios for comparisons */}
+        <Button size="small" onClick={onGoToScenarios} data-testid="banner-go-scenarios">
+          Comparer des travaux ? → Scénarios
+        </Button>
         <Button
           variant="outlined"
           startIcon={<UndoIcon />}

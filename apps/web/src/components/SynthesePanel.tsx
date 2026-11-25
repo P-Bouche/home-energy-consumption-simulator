@@ -1,7 +1,11 @@
-import { Alert, Box, Chip, Divider, List, ListItem, ListItemText, Paper, Typography } from '@mui/material';
+import { useState } from 'react';
+import { Alert, Box, Button, Chip, Divider, List, ListItem, ListItemText, Paper, Typography } from '@mui/material';
 import { useSimulationStore } from '../store/simulation-store.ts';
 import { ConfidenceBadge } from './ConfidenceBadge.tsx';
 import type { ImportReportJson, SimulationResultJson } from '../types.ts';
+
+/** localStorage key: the "Par où commencer ?" card is dismissed forever on this device (#62) */
+const NEXT_STEPS_KEY = 'hes.next-steps-dismissed';
 
 const LABEL_COLORS: Record<string, string> = {
   A: '#1a9850',
@@ -55,14 +59,61 @@ function SimulationSummary({ result }: { readonly result: SimulationResultJson }
  * from the latest simulation, and the inferred values of the import expressed
  * in plain words. Presentation only.
  */
-export function SynthesePanel({ report }: { readonly report: ImportReportJson }) {
+export function SynthesePanel({
+  report,
+  onGoToScenarios
+}: Readonly<{ report: ImportReportJson; onGoToScenarios: () => void }>) {
   const result = useSimulationStore((s) => s.result);
+  const [showNextSteps, setShowNextSteps] = useState(() => {
+    try {
+      return localStorage.getItem(NEXT_STEPS_KEY) !== '1';
+    } catch {
+      return true;
+    }
+  });
+
+  const dismissNextSteps = (): void => {
+    try {
+      localStorage.setItem(NEXT_STEPS_KEY, '1');
+    } catch {
+      // private mode etc.: just hide for this render
+    }
+    setShowNextSteps(false);
+  };
 
   return (
     <Paper sx={{ p: 3 }} data-testid="synthese-panel">
-      <Typography variant="h6" component="h2">
-        Synthèse — DPE {report.dpeNumber ?? 'inconnu'}
-      </Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Typography variant="h6" component="h2" sx={{ flexGrow: 1 }}>
+          Synthèse — DPE {report.dpeNumber ?? 'inconnu'}
+        </Typography>
+        <Button variant="outlined" size="small" onClick={onGoToScenarios} data-testid="cta-test-renovation">
+          Tester une rénovation
+        </Button>
+      </Box>
+
+      {showNextSteps && (
+        <Alert
+          severity="info"
+          sx={{ mt: 2 }}
+          data-testid="next-steps-card"
+          onClose={dismissNextSteps}
+          closeText="Ne plus afficher"
+        >
+          <Typography variant="subtitle2">Par où commencer ?</Typography>
+          <List dense disablePadding>
+            <ListItem disableGutters dense>
+              <ListItemText primary="1. Voir la synthèse du DPE (cet onglet)" />
+            </ListItem>
+            <ListItem disableGutters dense>
+              <ListItemText primary="2. Tester une rénovation (onglet Scénarios, sans modifier le bâtiment)" />
+            </ListItem>
+            <ListItem disableGutters dense>
+              <ListItemText primary="3. Corriger un élément si une valeur DPE semble fausse (onglet Corriger le bâtiment)" />
+            </ListItem>
+          </List>
+        </Alert>
+      )}
       <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
         {report.parsedFields.length} champs lus · {report.unrecognizedFields.length} chemins non reconnus ·{' '}
         {report.missingFields.length} champs absents
