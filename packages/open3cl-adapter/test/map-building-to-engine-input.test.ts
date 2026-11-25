@@ -56,6 +56,7 @@ function baseInput(overrides: Partial<BuildingInput> = {}): BuildingInput {
         buildingId: '11111111-1111-4111-8111-111111111111',
         description: measured('Chaudière gaz', 'dpe-xml:x', date),
         installationType: measured('1', 'dpe-xml:x', date),
+        generatorType: measured('88', 'dpe-xml:x', date),
         heatedAreaM2: measured(80.84, 'dpe-xml:x', date)
       }
     ],

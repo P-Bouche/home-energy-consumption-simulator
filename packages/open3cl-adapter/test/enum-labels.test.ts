@@ -23,14 +23,15 @@ const KIND_TO_ENGINE_TABLE: Record<EnumLabelKind, { table: string; xmlField: str
   glazingType: { table: 'type_vitrage', xmlField: 'enum_type_vitrage_id' },
   frameMaterial: { table: 'type_materiaux_menuiserie', xmlField: 'enum_type_materiaux_menuiserie_id' },
   installationType: { table: 'type_installation', xmlField: 'enum_type_installation_id' },
-  ventilationType: { table: 'type_ventilation', xmlField: 'enum_type_ventilation_id' }
+  ventilationType: { table: 'type_ventilation', xmlField: 'enum_type_ventilation_id' },
+  generatorType: { table: 'type_generateur_ch', xmlField: 'enum_type_generateur_ch_id' }
 };
 
 const FIXTURES_DIR = fileURLToPath(new URL('./fixtures', import.meta.url));
 
 describe('enum-labels (vendored engine tables)', () => {
   it('exposes one non-empty table per enum kind', () => {
-    expect(ENUM_LABEL_KINDS).toHaveLength(9);
+    expect(ENUM_LABEL_KINDS).toHaveLength(10);
     for (const kind of ENUM_LABEL_KINDS) {
       expect(Object.keys(ENUM_LABELS[kind]).length).toBeGreaterThan(0);
     }
@@ -53,6 +54,8 @@ describe('enum-labels (vendored engine tables)', () => {
       'installation hybride collective-individuelle (chauffage base + appoint individuel ou convecteur bi-jonction)'
     );
     expect(enumLabel('ventilationType', '2')).toBe("ventilation par entrées d'air hautes et basses");
+    expect(enumLabel('generatorType', '88')).toBe('chaudière gaz standard 1991-2000');
+    expect(enumLabel('generatorType', '7')).toBe('pac air/eau installée après 2017');
   });
 
   it('returns null for an unknown id — callers must show the raw id, never guess a label', () => {

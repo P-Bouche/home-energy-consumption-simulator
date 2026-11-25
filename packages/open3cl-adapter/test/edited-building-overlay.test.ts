@@ -59,6 +59,30 @@ describe('edited-building overlay path (P4 edits)', () => {
     ).toBe(true);
   });
 
+  it('a heating v2 command overlays generatorType into generateur_chauffage (ADR-0004)', () => {
+    const building = importFixture();
+    const edited = building.apply(
+      { type: 'building.heating-system.update.v2', buildingId: building.id, systemId: 'heating-1', generatorType: '97' },
+      editCtx
+    );
+    expect(edited.ok).toBe(true);
+    if (!edited.ok) return;
+    const view = toSimulationView(edited.value);
+    expect(hasUserEdits(view)).toBe(true);
+    const mapping = buildEngineInput(view);
+    expect(mapping.editedSource).toBe(true);
+    const json = mapping.input.kind === 'json' ? mapping.input.json : null;
+    const logement = (json as Record<string, unknown>)['logement'] as Record<string, unknown>;
+    const ic = (logement['installation_chauffage_collection'] as Record<string, unknown>)['installation_chauffage'] as Record<string, unknown>[];
+    const genRaw = (ic[0]?.['generateur_chauffage_collection'] as Record<string, unknown>)['generateur_chauffage'];
+    const gen = (Array.isArray(genRaw) ? genRaw[0] : genRaw) as Record<string, unknown>;
+    const genDe = gen?.['donnee_entree'] as Record<string, unknown>;
+    expect(genDe['enum_type_generateur_ch_id']).toBe('97');
+    expect(
+      mapping.defaults.some((d) => d.path.includes('enum_type_generateur_ch_id') && d.source === 'user' && d.value === '97')
+    ).toBe(true);
+  });
+
   it('overlayUserEdits patches windows (uw_saisi) and rejects unknown elements at the domain level', () => {
     const building = importFixture();
     const bad = building.fork(

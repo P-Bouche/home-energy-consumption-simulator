@@ -34,6 +34,7 @@ import { useSimulationStore } from '../store/simulation-store.ts';
 import { useEnumLabels } from '../hooks/use-enum-labels.ts';
 import { ENUM_KINDS, enumOptions, resolveEnumLabel, type EnumLabelKind } from '../services/enum-labels.ts';
 import { describeQ4pa, describeSw, describeU } from '../services/u-reading.ts';
+import { HEATING_PRESETS, U_PRESETS, VENTILATION_PRESETS, WINDOW_PRESETS } from '../services/presets.ts';
 import { translateFieldError } from '../services/error-messages.ts';
 import { previousResult } from '../services/edit-impact.ts';
 import { ConfidenceBadge } from './ConfidenceBadge.tsx';
@@ -138,6 +139,7 @@ const KINDS: Record<EditableKind, KindDef> = {
     fields: [
       { field: 'description', label: 'Description', numeric: false },
       { field: 'installationType', label: 'Type d’installation', numeric: false, enumKind: 'installationType' },
+      { field: 'generatorType', label: 'Type de générateur', numeric: false, enumKind: 'generatorType' },
       { field: 'heatedAreaM2', label: 'Surface chauffée (m²)', numeric: true, step: 0.1 }
     ]
   },
@@ -248,8 +250,13 @@ export function BuildingEditorPanel({ buildingId }: { readonly buildingId: strin
   const onSave = async (): Promise<void> => {
     if (target === null || building === null) return;
     const def = KINDS[target.kind];
+    // Level M (issue #32): a generator preset is sent via the v2 command (ADR-0004)
+    const tag =
+      target.kind === 'heating-system' && (form['generatorType'] ?? '').trim() !== ''
+        ? 'building.heating-system.update.v2'
+        : def.tag;
     const command: Record<string, unknown> = {
-      type: def.tag,
+      type: tag,
       buildingId: building.id,
       [def.idField]: target.id
     };
@@ -353,6 +360,59 @@ export function BuildingEditorPanel({ buildingId }: { readonly buildingId: strin
     f.field === 'uValueWm2K' ? (f.label.startsWith('Uw') ? 'Uw' : 'U') : undefined;
 
   /**
+   * Level-M preset cards for one field (issue #32): plain-language choices
+   * mapped to the raw value the command sends. Empty for fields without presets.
+   */
+  const presetsFor = (f: FieldDef): readonly { label: string; value: string; hint?: string; apply?: Record<string, string> }[] => {
+    if (f.uNoun !== undefined) {
+      const isWindow = target?.kind === 'window';
+      if (isWindow) {
+        // window preset = the whole coherent group Uw + glazingType + Sw (one v1 command)
+        return WINDOW_PRESETS.map((p) => ({
+          label: p.label,
+          value: String(p.uw),
+          hint: describeU(p.uw, f.uNoun?.noun ?? 'baie vitrée', f.uNoun?.gender ?? 'f', 'window'),
+          apply: { uValueWm2K: String(p.uw), glazingType: p.glazingType, solarFactorSw: String(p.sw) }
+        }));
+      }
+      return U_PRESETS.map((p) => ({
+        label: p.label,
+        value: String(p.u),
+        hint: describeU(p.u, f.uNoun?.noun ?? 'paroi', f.uNoun?.gender ?? 'm', 'wall')
+      }));
+    }
+    if (target?.kind === 'heating-system' && f.field === 'generatorType') {
+      return HEATING_PRESETS.map((p) => ({ label: p.label, value: p.generatorType }));
+    }
+    if (target?.kind === 'ventilation-system' && f.field === 'ventilationType') {
+      return VENTILATION_PRESETS.map((p) => ({ label: p.label, value: p.ventilationType }));
+    }
+    return [];
+  };
+
+  /** Clicking a preset card just fills the raw field — the command contract is unchanged. */
+  const renderPresetChips = (f: FieldDef): React.ReactElement | null => {
+    const presets = presetsFor(f);
+    if (presets.length === 0) return null;
+    const current = (form[f.field] ?? '').trim();
+    return (
+      <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }} data-testid={`presets-${f.field}`}>
+        {presets.map((p) => (
+          <Chip
+            key={p.value}
+            size="small"
+            label={p.hint !== undefined && p.hint !== '' ? `${p.label} — ${p.hint}` : p.label}
+            color={current === p.value ? 'primary' : 'default'}
+            variant={current === p.value ? 'filled' : 'outlined'}
+            data-testid={`preset-${f.field}-${p.value}`}
+            onClick={() => setForm((prev) => ({ ...prev, ...(p.apply ?? { [f.field]: p.value }) }))}
+          />
+        ))}
+      </Box>
+    );
+  };
+
+  /**
    * Renders one dialog field: enum fields as a labeled select (French label
    * first, raw id secondary, unknown ids flagged honestly), U fields as a
    * bounded numeric input with a plain-language reading, other fields as
@@ -368,7 +428,9 @@ export function BuildingEditorPanel({ buildingId }: { readonly buildingId: strin
       const options = enumOptions(table, value);
       const resolved = resolveEnumLabel(table, value);
       return (
-        <FormControl key={f.field} fullWidth error={rawErrors.length > 0} data-testid={`field-${f.field}`}>
+        <Box key={f.field}>
+          {renderPresetChips(f)}
+          <FormControl fullWidth error={rawErrors.length > 0} data-testid={`field-${f.field}`}>
           <InputLabel>{f.label}</InputLabel>
           <Select
             label={f.label}
@@ -396,7 +458,8 @@ export function BuildingEditorPanel({ buildingId }: { readonly buildingId: strin
                   ? `Valeur envoyée : id ${value}`
                   : `id ${value} inconnu — envoyé tel quel`}
           </FormHelperText>
-        </FormControl>
+          </FormControl>
+        </Box>
       );
     }
     const typedNum = value.trim() === '' ? Number.NaN : Number(value);
@@ -418,24 +481,26 @@ export function BuildingEditorPanel({ buildingId }: { readonly buildingId: strin
         ? frenchErrors.join(' ; ')
         : liveError ?? ([reading, f.helper].filter((p) => p !== '').join(' · ') || ' ');
     return (
-      <TextField
-        key={f.field}
-        label={f.label}
-        type={f.numeric ? 'number' : 'text'}
-        value={value}
-        fullWidth
-        slotProps={{
-          htmlInput: {
-            'data-testid': `field-${f.field}`,
-            ...(f.min !== undefined ? { min: f.min } : {}),
-            ...(f.max !== undefined ? { max: f.max } : {}),
-            ...(f.step !== undefined ? { step: f.step } : {})
-          }
-        }}
-        error={rawErrors.length > 0 || liveError !== null}
-        helperText={helperText}
-        onChange={(e) => setForm((prev) => ({ ...prev, [f.field]: e.target.value }))}
-      />
+      <Box key={f.field}>
+        {renderPresetChips(f)}
+        <TextField
+          label={f.label}
+          type={f.numeric ? 'number' : 'text'}
+          value={value}
+          fullWidth
+          slotProps={{
+            htmlInput: {
+              'data-testid': `field-${f.field}`,
+              ...(f.min !== undefined ? { min: f.min } : {}),
+              ...(f.max !== undefined ? { max: f.max } : {}),
+              ...(f.step !== undefined ? { step: f.step } : {})
+            }
+          }}
+          error={rawErrors.length > 0 || liveError !== null}
+          helperText={helperText}
+          onChange={(e) => setForm((prev) => ({ ...prev, [f.field]: e.target.value }))}
+        />
+      </Box>
     );
   };
 

@@ -318,6 +318,9 @@ export function mapSystems(
   chItems.forEach((item, i) => {
     const base = `dpe/logement/installation_chauffage_collection/installation_chauffage[${i + 1}]`;
     const de = childRecord(item, 'donnee_entree') ?? {};
+    const genRaw = childRecord(item, 'generateur_chauffage_collection')?.['generateur_chauffage'];
+    const gen = Array.isArray(genRaw) ? genRaw[0] : genRaw;
+    const genDe = gen === undefined || gen === null ? undefined : childRecord(gen, 'donnee_entree');
     const description = ctx.measuredOrMissing(`${base}/donnee_entree/description`, str(de['description']), strConv, 'heating description missing')
       ?? ctx.recordInferred(`${base}/donnee_entree/description`, `installation_chauffage ${i + 1}`, INFERENCE_RULES.DEFAULT_ELEMENT_LABEL.rule, INFERENCE_RULES.DEFAULT_ELEMENT_LABEL.confidence);
     heatingSystems.push({
@@ -325,6 +328,7 @@ export function mapSystems(
       buildingId,
       description,
       installationType: ctx.measuredOrMissing(`${base}/donnee_entree/enum_type_installation_id`, str(de['enum_type_installation_id']), strConv, 'installation type missing'),
+      generatorType: ctx.measuredOrMissing(`${base}/generateur_chauffage_collection/generateur_chauffage[1]/donnee_entree/enum_type_generateur_ch_id`, str(genDe?.['enum_type_generateur_ch_id']), strConv, 'generator type missing'),
       heatedAreaM2: ctx.measuredOrMissing(`${base}/donnee_entree/surface_chauffee`, str(de['surface_chauffee']), numConv, 'surface_chauffee missing')
     });
   });

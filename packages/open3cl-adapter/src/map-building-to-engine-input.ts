@@ -305,6 +305,13 @@ export function overlayUserEdits(dpe: Record<string, unknown>, view: BuildingSim
     if (isUser(system.installationType)) { de['enum_type_installation_id'] = userValue(system.installationType); log(ctx, 'installation_chauffage/donnee_entree/enum_type_installation_id', userValue(system.installationType)); }
     if (isUser(system.description)) { de['description'] = userValue(system.description); log(ctx, 'installation_chauffage/donnee_entree/description', userValue(system.description)); }
     if (isUser(system.heatedAreaM2)) { de['surface_chauffee'] = userValue(system.heatedAreaM2); log(ctx, 'installation_chauffage/donnee_entree/surface_chauffee', userValue(system.heatedAreaM2)); }
+    // ADR-0004: generator type drives the engine result (9_generateur_ch.js) —
+    // patch the first generateur_chauffage entry, position-pinned per ADR-0003.
+    if (isUser(system.generatorType)) {
+      const genDe = child(child(child(item, 'generateur_chauffage_collection'), 'generateur_chauffage'), 'donnee_entree');
+      genDe['enum_type_generateur_ch_id'] = userValue(system.generatorType);
+      log(ctx, 'installation_chauffage/generateur_chauffage_collection/generateur_chauffage/donnee_entree/enum_type_generateur_ch_id', userValue(system.generatorType));
+    }
   });
 
   overlayElements(ctx, ['logement', 'ventilation_collection', 'ventilation'], view.ventilationSystems, 'ventilation', (item, system) => {

@@ -79,6 +79,7 @@ export function makeBuildingInput(overrides: Partial<BuildingInput> = {}): Build
         buildingId: id,
         description: measured('Chaudière gaz', 'dpe-xml:x', testDate),
         installationType: measured('1', 'dpe-xml:x', testDate),
+        generatorType: measured('88', 'dpe-xml:x', testDate),
         heatedAreaM2: measured(80.84, 'dpe-xml:x', testDate)
       }
     ],

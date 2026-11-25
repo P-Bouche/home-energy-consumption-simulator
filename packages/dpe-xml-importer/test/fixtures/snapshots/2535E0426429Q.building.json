@@ -4382,6 +4382,12 @@
         "confidence": 1,
         "importDate": {}
       },
+      "generatorType": {
+        "value": "93",
+        "source": "dpe-xml:dpe/logement/installation_chauffage_collection/installation_chauffage[1]/generateur_chauffage_collection/generateur_chauffage[1]/donnee_entree/enum_type_generateur_ch_id",
+        "confidence": 1,
+        "importDate": {}
+      },
       "heatedAreaM2": {
         "value": 755.87,
         "source": "dpe-xml:dpe/logement/installation_chauffage_collection/installation_chauffage[1]/donnee_entree/surface_chauffee",
@@ -4401,6 +4407,12 @@
       "installationType": {
         "value": "1",
         "source": "dpe-xml:dpe/logement/installation_chauffage_collection/installation_chauffage[2]/donnee_entree/enum_type_installation_id",
+        "confidence": 1,
+        "importDate": {}
+      },
+      "generatorType": {
+        "value": "99",
+        "source": "dpe-xml:dpe/logement/installation_chauffage_collection/installation_chauffage[2]/generateur_chauffage_collection/generateur_chauffage[1]/donnee_entree/enum_type_generateur_ch_id",
         "confidence": 1,
         "importDate": {}
       },

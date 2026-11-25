@@ -8,6 +8,8 @@ import type { BuildingId, SystemId, WallId, WindowId, RoofId, FloorId } from './
  * commands): bump this constant and add new `.vN` tags on any breaking change,
  * never rename existing tags.
  */
+// Stays 1: adding the v2 heating tag is additive (v1 untouched, per ADR-0004);
+// the bump rule applies to breaking changes only.
 export const COMMAND_VOCABULARY_VERSION = 1;
 
 /**
@@ -19,6 +21,7 @@ export type CommandTypeTag =
   | 'building.roof.update.v1'
   | 'building.floor.update.v1'
   | 'building.heating-system.update.v1'
+  | 'building.heating-system.update.v2'
   | 'building.ventilation-system.update.v1';
 
 /**
@@ -99,6 +102,20 @@ export interface UpdateHeatingSystemCommand extends CommandBase {
 }
 
 /**
+ * Edits a heating installation (DPE `installation_chauffage`), v2 superset of
+ * v1 adding `generatorType` (DPE `enum_type_generateur_ch_id`, ADR-0004).
+ * The v1 tag is frozen and never extended in place.
+ */
+export interface UpdateHeatingSystemV2Command extends CommandBase {
+  readonly type: 'building.heating-system.update.v2';
+  readonly systemId: SystemId;
+  readonly description?: string;
+  readonly installationType?: string | null;
+  readonly generatorType?: string | null;
+  readonly heatedAreaM2?: number | null;
+}
+
+/**
  * Edits a ventilation installation (DPE `ventilation`).
  */
 export interface UpdateVentilationSystemCommand extends CommandBase {
@@ -119,6 +136,7 @@ export type BuildingCommand =
   | UpdateRoofCommand
   | UpdateFloorCommand
   | UpdateHeatingSystemCommand
+  | UpdateHeatingSystemV2Command
   | UpdateVentilationSystemCommand;
 
 /**
@@ -131,6 +149,7 @@ export const COMMAND_ELEMENT: Record<CommandTypeTag, { idField: string; kind: st
   'building.roof.update.v1': { idField: 'roofId', kind: 'roof' },
   'building.floor.update.v1': { idField: 'floorId', kind: 'floor' },
   'building.heating-system.update.v1': { idField: 'systemId', kind: 'heating-system' },
+  'building.heating-system.update.v2': { idField: 'systemId', kind: 'heating-system' },
   'building.ventilation-system.update.v1': { idField: 'systemId', kind: 'ventilation-system' }
 };
 
@@ -174,6 +193,12 @@ export const COMMAND_EDITABLE_FIELDS: Record<CommandTypeTag, Readonly<Record<str
   'building.heating-system.update.v1': {
     description: 'string',
     installationType: 'string',
+    heatedAreaM2: 'number'
+  },
+  'building.heating-system.update.v2': {
+    description: 'string',
+    installationType: 'string',
+    generatorType: 'string',
     heatedAreaM2: 'number'
   },
   'building.ventilation-system.update.v1': {

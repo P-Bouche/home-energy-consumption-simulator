@@ -16,7 +16,8 @@ export type EnumLabelKind =
   | 'glazingType'
   | 'frameMaterial'
   | 'installationType'
-  | 'ventilationType';
+  | 'ventilationType'
+  | 'generatorType';
 
 /**
  * Every enum kind the editor/scenario catalog needs, one lookup each.
@@ -30,7 +31,8 @@ export const ENUM_KINDS: readonly EnumLabelKind[] = [
   'glazingType',
   'frameMaterial',
   'installationType',
-  'ventilationType'
+  'ventilationType',
+  'generatorType'
 ];
 
 /**
