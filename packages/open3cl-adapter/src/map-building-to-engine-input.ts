@@ -300,7 +300,29 @@ export function overlayUserEdits(dpe: Record<string, unknown>, view: BuildingSim
     if (isUser(door.doorType)) { de['enum_type_porte_id'] = userValue(door.doorType); log(ctx, 'porte/donnee_entree/enum_type_porte_id', userValue(door.doorType)); }
   });
 
-  overlayElements(ctx, ['logement', 'installation_chauffage_collection', 'installation_chauffage'], view.heatingSystems, 'heating', (item, system) => {
+  // ADR-0006 (issue #61): create/delete change the heating collection cardinality.
+  // The retained source document is the verbatim import, so cardinality is derived:
+  // a source positional id (heating-i) absent from the view is dropped, a view id
+  // beyond the source length is appended as a blank entry. Survivor ids are never
+  // renumbered (ADR-0003); the collection is then overlaid positionally in view order.
+  const heatPath = ['logement', 'installation_chauffage_collection', 'installation_chauffage'];
+  const heatItems = collection(ctx.dpe, heatPath);
+  const viewHeatIds = new Set(view.heatingSystems.map((s) => s.id));
+  const keptHeat = heatItems.filter((_, i) => viewHeatIds.has(`heating-${i + 1}`));
+  for (const s of view.heatingSystems) {
+    const idx = elementIndex(s.id, 'heating');
+    if (idx !== null && idx >= heatItems.length) {
+      // A new installation needs a complete engine entry: clone the first source
+      // entry (coherent emetteur/generateur structure) — user fields are overlaid
+      // right after, including the generator type (ADR-0004).
+      const template = heatItems[0] !== undefined ? (JSON.parse(JSON.stringify(heatItems[0])) as Record<string, unknown>) : {};
+      keptHeat.push(template);
+      log(ctx, `installation_chauffage_collection/${s.id}`, 'created entry appended (ADR-0006)');
+    }
+  }
+  heatItems.length = 0;
+  heatItems.push(...keptHeat);
+  const applyHeating = (item: Record<string, unknown>, system: (typeof view.heatingSystems)[number]): void => {
     const de = child(item, 'donnee_entree');
     if (isUser(system.installationType)) { de['enum_type_installation_id'] = userValue(system.installationType); log(ctx, 'installation_chauffage/donnee_entree/enum_type_installation_id', userValue(system.installationType)); }
     if (isUser(system.description)) { de['description'] = userValue(system.description); log(ctx, 'installation_chauffage/donnee_entree/description', userValue(system.description)); }
@@ -312,6 +334,11 @@ export function overlayUserEdits(dpe: Record<string, unknown>, view: BuildingSim
       genDe['enum_type_generateur_ch_id'] = userValue(system.generatorType);
       log(ctx, 'installation_chauffage/generateur_chauffage_collection/generateur_chauffage/donnee_entree/enum_type_generateur_ch_id', userValue(system.generatorType));
     }
+  };
+  view.heatingSystems.forEach((system, i) => {
+    const entry = heatItems[i];
+    if (entry === undefined) return;
+    applyHeating(entry, system);
   });
 
   overlayElements(ctx, ['logement', 'ventilation_collection', 'ventilation'], view.ventilationSystems, 'ventilation', (item, system) => {

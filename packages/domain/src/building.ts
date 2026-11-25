@@ -12,7 +12,9 @@ import {
   COMMAND_ELEMENT,
   inverseOfCommand,
   validateCommandFields,
-  type BuildingCommand
+  type BuildingCommand,
+  type CreateHeatingSystemCommand,
+  type DeleteHeatingSystemCommand
 } from './commands.ts';
 import { CommandValidationError, ElementNotFoundError, type CommandError, type FieldError } from './command-errors.ts';
 import { type Either, left, right } from './either.ts';
@@ -78,6 +80,12 @@ export interface BuildingInput {
   readonly photovoltaicSystems: readonly PhotovoltaicSystem[];
   readonly importedAt: Date;
   /**
+   * High-water mark of minted `heating-<n>` ids (ADR-0006): create mints
+   * `heating-<seq+1>` so a deleted id is NEVER reused, even after reload —
+   * ids are persisted in audit rows (ADR-0003). Defaults to the import count.
+   */
+  readonly heatingSystemSeq?: number;
+  /**
    * Optimistic-locking version of the aggregate (P4): 0 at import, +1 on every
    * successfully applied command. Not part of {@link BuildingJson} (the
    * persistence document is versioned separately in the `buildings.version`
@@ -135,6 +143,8 @@ export interface BuildingJson {
   readonly photovoltaicSystems: readonly PhotovoltaicSystem[];
   readonly importedAt: string;
   readonly sourceDpeXml: string | null;
+  /** Persisted high-water mark of minted heating ids (ADR-0006); optional for legacy JSON */
+  readonly heatingSystemSeq?: number;
 }
 
 function cToJ<T>(c: Confidence<T> | null): ConfidenceJson<T> | null {
@@ -190,6 +200,7 @@ export class Building {
   readonly photovoltaicSystems: readonly PhotovoltaicSystem[];
   readonly importedAt: Date;
   readonly sourceDpeXml: string | null;
+  readonly heatingSystemSeq: number;
   private readonly events: DomainEvent[] = [];
 
   private constructor(input: BuildingInput) {
@@ -224,6 +235,12 @@ export class Building {
     this.photovoltaicSystems = Object.freeze([...input.photovoltaicSystems]);
     this.importedAt = new Date(input.importedAt.getTime());
     this.sourceDpeXml = typeof input.sourceDpeXml === 'string' ? input.sourceDpeXml : null;
+    this.heatingSystemSeq =
+      input.heatingSystemSeq ??
+      input.heatingSystems.reduce((m, s) => {
+        const n = /^heating-(\d+)$/.exec(s.id)?.[1];
+        return n === undefined ? m : Math.max(m, Number(n));
+      }, 0);
   }
 
   /**
@@ -285,7 +302,8 @@ export class Building {
       ventilationSystems: revived.ventilationSystems,
       photovoltaicSystems: revived.photovoltaicSystems,
       importedAt: new Date(revived.importedAt),
-      sourceDpeXml: typeof json.sourceDpeXml === 'string' ? json.sourceDpeXml : null
+      sourceDpeXml: typeof json.sourceDpeXml === 'string' ? json.sourceDpeXml : null,
+      heatingSystemSeq: json.heatingSystemSeq
     };
     Building.assertInvariants(input);
     return new Building(input);
@@ -496,6 +514,13 @@ export class Building {
     now: Date,
     restoration: ReadonlyMap<string, ConfidenceJson<unknown> | null> | null = null
   ): Either<CommandError, { patch: Partial<BuildingInput>; changes: FieldChange[] }> {
+    // ADR-0006 (issue #61): heating create/delete change collection cardinality.
+    if (command.type === 'building.heating-system.create.v1') {
+      return this.createHeatingSystem(command, now, restoration);
+    }
+    if (command.type === 'building.heating-system.delete.v1') {
+      return this.deleteHeatingSystem(command, now);
+    }
     const { idField, kind } = COMMAND_ELEMENT[command.type];
     const rec = command as unknown as Record<string, unknown>;
     const elementId = rec[idField] as string;
@@ -568,6 +593,103 @@ export class Building {
   }
 
   /**
+   * ADR-0006: creates a heating installation. The id is minted append-only
+   * (`heating-<max+1>`, never reused — ADR-0003). On undo of a delete
+   * (restoration carries the `__removed` element), the original id is
+   * restored at its original index instead.
+   */
+  private createHeatingSystem(
+    command: CreateHeatingSystemCommand,
+    now: Date,
+    restoration: ReadonlyMap<string, ConfidenceJson<unknown> | null> | null
+  ): Either<CommandError, { patch: Partial<BuildingInput>; changes: FieldChange[] }> {
+    const rec = command as unknown as Record<string, unknown>;
+    const removedRaw = restoration?.get('__removed') ?? null;
+    const removed =
+      removedRaw !== null && typeof removedRaw === 'object' && 'value' in (removedRaw as unknown as Record<string, unknown>)
+        ? ((removedRaw as unknown as { value: unknown }).value as unknown as Record<string, unknown>)
+        : null;
+    // ADR-0006: ids come from the persisted high-water mark, so a deleted id is
+    // never re-minted (audit rows keep referencing it, ADR-0003).
+    const id = removed?.['id'] !== undefined ? String(removed['id']) : `heating-${this.heatingSystemSeq + 1}`;
+    if (this.heatingSystems.some((s) => s.id === id) && removed === null) {
+      return left(new CommandValidationError([{ field: 'systemId', message: `heating system ${id} already exists` }]));
+    }
+    const fields = COMMAND_EDITABLE_FIELDS['building.heating-system.create.v1'];
+    const changes: FieldChange[] = [];
+    const element: Record<string, unknown> = { id, buildingId: this.id };
+    for (const field of Object.keys(fields)) {
+      // undo of a delete: the removed element's full Confidence wins (ADR-0006)
+      if (removed !== null && removed[field] !== undefined) {
+        element[field] = confidenceFromJson(removed[field] as ConfidenceJson<unknown>);
+        continue;
+      }
+      const value = rec[field];
+      if (value === undefined) {
+        element[field] = null;
+        continue;
+      }
+      const newConfidence = value === null ? null : userSupplied(value, now);
+      element[field] = newConfidence;
+      changes.push({
+        field,
+        oldValue: null,
+        newValue: newConfidence === null ? null : (confidenceToJson(newConfidence) as ConfidenceJson<unknown>)
+      });
+    }
+    changes.push({ field: 'id', oldValue: null, newValue: id as unknown as ConfidenceJson<unknown> });
+    const list = [...this.heatingSystems];
+    const at = removed?.['id'] !== undefined ? Math.max(0, Number(/^heating-(\d+)$/.exec(String(removed['id']))?.[1] ?? 1)) - 1 : list.length;
+    list.splice(Math.min(at, list.length), 0, element as unknown as HeatingSystem);
+    return right({
+      patch: { heatingSystems: list, heatingSystemSeq: removed === null ? this.heatingSystemSeq + 1 : this.heatingSystemSeq },
+      changes
+    });
+  }
+
+  /**
+   * ADR-0006: deletes a heating installation by id. The removed element is
+   * recorded in the changes (`__removed`) so undo can restore it verbatim.
+   */
+  private deleteHeatingSystem(
+    command: DeleteHeatingSystemCommand,
+    now: Date
+  ): Either<CommandError, { patch: Partial<BuildingInput>; changes: FieldChange[] }> {
+    const index = this.heatingSystems.findIndex((s) => s.id === command.systemId);
+    if (index < 0) {
+      return left(new ElementNotFoundError('heating-system', command.systemId));
+    }
+    // a building without any heating installation is not simulable (the engine
+    // then omits ep_conso_5_usages) — never persist such a state (ADR-0006)
+    if (this.heatingSystems.length <= 1) {
+      return left(
+        new CommandValidationError([
+          { field: 'systemId', message: 'at least one heating system must remain — create another one before deleting this one' }
+        ])
+      );
+    }
+    const removed = this.heatingSystems[index] as unknown as Record<string, unknown>;
+    const elJson: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(removed)) {
+      elJson[k] = v !== null && typeof v === 'object' && 'confidence' in (v as Record<string, unknown>)
+        ? (confidenceToJson(v as Confidence<unknown>) as ConfidenceJson<unknown>)
+        : v;
+    }
+    const list = [...this.heatingSystems];
+    list.splice(index, 1);
+    return right({
+      patch: { heatingSystems: list },
+      changes: [
+        {
+          field: '__removed',
+          oldValue: { value: elJson, source: 'user', confidence: 1, importDate: now } as unknown as ConfidenceJson<unknown>,
+          newValue: null
+        }
+      ]
+    });
+  }
+
+  /**
    * Builds a derived aggregate (private constructor path) with a new version.
    * The source document and import metadata are carried over unchanged.
    */
@@ -604,6 +726,7 @@ export class Building {
       photovoltaicSystems: prev.photovoltaicSystems,
       importedAt: prev.importedAt,
       sourceDpeXml: prev.sourceDpeXml,
+      heatingSystemSeq: prev.heatingSystemSeq,
       ...patch
     };
     return new Building(input);
@@ -646,7 +769,8 @@ export class Building {
       ventilationSystems: this.ventilationSystems,
       photovoltaicSystems: this.photovoltaicSystems,
       importedAt: this.importedAt.toISOString(),
-      sourceDpeXml: this.sourceDpeXml
+      sourceDpeXml: this.sourceDpeXml,
+      heatingSystemSeq: this.heatingSystemSeq
     };
   }
 }

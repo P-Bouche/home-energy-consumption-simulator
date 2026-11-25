@@ -3894,5 +3894,6 @@
   ],
   "photovoltaicSystems": [],
   "importedAt": "2026-11-20T10:00:00.000Z",
-  "sourceDpeXml": null
+  "sourceDpeXml": null,
+  "heatingSystemSeq": 1
 }

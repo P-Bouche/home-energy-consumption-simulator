@@ -190,6 +190,55 @@ describe('corpus-wide importer ↔ overlay contract (positional id mapping)', ()
     // buildEngineInput must refuse too (edited-source path, uncovered edit)
     expect(() => buildEngineInput(forged)).toThrow(SimulationMappingError);
   });
+
+  // ADR-0006: cardinality changes — append (create) and drop (delete) of heating entries
+  it('ADR-0006 corpus contract: create appends an entry, delete drops it, survivors keep their ids', () => {
+    for (const file of fixtureFiles) {
+      const building = importFixture(file);
+      if (building.heatingSystems.length === 0) continue;
+      // create a second heating system via the domain command
+      const created = building.apply(
+        {
+          type: 'building.heating-system.create.v1',
+          buildingId: building.id,
+          description: 'Complément',
+          generatorType: '42', heatedAreaM2: 40
+        },
+        editCtx
+      );
+      expect(created.ok, file).toBe(true);
+      if (!created.ok) continue;
+      const viewCreated = toSimulationView(created.value);
+      const mapping = buildEngineInput(viewCreated);
+      const json = mapping.input.kind === 'json' ? mapping.input.json : null;
+      const logement = (json as Record<string, unknown>)['logement'] as Record<string, unknown>;
+      const icsRaw = (logement['installation_chauffage_collection'] as Record<string, unknown>)['installation_chauffage'];
+      const ics = (Array.isArray(icsRaw) ? icsRaw : [icsRaw]) as Record<string, unknown>[];
+      expect(ics.length, `append ${file}`).toBe(building.heatingSystems.length + 1);
+      const last = ics[ics.length - 1] as Record<string, unknown>;
+      const genRaw = (last['generateur_chauffage_collection'] as Record<string, unknown>)['generateur_chauffage'];
+      const gen = (Array.isArray(genRaw) ? genRaw[0] : genRaw) as Record<string, unknown>;
+      expect(((gen['donnee_entree'] as Record<string, unknown>)['enum_type_generateur_ch_id']), `generator ${file}`).toBe('42');
+
+      // delete the first system: its source entry is dropped, the created one stays
+      const deleted = created.value.apply(
+        { type: 'building.heating-system.delete.v1', buildingId: building.id, systemId: 'heating-1' },
+        editCtx
+      );
+      expect(deleted.ok, file).toBe(true);
+      if (!deleted.ok) continue;
+      const mapping2 = buildEngineInput(toSimulationView(deleted.value));
+      const json2 = mapping2.input.kind === 'json' ? mapping2.input.json : null;
+      const logement2 = (json2 as Record<string, unknown>)['logement'] as Record<string, unknown>;
+      const ics2Raw = (logement2['installation_chauffage_collection'] as Record<string, unknown>)['installation_chauffage'];
+      const ics2 = (Array.isArray(ics2Raw) ? ics2Raw : [ics2Raw]) as Record<string, unknown>[];
+      expect(ics2.length, `drop ${file}`).toBe(building.heatingSystems.length);
+      // the created system is appended last and keeps its user description
+      const last2 = ics2[ics2.length - 1] as Record<string, unknown>;
+      expect((last2?.['donnee_entree'] as Record<string, unknown>)['description'], `created survivor ${file}`).toBe('Complément');
+      expect(mapping2.defaults.some((d) => String(d.value).includes('NOT overlaid')), `unmatched ${file}`).toBe(false);
+    }
+  });
 });
 
 describe('uw_saisi is honored by the engine across the corpus (windows)', () => {

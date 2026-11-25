@@ -61,7 +61,23 @@ const FIXED_TEMPLATES: readonly { readonly raw: string; readonly build: (subject
   { raw: 'must be a finite number', build: (s) => `${s} doit être un nombre valide` },
   { raw: 'must be a non-empty string', build: (s) => `${s} ne doit pas être vide` },
   { raw: 'must be a positive integer', build: (s) => `${s} doit être un nombre entier positif` },
-  { raw: 'description cannot be null', build: () => 'La description ne doit pas être vide' }
+  { raw: 'description cannot be null', build: () => 'La description ne doit pas être vide' },
+  {
+    raw: 'at least one heating system must remain — create another one before deleting this one',
+    build: () => 'Il faut au moins une installation de chauffage — ajoutez-en une autre avant de supprimer celle-ci'
+  },
+  {
+    raw: 'description is required when creating a heating system',
+    build: () => 'La description est requise pour ajouter un chauffage'
+  },
+  {
+    raw: 'generatorType is required when creating a heating system',
+    build: () => 'Le type de générateur est requis pour ajouter un chauffage (choisissez une carte préréglée)'
+  },
+  {
+    raw: 'heatedAreaM2 is required when creating a heating system',
+    build: () => 'La surface chauffée (m²) est requise pour ajouter un chauffage'
+  }
 ];
 
 /**

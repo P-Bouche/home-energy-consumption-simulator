@@ -83,6 +83,46 @@ describe('edited-building overlay path (P4 edits)', () => {
     ).toBe(true);
   });
 
+  it('ADR-0006: a created heating system appends a source entry; a deleted one drops its entry, survivors keep their ids', () => {
+    const building = importFixture();
+    // create a second heating system (poêle) with a user generator type
+    const created = building.apply(
+      { type: 'building.heating-system.create.v1', buildingId: building.id, description: 'Poêle à bois', generatorType: '22', heatedAreaM2: 40 },
+      editCtx
+    );
+    expect(created.ok).toBe(true);
+    if (!created.ok) return;
+    let view = toSimulationView(created.value);
+    let mapping = buildEngineInput(view);
+    let json = mapping.input.kind === 'json' ? mapping.input.json : null;
+    let logement = (json as Record<string, unknown>)['logement'] as Record<string, unknown>;
+    let ics = (logement['installation_chauffage_collection'] as Record<string, unknown>)['installation_chauffage'];
+    let icArr = (Array.isArray(ics) ? ics : [ics]) as Record<string, unknown>[];
+    expect(icArr).toHaveLength(2);
+    const gen0 = (icArr[1]?.['generateur_chauffage_collection'] as Record<string, unknown>)['generateur_chauffage'];
+    const gen0Arr = Array.isArray(gen0) ? gen0 : [gen0];
+    expect(((gen0Arr[0] as Record<string, unknown>)['donnee_entree'] as Record<string, unknown>)['enum_type_generateur_ch_id']).toBe('22');
+
+    // now delete heating-1: the source entry must be dropped, heating-2 keeps its id
+    const deleted = created.value.apply(
+      { type: 'building.heating-system.delete.v1', buildingId: building.id, systemId: 'heating-1' },
+      editCtx
+    );
+    expect(deleted.ok).toBe(true);
+    if (!deleted.ok) return;
+    view = toSimulationView(deleted.value);
+    mapping = buildEngineInput(view);
+    json = mapping.input.kind === 'json' ? mapping.input.json : null;
+    logement = (json as Record<string, unknown>)['logement'] as Record<string, unknown>;
+    ics = (logement['installation_chauffage_collection'] as Record<string, unknown>)['installation_chauffage'];
+    icArr = (Array.isArray(ics) ? ics : [ics]) as Record<string, unknown>[];
+    expect(icArr).toHaveLength(1);
+    const de = (icArr[0]?.['donnee_entree'] as Record<string, unknown>);
+    expect(de['description']).toBe('Poêle à bois');
+    // no unmatched user edit was logged
+    expect(mapping.defaults.some((d) => String(d.value).includes('NOT overlaid'))).toBe(false);
+  });
+
   it('overlayUserEdits patches windows (uw_saisi) and rejects unknown elements at the domain level', () => {
     const building = importFixture();
     const bad = building.fork(
