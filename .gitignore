@@ -11,3 +11,5 @@ test-results/
 .poc-worktrees/
 __pycache__/
 .dev-pids
+.dev-logs/
+.dev-mode

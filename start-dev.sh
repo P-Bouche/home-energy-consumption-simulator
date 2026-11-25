@@ -24,6 +24,7 @@ if [[ "$MODE" != "postgres" && "$MODE" != "memory" ]]; then
   echo "Mode invalide: $MODE (attendu: postgres|memory)" >&2
   exit 2
 fi
+echo "$MODE" >"$SCRIPT_DIR/.dev-mode" # lu par stop-dev.sh
 
 if [[ "$MODE" == "postgres" ]]; then
   echo "Docker: verification de la base PostgreSQL/PostGIS..."
