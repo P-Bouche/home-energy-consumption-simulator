@@ -34,7 +34,7 @@ describe('P3 API integration: GET /buildings/:id/geometry (in-memory repository)
     expect(res.body.buildingId).toBe(buildingId);
     const geometry = res.body.geometry;
     expect(geometry.buildingId).toBe(buildingId);
-    expect(geometry.inferenceRulesVersion).toBe('1.0.0');
+    expect(geometry.inferenceRulesVersion).toBe('2.0.0');
     expect(geometry.coordinateSystem).toEqual({
       unit: 'm',
       upAxis: 'Z',
