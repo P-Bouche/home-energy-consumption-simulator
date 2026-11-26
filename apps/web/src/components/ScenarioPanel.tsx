@@ -34,9 +34,11 @@ import { ENUM_KINDS, enumOptions } from '../services/enum-labels.ts';
 import { describeU } from '../services/u-reading.ts';
 import {
   catalogEntryForWork,
+  commandRowsToWorkRows,
   composeWorkCommand,
   elementOptionsForWork,
   uNounForTargetKind,
+  workRowsToCommandRows,
   WORK_CATALOG
 } from '../services/work-catalog.ts';
 import type { CommandJson, ComparisonEntryJson } from '../types.ts';
@@ -296,7 +298,13 @@ export function ScenarioPanel({ buildingId }: { readonly buildingId: string }) {
           size="small"
           variant={mode === 'advanced' ? 'outlined' : 'text'}
           data-testid="advanced-mode-toggle"
-          onClick={() => setMode(mode === 'work' ? 'advanced' : 'work')}
+          onClick={() => {
+            // issue #74: carry the in-progress draft across the mode switch
+            // (work rows ↔ command rows are the same frozen commands)
+            if (mode === 'work') setRows(workRowsToCommandRows(works));
+            else setWorks(commandRowsToWorkRows(rows));
+            setMode(mode === 'work' ? 'advanced' : 'work');
+          }}
         >
           {mode === 'advanced' ? 'Mode travaux' : 'Mode avancé'}
         </Button>

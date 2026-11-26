@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { buildCommand, catalogEntryFor } from '../src/components/command-catalog.ts';
 import {
   catalogEntryForWork,
+  commandRowsToWorkRows,
   commandTypesForWork,
   composeWorkCommand,
   elementOptionFor,
@@ -9,6 +10,7 @@ import {
   targetsForWork,
   uNounForTargetKind,
   workEntryFor,
+  workRowsToCommandRows,
   WORK_CATALOG
 } from '../src/services/work-catalog.ts';
 import type { BuildingJson, WallJson, WindowJson } from '../src/types.ts';
@@ -189,5 +191,16 @@ describe('work-catalog service (work-first scenarios, US 10 / F7)', () => {
     expect(composeWorkCommand('heating-change', 'heating-1', { installationType: '4' })?.type).toBe(
       'building.heating-system.update.v1'
     );
+  });
+
+  it('converts work rows ↔ command rows without losing the draft (issue #74)', () => {
+    const works = [{ workId: 'window-replacement', targetId: 'window-1', values: { uValueWm2K: '1.1' } }];
+    const rows = workRowsToCommandRows(works);
+    expect(rows).toEqual([{ type: 'building.window.update.v1', targetId: 'window-1', values: { uValueWm2K: '1.1' } }]);
+    // round-trip preserves the draft
+    expect(commandRowsToWorkRows(rows)).toEqual(works);
+    // unknown rows/works are dropped, never crash
+    expect(workRowsToCommandRows([{ workId: 'nope', targetId: '', values: {} }])).toEqual([]);
+    expect(commandRowsToWorkRows([{ type: 'nope', targetId: '', values: {} }])).toEqual([]);
   });
 });

@@ -183,6 +183,31 @@ test('issue #73: advanced mode — « Type de générateur » is a labeled selec
 });
 
 /**
+ * Issue #74 (bug): toggling the form between « travaux » and « avancé » must
+ * not lose the in-progress draft — both modes now edit the same frozen
+ * commands, converted on toggle.
+ */
+test('issue #74: mode toggle keeps the in-progress work row', async ({ page }) => {
+  await page.goto('/');
+  await page.getByTestId('file-input').setInputFiles(fixture);
+  await expect(page.getByTestId('upload-success')).toContainText('Bâtiment importé');
+  await page.getByTestId('tab-scenarios').click();
+  await expect(page.getByTestId('scenario-panel')).toBeVisible();
+
+  await selectOption(page, 'work-type-0', /Remplacement des fenêtres/i);
+  await selectOption(page, 'work-target-0', /Fenêtre ouest/);
+  await inputOf(page, 'work-field-0-uValueWm2K').fill('1.1');
+
+  await page.getByTestId('advanced-mode-toggle').click();
+  await expect(page.getByTestId('command-row-0')).toBeVisible();
+  await expect(inputOf(page, 'command-field-0-uValueWm2K')).toHaveValue('1.1');
+
+  await page.getByTestId('advanced-mode-toggle').click();
+  await expect(page.getByTestId('work-row-0')).toBeVisible();
+  await expect(inputOf(page, 'work-field-0-uValueWm2K')).toHaveValue('1.1');
+});
+
+/**
  * Wave-2 E (UX US 10 / F7): work-first creation — two scenarios built from
  * named works (« Isolation des murs », « Remplacement des fenêtres »), the
  * target picked by plain name/location (« Mur nord — 54,25 m² »), the U via

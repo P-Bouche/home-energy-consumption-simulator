@@ -267,3 +267,42 @@ export function composeWorkCommand(
   if (entry === undefined) return undefined;
   return buildCommand(entry, targetId, values);
 }
+
+/** Structural shape of a work-first form row (issue #74 conversions). */
+export interface WorkRowLike {
+  readonly workId: string;
+  readonly targetId: string;
+  readonly values: Record<string, string>;
+}
+
+/** Structural shape of an advanced command-row form row (issue #74 conversions). */
+export interface CommandRowLike {
+  readonly type: string;
+  readonly targetId: string;
+  readonly values: Record<string, string>;
+}
+
+/**
+ * Converts work-first rows into advanced command rows, one frozen command per
+ * work (same type the work maps to). Used when toggling the form to advanced
+ * mode so the in-progress draft is not lost (issue #74). Rows of unknown
+ * works are dropped (they cannot be represented as a command).
+ */
+export function workRowsToCommandRows(works: readonly WorkRowLike[]): CommandRowLike[] {
+  return works.flatMap((w) => {
+    const entry = catalogEntryForWork(w.workId);
+    return entry === undefined ? [] : [{ type: entry.type, targetId: w.targetId, values: { ...w.values } }];
+  });
+}
+
+/**
+ * Converts advanced command rows back into work-first rows (the work whose
+ * first command type matches). Used when toggling back to work mode (issue
+ * #74). Rows of unknown command types are dropped (no named work behind them).
+ */
+export function commandRowsToWorkRows(rows: readonly CommandRowLike[]): WorkRowLike[] {
+  return rows.flatMap((r) => {
+    const work = WORK_CATALOG.find((w) => w.commandTypes[0] === r.type);
+    return work === undefined ? [] : [{ workId: work.id, targetId: r.targetId, values: { ...r.values } }];
+  });
+}
