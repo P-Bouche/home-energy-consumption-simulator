@@ -176,8 +176,17 @@ export interface WorkElementOption {
   readonly id: string;
   /** e.g. « Mur nord — 54,25 m² » (labeled kind + orientation label + area) */
   readonly primary: string;
-  /** e.g. « wall-1 · <DPE description> » — the raw id is always kept visible */
+  /** e.g. « wall-1 · <DPE description> », truncated to {@link SECONDARY_MAX_CHARS} (issue #75) */
   readonly secondary: string;
+  /** the untruncated secondary text — kept for the option's tooltip (`title`) */
+  readonly secondaryFull: string;
+}
+
+/** Max length of the secondary line in the « Élément » select (issue #75). */
+export const SECONDARY_MAX_CHARS = 80;
+
+function truncate(text: string, max: number): string {
+  return text.length <= max ? text : `${text.slice(0, max - 1).trimEnd()}…`;
 }
 
 /** raw orientation enum id of an envelope element, when the DPE carried one */
@@ -217,8 +226,8 @@ export function elementOptionFor(
     primary += ` — ${area.toLocaleString('fr-FR')} m²`;
   }
   const description = target.description.value.trim();
-  const secondary = description === '' ? target.id : `${target.id} · ${description}`;
-  return { id: target.id, primary, secondary };
+  const secondaryFull = description === '' ? target.id : `${target.id} · ${description}`;
+  return { id: target.id, primary, secondary: truncate(secondaryFull, SECONDARY_MAX_CHARS), secondaryFull };
 }
 
 /**

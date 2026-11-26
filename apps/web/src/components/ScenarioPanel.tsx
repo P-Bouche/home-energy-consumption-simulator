@@ -355,7 +355,7 @@ export function ScenarioPanel({ buildingId }: { readonly buildingId: string }) {
                       Élément…
                     </MenuItem>
                     {options.map((o) => (
-                      <MenuItem key={o.id} value={o.id} sx={{ whiteSpace: 'normal' }}>
+                      <MenuItem key={o.id} value={o.id} sx={{ whiteSpace: 'normal' }} title={o.secondaryFull}>
                         <ListItemText primary={o.primary} secondary={o.secondary} />
                       </MenuItem>
                     ))}

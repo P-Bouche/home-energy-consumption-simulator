@@ -136,6 +136,21 @@ describe('work-catalog service (work-first scenarios, US 10 / F7)', () => {
     expect(heatingOption.secondary).toBe('heating-1 · Chaudière gaz standard');
   });
 
+  it('truncates a long secondary line in the « Élément » select but keeps the full text for the tooltip (issue #75)', () => {
+    const longWindow: WindowJson = {
+      ...window,
+      description: conf('Fenêtres battantes bois, orientées Ouest, simple vitrage avec volets battants bois et grille de ventilation')
+    };
+    const option = elementOptionFor(longWindow, 'windows', { orientation: ORIENTATION });
+    expect(option.primary).toBe('Fenêtre est — 1,44 m²');
+    expect(option.secondary.length).toBeLessThanOrEqual(81); // 80 chars + ellipsis
+    expect(option.secondary.endsWith('…')).toBe(true);
+    expect(option.secondaryFull).toBe(`window-1 · ${longWindow.description.value}`);
+    // short descriptions are not truncated
+    const short = elementOptionFor(wall, 'walls', { orientation: ORIENTATION });
+    expect(short.secondary).toBe(short.secondaryFull);
+  });
+
   it('provides the guided U noun per target kind', () => {
     expect(uNounForTargetKind('walls')).toEqual({ noun: 'mur', gender: 'm' });
     expect(uNounForTargetKind('roofs')).toEqual({ noun: 'toiture', gender: 'f' });
