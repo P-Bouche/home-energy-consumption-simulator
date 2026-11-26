@@ -31,6 +31,7 @@ import { useScenarioStore } from '../store/scenario-store.ts';
 import { buildCommand, catalogEntryFor, COMMAND_CATALOG, type CommandCatalogField } from './command-catalog.ts';
 import { useEnumLabels } from '../hooks/use-enum-labels.ts';
 import { ENUM_KINDS, enumOptions } from '../services/enum-labels.ts';
+import { presetsForCatalogField } from '../services/presets.ts';
 import { describeU } from '../services/u-reading.ts';
 import {
   catalogEntryForWork,
@@ -147,14 +148,16 @@ export function ScenarioPanel({ buildingId }: { readonly buildingId: string }) {
     targetKind: string,
     values: Record<string, string>,
     setValue: (next: string) => void,
+    setPatch: (patch: Record<string, string>) => void,
     testId: string
   ): React.ReactElement => {
     const value = values[field.key] ?? '';
+    let control: React.ReactElement;
     if (field.enumKind !== undefined) {
       const table = enumTables[field.enumKind] ?? null;
       const options = enumOptions(table, value);
-      return (
-        <FormControl key={field.key} size="small" sx={{ minWidth: 220, flexShrink: 0 }} data-testid={testId}>
+      control = (
+        <FormControl size="small" sx={{ minWidth: 220, flexShrink: 0 }} data-testid={testId}>
           <InputLabel>{field.label}</InputLabel>
           <Select label={field.label} value={value} onChange={(e) => setValue(String(e.target.value))}>
             <MenuItem value="" disabled>
@@ -172,32 +175,61 @@ export function ScenarioPanel({ buildingId }: { readonly buildingId: string }) {
           <FormHelperText>{value === '' ? ' ' : `Valeur envoyée : id ${value}`}</FormHelperText>
         </FormControl>
       );
+    } else {
+      const typedNum = value.trim() === '' ? Number.NaN : Number(value);
+      const noun = uNounForTargetKind(targetKind);
+      const reading = Number.isFinite(typedNum) && typedNum > 0 ? describeU(typedNum, noun.noun, noun.gender) : '';
+      const helper = [reading, field.helper].filter((p) => p !== undefined && p !== '').join(' · ');
+      control = (
+        <TextField
+          size="small"
+          type={field.input === 'number' ? 'number' : 'text'}
+          label={field.label}
+          placeholder={field.placeholder}
+          value={value}
+          data-testid={testId}
+          slotProps={{
+            htmlInput: {
+              ...(field.min !== undefined ? { min: field.min } : {}),
+              ...(field.max !== undefined ? { max: field.max } : {})
+            }
+          }}
+          helperText={helper === '' ? ' ' : helper}
+          // issue #76: wide enough for the floating label (« Uw (W/m².K) ») and allowed to shrink,
+          // so the label/helper never overlap the field in the wrapping row
+          sx={{ minWidth: 200 }}
+          onChange={(e) => setValue(e.target.value)}
+        />
+      );
     }
-    const typedNum = value.trim() === '' ? Number.NaN : Number(value);
+    // issue #77: level-M preset chips (same tables as the editor) under the raw field
+    const presets = presetsForCatalogField(field.key, targetKind);
+    if (presets.length === 0) return control;
+    const current = value.trim();
     const noun = uNounForTargetKind(targetKind);
-    const reading = Number.isFinite(typedNum) && typedNum > 0 ? describeU(typedNum, noun.noun, noun.gender) : '';
-    const helper = [reading, field.helper].filter((p) => p !== undefined && p !== '').join(' · ');
     return (
-      <TextField
-        key={field.key}
-        size="small"
-        type={field.input === 'number' ? 'number' : 'text'}
-        label={field.label}
-        placeholder={field.placeholder}
-        value={value}
-        data-testid={testId}
-        slotProps={{
-          htmlInput: {
-            ...(field.min !== undefined ? { min: field.min } : {}),
-            ...(field.max !== undefined ? { max: field.max } : {})
-          }
-        }}
-        helperText={helper === '' ? ' ' : helper}
-        // issue #76: wide enough for the floating label (« Uw (W/m².K) ») and allowed to shrink,
-        // so the label/helper never overlap the field in the wrapping row
-        sx={{ minWidth: 200 }}
-        onChange={(e) => setValue(e.target.value)}
-      />
+      <Stack key={field.key} spacing={0.5} sx={{ flexShrink: 0 }} data-testid={`presets-${testId}`}>
+        {control}
+        <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+          {presets.map((p) => {
+            const hint =
+              field.input === 'number'
+                ? describeU(Number(p.value), noun.noun, noun.gender, targetKind === 'windows' ? 'window' : 'wall')
+                : '';
+            return (
+              <Chip
+                key={p.value}
+                size="small"
+                label={hint !== '' ? `${p.label} — ${hint}` : p.label}
+                color={current === p.value ? 'primary' : 'default'}
+                variant={current === p.value ? 'filled' : 'outlined'}
+                data-testid={`preset-${testId}-${p.value}`}
+                onClick={() => setPatch(p.apply ?? { [field.key]: p.value })}
+              />
+            );
+          })}
+        </Box>
+      </Stack>
     );
   };
 
@@ -375,6 +407,7 @@ export function ScenarioPanel({ buildingId }: { readonly buildingId: string }) {
                     entry.targetKind,
                     work.values,
                     (next) => setWorks(works.map((w, i) => (i === index ? { ...w, values: { ...w.values, [field.key]: next } } : w))),
+                    (patch) => setWorks(works.map((w, i) => (i === index ? { ...w, values: { ...w.values, ...patch } } : w))),
                     `work-field-${index}-${field.key}`
                   )
                 )}
@@ -431,6 +464,7 @@ export function ScenarioPanel({ buildingId }: { readonly buildingId: string }) {
                     entry.targetKind,
                     row.values,
                     (next) => setRows(rows.map((r, i) => (i === index ? { ...r, values: { ...r.values, [field.key]: next } } : r))),
+                    (patch) => setRows(rows.map((r, i) => (i === index ? { ...r, values: { ...r.values, ...patch } } : r))),
                     `command-field-${index}-${field.key}`
                   )
                 )}
