@@ -73,6 +73,20 @@ export const DOOR_HEIGHT_M = 2.0;
 export const DEFAULT_RIDGE_SPAN_FRACTION = 0.25;
 
 /**
+ * Ridge height as a fraction of the short span for finished attics under the
+ * slopes — `type_plancher_haut` enum code 12, "combles aménagés sous rampant".
+ * Rule `ridge-height-from-roof-type`.
+ */
+export const RIDGE_SPAN_FRACTION_FINISHED_ATTIC = 0.35;
+
+/**
+ * Ridge height as a fraction of the short span for pitched roof coverings —
+ * `type_plancher_haut` enum codes 13 ("toiture en chaume") and 16 ("toitures
+ * en bac acier"). Rule `ridge-height-from-roof-type`.
+ */
+export const RIDGE_SPAN_FRACTION_PITCHED_COVER = 0.3;
+
+/**
  * Recess depth of opening frames into the wall thickness (m). Display
  * constant: the glazing sits this far behind the outer wall face, inside the
  * 0.2 m wall (Class B, ADR-0005).
@@ -151,24 +165,21 @@ function placementConfidence(importDate: Date, value: Placement, inputs: readonl
   return createConfidence(value, p.source, p.confidence, importDate);
 }
 
+/** Cardinal of each compass orientation ('horizontal' has none). */
+const ORIENTATION_CARDINAL: Record<Orientation, Cardinal | null> = {
+  N: 'N',
+  NE: 'N',
+  NW: 'N',
+  E: 'E',
+  SE: 'E',
+  S: 'S',
+  W: 'W',
+  SW: 'W',
+  horizontal: null
+};
+
 function toCardinal(orientation: Orientation | null): Cardinal | null {
-  if (orientation === null || orientation === 'horizontal') return null;
-  switch (orientation) {
-    case 'N':
-    case 'NE':
-    case 'NW':
-      return 'N';
-    case 'E':
-    case 'SE':
-      return 'E';
-    case 'S':
-      return 'S';
-    case 'W':
-    case 'SW':
-      return 'W';
-    default:
-      return null;
-  }
+  return orientation === null ? null : ORIENTATION_CARDINAL[orientation];
 }
 
 /**
@@ -263,6 +274,15 @@ function sideLength(side: Cardinal, width: number, depth: number): number {
 }
 
 /**
+ * Splits a total width along X into strip widths proportional to `areas`
+ * (sum-normalized). Shared by floors, roof strips and rooms.
+ */
+function splitAlongX(areas: readonly number[], width: number): number[] {
+  const sum = areas.reduce((a, b) => a + b, 0);
+  return areas.map((a) => (a / sum) * width);
+}
+
+/**
  * Rebuilds a face with reversed winding when its computed normal does not point
  * along `outward` (dot < 0), so every emitted face has a deterministic outward
  * normal regardless of the side parametrization.
@@ -273,23 +293,55 @@ function faceOutward(vertices: readonly Vector3[], outward: Vector3): Face {
   return dot < 0 ? makeFace([...vertices].reverse()) : face;
 }
 
+/**
+ * Per-side geometry of the footprint parametrization (Z-up, N = +Y), shared
+ * by every wall/opening helper: outward unit normal, unit vector along
+ * increasing `from`, a point mapper (`u` along the side, `d` outward from
+ * the footprint edge — the outer wall face sits at d = thickness/2 —, `z`
+ * height) and the wall origin on the outer face.
+ */
+interface SideGeometry {
+  readonly outward: Vector3;
+  readonly along: Vector3;
+  readonly point: (width: number, depth: number, u: number, d: number, z: number) => Vector3;
+  readonly origin: (from: number, width: number, depth: number, t: number) => Vector3;
+}
+
+const SIDES: Record<Cardinal, SideGeometry> = {
+  N: {
+    outward: v3(0, 1, 0),
+    along: v3(1, 0, 0),
+    point: (_w, depth, u, d, z) => v3(u, depth + d, z),
+    origin: (from, _w, depth, t) => v3(from, depth + t, 0)
+  },
+  S: {
+    outward: v3(0, -1, 0),
+    along: v3(1, 0, 0),
+    point: (_w, _depth, u, d, z) => v3(u, -d, z),
+    origin: (from, _w, _depth, t) => v3(from, -t, 0)
+  },
+  E: {
+    outward: v3(1, 0, 0),
+    along: v3(0, 1, 0),
+    point: (width, _depth, u, d, z) => v3(width + d, u, z),
+    origin: (from, width, _depth, t) => v3(width + t, from, 0)
+  },
+  W: {
+    outward: v3(-1, 0, 0),
+    along: v3(0, 1, 0),
+    point: (_w, _depth, u, d, z) => v3(-d, u, z),
+    origin: (from, _w, _depth, t) => v3(-t, from, 0)
+  }
+};
+
 /** Outward unit normal of a wall side. */
 function sideOutward(side: Cardinal): Vector3 {
-  switch (side) {
-    case 'N':
-      return v3(0, 1, 0);
-    case 'S':
-      return v3(0, -1, 0);
-    case 'E':
-      return v3(1, 0, 0);
-    case 'W':
-      return v3(-1, 0, 0);
-  }
+  return SIDES[side].outward;
 }
 
 /** Unit vector along the side direction (increasing `from`). */
 function sideAlong(side: Cardinal): Vector3 {
-  return side === 'N' || side === 'S' ? v3(1, 0, 0) : v3(0, 1, 0);
+  return SIDES[side].along;
 }
 
 /**
@@ -298,16 +350,7 @@ function sideAlong(side: Cardinal): Vector3 {
  * d = thickness/2), `z` = height.
  */
 function sidePoint(side: Cardinal, width: number, depth: number, u: number, d: number, z: number): Vector3 {
-  switch (side) {
-    case 'N':
-      return v3(u, depth + d, z);
-    case 'S':
-      return v3(u, -d, z);
-    case 'E':
-      return v3(width + d, u, z);
-    case 'W':
-      return v3(-d, u, z);
-  }
+  return SIDES[side].point(width, depth, u, d, z);
 }
 
 /**
@@ -329,17 +372,7 @@ function wallFace(side: Cardinal, from: number, to: number, z0: number, z1: numb
 }
 
 function wallOrigin(side: Cardinal, from: number, width: number, depth: number, thickness: number): Vector3 {
-  const t = thickness / 2;
-  switch (side) {
-    case 'N':
-      return v3(from, depth + t, 0);
-    case 'S':
-      return v3(from, -t, 0);
-    case 'E':
-      return v3(width + t, from, 0);
-    case 'W':
-      return v3(-t, from, 0);
-  }
+  return SIDES[side].origin(from, width, depth, thickness / 2);
 }
 
 /**
@@ -443,9 +476,12 @@ function horizontalFace(x0: number, x1: number, depth: number, z: number, up: bo
  *
  * The reconstruction is a rectangular footprint (aspect 4:3 unless the living
  * area says otherwise is impossible — the DPE gives areas, not shapes), one
- * wall segment per DPE wall placed on the side matching its orientation,
- * openings as panels on their host wall, roof/floor as horizontal slabs,
- * rooms as floor strips. See docs/geometry.md for the full rules catalog.
+ * wall segment per DPE wall placed on the side matching its orientation.
+ * Class B (ADR-0005, inference rules 2.0.0): a pitched gable roof over the
+ * footprint, openings punched as holes in their host wall with recessed
+ * frames, multi-level buildings stacked per level with inter-level floor
+ * slabs, and rooms as floor strips. See docs/geometry.md for the full rules
+ * catalog.
  */
 export class ReconstructionService {
   readonly inferenceRulesVersion = INFERENCE_RULES_VERSION;
@@ -726,10 +762,10 @@ export class ReconstructionService {
       ];
     }
     const areas = elements.map((el) => (el.areaM2 !== null && el.areaM2.value > 0 ? el.areaM2.value : totalArea / elements.length));
-    const sum = areas.reduce((a, b) => a + b, 0);
+    const widths = splitAlongX(areas, width);
     let x = 0;
     return elements.map((el, i) => {
-      const w = (areas[i] as number) / sum * width;
+      const w = widths[i] as number;
       const face = horizontalFace(x, x + w, depth, z, up);
       const placement: Placement = {
         origin: v3(x, 0, z),
@@ -768,11 +804,12 @@ export class ReconstructionService {
     for (const roof of sortByNumericSuffix(building.roofs)) {
       const type = roof.roofType?.value ?? '';
       const text = `${type} ${roof.description.value}`.toLowerCase();
+      // codes per the DPE importer enum table `type_plancher_haut` (domain roofType)
       if (type === '12' || /combles|rampant/.test(text)) {
-        return { m: 0.35 * span, rule: RULES.ridgeHeightFromRoofType }; // combles aménagés sous rampant
+        return { m: RIDGE_SPAN_FRACTION_FINISHED_ATTIC * span, rule: RULES.ridgeHeightFromRoofType }; // 12 = combles aménagés sous rampant
       }
       if (type === '13' || type === '16' || /toiture|chaume|bac acier/.test(text)) {
-        return { m: 0.3 * span, rule: RULES.ridgeHeightFromRoofType };
+        return { m: RIDGE_SPAN_FRACTION_PITCHED_COVER * span, rule: RULES.ridgeHeightFromRoofType }; // 13 = chaume, 16 = bac acier
       }
     }
     return { m: DEFAULT_RIDGE_SPAN_FRACTION * span, rule: RULES.ridgeHeightDefault };
@@ -812,10 +849,10 @@ export class ReconstructionService {
     }
     const totalArea = width * depth;
     const areas = roofs.map((r) => (r.areaM2 !== null && r.areaM2.value > 0 ? r.areaM2.value : totalArea / roofs.length));
-    const sum = areas.reduce((a, b) => a + b, 0);
+    const widths = splitAlongX(areas, width);
     let x = 0;
     return roofs.map((roof, i) => {
-      const w = (areas[i] as number) / sum * width;
+      const w = widths[i] as number;
       const x0 = x;
       x += w;
       const placement: Placement = {
@@ -887,8 +924,8 @@ export class ReconstructionService {
 
   /**
    * Plans each opening on its host wall (same orientation, else the longest
-   * wall by full quad area), clamping the cursor so openings never overflow
-   * the host wall corner. `from` is absolute along the side.
+   * wall), clamping the cursor so openings never overflow the host wall
+   * corner. `from` is absolute along the side.
    */
   private planOpenings(
     building: Building,
@@ -897,7 +934,6 @@ export class ReconstructionService {
     fp: Footprint,
     placedWalls: readonly PlacedWall[]
   ): OpeningPlan[] {
-    const { height } = fp;
     const sorted = sortByNumericSuffix(openings);
     if (sorted.length === 0) return [];
 
@@ -911,7 +947,7 @@ export class ReconstructionService {
       let host = card === null ? null : (placedWalls.find((w) => w.side === card) ?? null);
       let hostRule: Rule = RULES.openingHostWallByOrientation;
       if (host === null) {
-        host = [...placedWalls].sort((a, b) => b.length * height - a.length * height)[0] ?? null;
+        host = [...placedWalls].sort((a, b) => b.length - a.length)[0] ?? null;
         hostRule = RULES.openingHostWallLongest;
       }
       if (host === null) continue;
@@ -1014,10 +1050,10 @@ export class ReconstructionService {
     }
     const roomFallback = (width * depth) / rooms.length;
     const areas = rooms.map((r) => (r.areaM2 !== null && r.areaM2.value > 0 ? r.areaM2.value : roomFallback));
-    const sum = areas.reduce((a, b) => a + b, 0);
+    const widths = splitAlongX(areas, width);
     let x = 0;
     return rooms.map((room: Room, i: number) => {
-      const w = (areas[i] as number) / sum * width;
+      const w = widths[i] as number;
       const face = horizontalFace(x, x + w, depth, 0.001, true);
       const placement: Placement = {
         origin: v3(x, 0, 0.001),

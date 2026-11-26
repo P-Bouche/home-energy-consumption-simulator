@@ -2,7 +2,7 @@
 
 - Date: 2026-11-26
 - Machine: AMD Ryzen 5 5600X 6-Core Processor, 12 vCPU @ 0 GHz, 15.6 GB RAM, linux x64
-- Node: v26.13.1 (budget measured on the .nvmrc runtime in CI)
+- Node: v26.13.1 (actual runtime of this run; the p95 < 2000 ms budget is defined against the .nvmrc runtime, Node 24.14.1, in CI)
 - Corpus: 15 DPE fixtures (packages/open3cl-adapter/test/fixtures), imported by the P1 importer, then reconstructed
 - Pipeline per sample: import is excluded; measured = ReconstructionService.reconstruct + geometryToJson + geometryToMeshBuffers (the work of GET /buildings/:id/geometry)
 - Samples: 5 runs per fixture after 1 warm-up (75 timed runs)
