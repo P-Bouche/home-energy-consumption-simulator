@@ -1,11 +1,10 @@
 import type { Building } from './building.ts';
 import { createConfidence, type Confidence } from './confidence.ts';
-import type { Door, Room, Window } from './entities.ts';
+import type { Door, Room, Wall, Window } from './entities.ts';
 import {
   COORDINATE_SYSTEM,
   computeMeshHash,
   makeFace,
-  meshArea,
   parseOrientation,
   v3,
   type Face,
@@ -21,8 +20,10 @@ import {
  * Version of the inference rules (TR: versioned inference rules). Recorded on
  * every produced Geometry as `inferenceRulesVersion`; bump on any rule change.
  * The full catalog with confidences is documented in docs/geometry.md.
+ * 2.0.0 = Class B (ADR-0005): pitched gable roof, openings as holes with
+ * recessed frames, multi-level wall stacking with inter-level slabs.
  */
-export const INFERENCE_RULES_VERSION = '1.0.0';
+export const INFERENCE_RULES_VERSION = '2.0.0';
 
 /**
  * Default living area when the DPE gives none (m²). Rule `living-area-default-80`.
@@ -66,9 +67,17 @@ export const WINDOW_SILL_M = 0.9;
 export const DOOR_HEIGHT_M = 2.0;
 
 /**
- * Outward offset of opening panels from the host wall (m). Display constant.
+ * Default ridge height as a fraction of the short footprint span (the ridge
+ * runs along the long axis). Rule `ridge-height-default`.
  */
-export const OPENING_OFFSET_M = 0.05;
+export const DEFAULT_RIDGE_SPAN_FRACTION = 0.25;
+
+/**
+ * Recess depth of opening frames into the wall thickness (m). Display
+ * constant: the glazing sits this far behind the outer wall face, inside the
+ * 0.2 m wall (Class B, ADR-0005).
+ */
+export const OPENING_RECESS_M = 0.15;
 
 type Cardinal = 'N' | 'E' | 'S' | 'W';
 
@@ -107,7 +116,13 @@ const RULES = {
   roomFromFootprint: rule('room-from-footprint', 0.5),
   slabAreaEqualShare: rule('slab-area-equal-share', 0.4),
   roomAreaEqualShare: rule('room-area-equal-share', 0.4),
-  openingCursorClamped: rule('opening-cursor-clamped-to-host-wall', 0.5)
+  openingCursorClamped: rule('opening-cursor-clamped-to-host-wall', 0.5),
+  // Class B (ADR-0005, inferenceRulesVersion 2.0.0)
+  ridgeHeightFromRoofType: rule('ridge-height-from-roof-type', 0.7),
+  ridgeHeightDefault: rule('ridge-height-default', 0.4),
+  openingHoleSubtraction: rule('opening-hole-subtraction', 0.5),
+  wallStackingPerLevel: rule('per-level-wall-stacking', 0.5),
+  interLevelFloorSlab: rule('inter-level-floor-slab', 0.5)
 } as const;
 
 interface Provenance {
@@ -196,8 +211,51 @@ function sortByNumericSuffix<T extends { id: string }>(items: readonly T[]): T[]
 interface Footprint {
   readonly width: number;
   readonly depth: number;
+  /** Total envelope height: ceiling × levels. */
   readonly height: number;
+  /** Ceiling height of one level (m). */
+  readonly ceiling: number;
+  /** Number of stacked levels. */
+  readonly levels: number;
   readonly provenance: readonly (Confidence<unknown> | Rule | null)[];
+}
+
+/**
+ * A DPE wall (or a synthesized one) placed on a footprint side: `from`/`length`
+ * in side coordinates. Openings are planned against these placements, then
+ * the wall mesh is split around their holes (Class B, ADR-0005).
+ */
+interface PlacedWall {
+  readonly wall: Wall | null;
+  readonly id: string;
+  readonly label: string;
+  readonly side: Cardinal;
+  readonly from: number;
+  readonly length: number;
+  readonly orientation: Orientation;
+  readonly orientationConf: Confidence<unknown> | Rule;
+  readonly areaConf: Confidence<unknown> | Rule;
+  readonly areaM2: Confidence<number> | null;
+  readonly uValueWm2K: Confidence<number> | null;
+}
+
+/**
+ * A planned opening (window/door) on its host wall, in side coordinates
+ * (`from` absolute along the side). The host wall band is split around the
+ * hole [from, from+w] × [z0, z0+h] and the opening gets a recessed frame.
+ */
+interface OpeningPlan {
+  readonly opening: Window | Door;
+  readonly kind: 'window' | 'door';
+  readonly host: PlacedWall;
+  readonly from: number;
+  readonly w: number;
+  readonly z0: number;
+  readonly h: number;
+  readonly orientation: Orientation;
+  readonly orientationConf: Confidence<unknown> | Rule;
+  readonly hostRule: Rule;
+  readonly clamped: boolean;
 }
 
 function sideLength(side: Cardinal, width: number, depth: number): number {
@@ -205,29 +263,69 @@ function sideLength(side: Cardinal, width: number, depth: number): number {
 }
 
 /**
- * Wall quad on a side, wound so the normal points outward.
- * `from`/`to` are distances along the side (0 at the footprint corner side).
+ * Rebuilds a face with reversed winding when its computed normal does not point
+ * along `outward` (dot < 0), so every emitted face has a deterministic outward
+ * normal regardless of the side parametrization.
  */
-function wallFace(side: Cardinal, from: number, to: number, height: number, width: number, depth: number, thickness: number): Face {
-  const t = thickness / 2;
+function faceOutward(vertices: readonly Vector3[], outward: Vector3): Face {
+  const face = makeFace(vertices);
+  const dot = face.normal.x * outward.x + face.normal.y * outward.y + face.normal.z * outward.z;
+  return dot < 0 ? makeFace([...vertices].reverse()) : face;
+}
+
+/** Outward unit normal of a wall side. */
+function sideOutward(side: Cardinal): Vector3 {
   switch (side) {
-    case 'N': {
-      const y = depth + t;
-      return makeFace([v3(from, y, 0), v3(from, y, height), v3(to, y, height), v3(to, y, 0)]);
-    }
-    case 'S': {
-      const y = -t;
-      return makeFace([v3(from, y, 0), v3(to, y, 0), v3(to, y, height), v3(from, y, height)]);
-    }
-    case 'E': {
-      const x = width + t;
-      return makeFace([v3(x, from, 0), v3(x, to, 0), v3(x, to, height), v3(x, from, height)]);
-    }
-    case 'W': {
-      const x = -t;
-      return makeFace([v3(x, from, 0), v3(x, from, height), v3(x, to, height), v3(x, to, 0)]);
-    }
+    case 'N':
+      return v3(0, 1, 0);
+    case 'S':
+      return v3(0, -1, 0);
+    case 'E':
+      return v3(1, 0, 0);
+    case 'W':
+      return v3(-1, 0, 0);
   }
+}
+
+/** Unit vector along the side direction (increasing `from`). */
+function sideAlong(side: Cardinal): Vector3 {
+  return side === 'N' || side === 'S' ? v3(1, 0, 0) : v3(0, 1, 0);
+}
+
+/**
+ * Maps a wall-side parametrization to a point: `u` = distance along the side,
+ * `d` = outward distance from the footprint edge (the outer wall face sits at
+ * d = thickness/2), `z` = height.
+ */
+function sidePoint(side: Cardinal, width: number, depth: number, u: number, d: number, z: number): Vector3 {
+  switch (side) {
+    case 'N':
+      return v3(u, depth + d, z);
+    case 'S':
+      return v3(u, -d, z);
+    case 'E':
+      return v3(width + d, u, z);
+    case 'W':
+      return v3(-d, u, z);
+  }
+}
+
+/**
+ * Wall quad on a side, wound so the normal points outward.
+ * `from`/`to` are distances along the side (0 at the footprint corner side),
+ * `z0`/`z1` the vertical band (one level of a stacked wall).
+ */
+function wallFace(side: Cardinal, from: number, to: number, z0: number, z1: number, width: number, depth: number, thickness: number): Face {
+  const t = thickness / 2;
+  return faceOutward(
+    [
+      sidePoint(side, width, depth, from, t, z0),
+      sidePoint(side, width, depth, from, t, z1),
+      sidePoint(side, width, depth, to, t, z1),
+      sidePoint(side, width, depth, to, t, z0)
+    ],
+    sideOutward(side)
+  );
 }
 
 function wallOrigin(side: Cardinal, from: number, width: number, depth: number, thickness: number): Vector3 {
@@ -245,56 +343,87 @@ function wallOrigin(side: Cardinal, from: number, width: number, depth: number, 
 }
 
 /**
- * Opening (window/door) quad on a host wall side, offset outward.
+ * One rectangular opening punched through the wall band [from, to] × [z0, z1]
+ * (side coordinates). The band is split into sub-faces around the hole (left /
+ * below / above / right strips), so the wall surface = band minus opening.
  */
-function openingFace(
-  side: Cardinal,
-  from: number,
-  to: number,
-  z0: number,
-  z1: number,
-  width: number,
-  depth: number,
-  thickness: number,
-  offset: number
-): Face {
-  const t = thickness / 2 + offset;
-  switch (side) {
-    case 'N': {
-      const y = depth + t;
-      return makeFace([v3(from, y, z0), v3(from, y, z1), v3(to, y, z1), v3(to, y, z0)]);
-    }
-    case 'S': {
-      const y = -t;
-      return makeFace([v3(from, y, z0), v3(to, y, z0), v3(to, y, z1), v3(from, y, z1)]);
-    }
-    case 'E': {
-      const x = width + t;
-      return makeFace([v3(x, from, z0), v3(x, to, z0), v3(x, to, z1), v3(x, from, z1)]);
-    }
-    case 'W': {
-      const x = -t;
-      return makeFace([v3(x, from, z0), v3(x, from, z1), v3(x, to, z1), v3(x, to, z0)]);
-    }
+interface Hole {
+  readonly from: number;
+  readonly to: number;
+  readonly z0: number;
+  readonly z1: number;
+}
+
+function wallBandFaces(side: Cardinal, from: number, to: number, z0: number, z1: number, holes: readonly Hole[], width: number, depth: number, thickness: number): Face[] {
+  if (holes.length === 0) {
+    return [wallFace(side, from, to, z0, z1, width, depth, thickness)];
   }
+  const faces: Face[] = [];
+  const sorted = [...holes]
+    .map((h) => ({ from: Math.max(h.from, from), to: Math.min(h.to, to), z0: Math.max(h.z0, z0), z1: Math.min(h.z1, z1) }))
+    .filter((h) => h.to > h.from && h.z1 > h.z0)
+    .sort((a, b) => a.from - b.from);
+  let prev = from;
+  for (const h of sorted) {
+    const hf = Math.max(h.from, prev);
+    const ht = h.to;
+    if (ht <= hf) continue;
+    if (hf > prev) faces.push(wallFace(side, prev, hf, z0, z1, width, depth, thickness)); // left strip
+    if (h.z0 > z0) faces.push(wallFace(side, hf, ht, z0, h.z0, width, depth, thickness)); // below sill
+    if (h.z1 < z1) faces.push(wallFace(side, hf, ht, h.z1, z1, width, depth, thickness)); // above lintel
+    prev = ht;
+  }
+  if (to > prev) faces.push(wallFace(side, prev, to, z0, z1, width, depth, thickness)); // right strip
+  return faces;
 }
 
 /**
- * Placement origin of an opening panel on a host wall side: on the wall plane
- * (offset outward by thickness/2 + opening offset), at the cursor position.
+ * Class B opening mesh: a recessed frame set into the wall thickness — glazing
+ * quad at `thickness/2 - OPENING_RECESS_M` from the footprint edge plus the
+ * four reveal quads connecting it to the outer wall face (no more +0.05 m
+ * floating panel, ADR-0005).
+ */
+function openingFrameFaces(side: Cardinal, from: number, to: number, z0: number, z1: number, width: number, depth: number, thickness: number): Face[] {
+  const dOut = thickness / 2;
+  const dIn = dOut - OPENING_RECESS_M;
+  const p = (u: number, d: number, z: number): Vector3 => sidePoint(side, width, depth, u, d, z);
+  const along = sideAlong(side);
+  return [
+    faceOutward([p(from, dIn, z0), p(to, dIn, z0), p(to, dIn, z1), p(from, dIn, z1)], sideOutward(side)),
+    faceOutward([p(from, dOut, z0), p(to, dOut, z0), p(to, dIn, z0), p(from, dIn, z0)], v3(0, 0, -1)),
+    faceOutward([p(from, dOut, z1), p(to, dOut, z1), p(to, dIn, z1), p(from, dIn, z1)], v3(0, 0, 1)),
+    faceOutward([p(from, dOut, z0), p(from, dOut, z1), p(from, dIn, z1), p(from, dIn, z0)], along),
+    faceOutward([p(to, dOut, z0), p(to, dIn, z0), p(to, dIn, z1), p(to, dOut, z1)], v3(-along.x, -along.y, -along.z))
+  ];
+}
+
+/**
+ * Placement origin of an opening on a host wall side: on the outer wall plane
+ * (thickness/2 out), at the cursor position and sill height.
  */
 function openingOrigin(side: Cardinal, from: number, z0: number, width: number, depth: number): Vector3 {
-  const t = WALL_THICKNESS_M / 2 + OPENING_OFFSET_M;
-  switch (side) {
-    case 'N':
-      return v3(from, depth + t, z0);
-    case 'S':
-      return v3(from, -t, z0);
-    case 'E':
-      return v3(width + t, from, z0);
-    case 'W':
-      return v3(-t, from, z0);
+  return sidePoint(side, width, depth, from, WALL_THICKNESS_M / 2, z0);
+}
+
+/**
+ * Class B pitched gable roof over the footprint strip [x0, x1]: two sloped
+ * quads (N and S) rising from the wall top to the ridge along the long X axis
+ * at y = depth/2, plus a gable triangle on each end strip (west at x0 = 0,
+ * east at x1 = width). Replaces the flat roof slab (ADR-0005).
+ */
+function pitchedRoofFaces(x0: number, x1: number, withWestGable: boolean, withEastGable: boolean, width: number, depth: number, wallTop: number, ridge: number, thickness: number): Face[] {
+  const t = thickness / 2;
+  const faces: Face[] = [
+    faceOutward([v3(x0, depth / 2, wallTop + ridge), v3(x1, depth / 2, wallTop + ridge), v3(x1, depth + t, wallTop), v3(x0, depth + t, wallTop)], v3(0, 1, 1)),
+    faceOutward([v3(x0, -t, wallTop), v3(x1, -t, wallTop), v3(x1, depth / 2, wallTop + ridge), v3(x0, depth / 2, wallTop + ridge)], v3(0, -1, 1))
+  ];
+  if (withWestGable) {
+    faces.push(faceOutward([v3(-t, depth / 2, wallTop + ridge), v3(-t, depth + t, wallTop), v3(-t, -t, wallTop)], v3(-1, 0, 0)));
   }
+  if (withEastGable) {
+    faces.push(faceOutward([v3(width + t, -t, wallTop), v3(width + t, depth + t, wallTop), v3(width + t, depth / 2, wallTop + ridge)], v3(1, 0, 0)));
+  }
+  return faces;
 }
 
 function horizontalFace(x0: number, x1: number, depth: number, z: number, up: boolean): Face {
@@ -330,12 +459,18 @@ export class ReconstructionService {
   reconstruct(building: Building): Geometry {
     const footprint = this.computeFootprint(building);
 
+    // Class B (ADR-0005): walls are placed first, openings planned against
+    // them, then wall meshes are split around the opening holes.
+    const placedWalls = this.placeWalls(building, footprint);
+    const windowPlans = this.planOpenings(building, building.windows, 'window', footprint, placedWalls);
+    const doorPlans = this.planOpenings(building, building.doors, 'door', footprint, placedWalls);
+
     const elements: GeometryElement[] = [];
-    elements.push(...this.buildWalls(building, footprint));
-    elements.push(...this.buildRoofs(building, footprint));
+    elements.push(...this.wallElements(building, footprint, placedWalls, [...windowPlans, ...doorPlans]));
+    elements.push(...this.roofElements(building, footprint));
     elements.push(...this.buildFloors(building, footprint));
-    elements.push(...this.buildOpenings(building, building.windows, 'window', footprint, elements));
-    elements.push(...this.buildOpenings(building, building.doors, 'door', footprint, elements));
+    elements.push(...this.openingElements(building, footprint, windowPlans));
+    elements.push(...this.openingElements(building, footprint, doorPlans));
     elements.push(...this.buildRooms(building, footprint));
 
     const meshHash = computeMeshHash(this.inferenceRulesVersion, elements);
@@ -387,6 +522,8 @@ export class ReconstructionService {
       width,
       depth,
       height: ceiling * levels,
+      ceiling,
+      levels,
       // Element-level provenance: area + height inputs. The footprint aspect
       // rule (always inferred — the DPE gives areas, not shapes) is recorded
       // at geometry level via inferenceRulesVersion, not per element.
@@ -400,31 +537,29 @@ export class ReconstructionService {
     };
   }
 
-  private buildWalls(building: Building, fp: Footprint): GeometryElement[] {
-    const importDate = building.importedAt;
+  /**
+   * Places every wall on a footprint side (same rules as before: orientation
+   * match, else most remaining capacity; length = area / total height,
+   * clamped to the side). Returns plain placements — the meshes (per-level
+   * stacking + opening holes) are built by {@link wallElements}.
+   */
+  private placeWalls(building: Building, fp: Footprint): PlacedWall[] {
     const { width, depth, height } = fp;
     const walls = sortByNumericSuffix(building.walls);
     if (walls.length === 0) {
-      return SIDE_ORDER.map((side, i) => {
-        const len = sideLength(side, width, depth);
-        const face = wallFace(side, 0, len, height, width, depth, WALL_THICKNESS_M);
-        const placement: Placement = {
-          origin: wallOrigin(side, 0, width, depth, WALL_THICKNESS_M),
-          dimensions: { width: len, depth: WALL_THICKNESS_M, height },
-          orientation: side
-        };
-        return {
-          id: `wall-synthesized-${i + 1}`,
-          kind: 'wall' as const,
-          label: `Mur ${side} (inféré)`,
-          mesh: { faces: [face] },
-          areaM2: createConfidence(len * height, RULES.wallsFromPerimeter.source, RULES.wallsFromPerimeter.confidence, importDate),
-          uValueWm2K: null,
-          orientation: createConfidence(side as Orientation, RULES.wallsFromPerimeter.source, RULES.wallsFromPerimeter.confidence, importDate),
-          placement: placementConfidence(importDate, placement, [RULES.wallsFromPerimeter, RULES.wallThickness]),
-          inferred: true
-        };
-      });
+      return SIDE_ORDER.map((side, i) => ({
+        wall: null,
+        id: `wall-synthesized-${i + 1}`,
+        label: `Mur ${side} (inféré)`,
+        side,
+        from: 0,
+        length: sideLength(side, width, depth),
+        orientation: side as Orientation,
+        orientationConf: RULES.wallsFromPerimeter,
+        areaConf: RULES.wallsFromPerimeter,
+        areaM2: null,
+        uValueWm2K: null
+      }));
     }
 
     const cursor: Record<Cardinal, number> = { N: 0, E: 0, S: 0, W: 0 };
@@ -434,7 +569,7 @@ export class ReconstructionService {
       if (card !== null) countOnSide[card] += 1;
     }
 
-    const out: GeometryElement[] = [];
+    const out: PlacedWall[] = [];
     // Walls with a known orientation are placed first (document order), then
     // walls without one take the side with the most remaining capacity.
     const ordered = [
@@ -493,29 +628,78 @@ export class ReconstructionService {
       const from = cursor[side];
       cursor[side] = from + length;
       countOnSide[side] += 1;
-      const face = wallFace(side, from, from + length, height, width, depth, WALL_THICKNESS_M);
       const orientation: Orientation = rawOrientation ?? (side as Orientation);
-      const placement: Placement = {
-        origin: wallOrigin(side, from, width, depth, WALL_THICKNESS_M),
-        dimensions: { width: length, depth: WALL_THICKNESS_M, height },
-        orientation: side
-      };
-      const prov = placementConfidence(importDate, placement, [areaConf, orientationConf, ...fp.provenance]);
       out.push({
+        wall,
         id: wall.id,
-        kind: 'wall',
         label: wall.description.value || wall.id,
-        mesh: { faces: [face] },
+        side,
+        from,
+        length,
+        orientation,
+        orientationConf,
+        areaConf,
         areaM2: wall.areaM2,
-        uValueWm2K: wall.uValueWm2K,
-        orientation: wall.orientation === null
-          ? createConfidence(orientation, orientationConf.source, orientationConf.confidence, importDate)
-          : createConfidence(orientation, wall.orientation.source, wall.orientation.confidence, importDate),
-        placement: prov,
-        inferred: prov.confidence < 1
+        uValueWm2K: wall.uValueWm2K
       });
     }
     return out;
+  }
+
+  /**
+   * Class B wall meshes: the ground-level band is split into sub-faces around
+   * the opening holes of this wall (rule `opening-hole-subtraction`), upper
+   * levels stack as one quad per level from z = level × ceiling (rule
+   * `per-level-wall-stacking`).
+   */
+  private wallElements(building: Building, fp: Footprint, placedWalls: readonly PlacedWall[], plans: readonly OpeningPlan[]): GeometryElement[] {
+    const importDate = building.importedAt;
+    const { width, depth, height, ceiling, levels } = fp;
+    const holesByWall = new Map<string, Hole[]>();
+    for (const plan of plans) {
+      const list = holesByWall.get(plan.host.id) ?? [];
+      list.push({ from: plan.from, to: plan.from + plan.w, z0: plan.z0, z1: plan.z0 + plan.h });
+      holesByWall.set(plan.host.id, list);
+    }
+    return placedWalls.map((pw) => {
+      const holes = holesByWall.get(pw.id) ?? [];
+      const faces: Face[] = [
+        ...wallBandFaces(pw.side, pw.from, pw.from + pw.length, 0, ceiling, holes, width, depth, WALL_THICKNESS_M)
+      ];
+      for (let level = 1; level < levels; level += 1) {
+        faces.push(wallFace(pw.side, pw.from, pw.from + pw.length, level * ceiling, (level + 1) * ceiling, width, depth, WALL_THICKNESS_M));
+      }
+      const placement: Placement = {
+        origin: wallOrigin(pw.side, pw.from, width, depth, WALL_THICKNESS_M),
+        dimensions: { width: pw.length, depth: WALL_THICKNESS_M, height },
+        orientation: pw.side
+      };
+      const prov = placementConfidence(importDate, placement, [
+        pw.areaConf,
+        pw.orientationConf,
+        ...fp.provenance,
+        holes.length > 0 ? RULES.openingHoleSubtraction : null,
+        levels > 1 ? RULES.wallStackingPerLevel : null
+      ]);
+      const synthesized = pw.wall === null;
+      return {
+        id: pw.id,
+        kind: 'wall' as const,
+        label: pw.label,
+        mesh: { faces },
+        areaM2: synthesized
+          ? createConfidence(pw.length * height, RULES.wallsFromPerimeter.source, RULES.wallsFromPerimeter.confidence, importDate)
+          : pw.areaM2,
+        uValueWm2K: pw.uValueWm2K,
+        orientation: synthesized
+          ? createConfidence(pw.orientation, RULES.wallsFromPerimeter.source, RULES.wallsFromPerimeter.confidence, importDate)
+          : pw.wall !== null && pw.wall.orientation !== null
+            ? createConfidence(pw.orientation, pw.wall.orientation.source, pw.wall.orientation.confidence, importDate)
+            : createConfidence(pw.orientation, pw.orientationConf.source, pw.orientationConf.confidence, importDate),
+        placement: prov,
+        inferred: synthesized || prov.confidence < 1
+      };
+    });
   }
 
   private splitTop(elements: readonly { areaM2: Confidence<number> | null; id: string }[], totalArea: number, z: number, depth: number, up: boolean, kind: GeometryElementKind, label: (el: { id: string }, i: number) => string, importDate: Date, synthesizedRule: Rule): GeometryElement[] {
@@ -572,22 +756,95 @@ export class ReconstructionService {
     });
   }
 
-  private buildRoofs(building: Building, fp: Footprint): GeometryElement[] {
-    return this.splitTop(
-      building.roofs,
-      fp.width * fp.depth,
-      fp.height,
-      fp.depth,
-      true,
-      'roof',
-      (el, i) => (building.roofs[i]?.description.value ?? el.id),
-      building.importedAt,
-      RULES.roofFromFootprint
-    );
+  /**
+   * Ridge height (m) of the Class B gable roof: inferred from the first DPE
+   * roof whose `roofType`/description denotes a pitched roof (rule
+   * `ridge-height-from-roof-type`), else the named default rule
+   * `ridge-height-default` (fraction of the short span). The ridge runs along
+   * the long footprint axis, so the span is the short axis.
+   */
+  private ridgeHeight(building: Building, fp: Footprint): { readonly m: number; readonly rule: Rule } {
+    const span = Math.min(fp.width, fp.depth);
+    for (const roof of sortByNumericSuffix(building.roofs)) {
+      const type = roof.roofType?.value ?? '';
+      const text = `${type} ${roof.description.value}`.toLowerCase();
+      if (type === '12' || /combles|rampant/.test(text)) {
+        return { m: 0.35 * span, rule: RULES.ridgeHeightFromRoofType }; // combles aménagés sous rampant
+      }
+      if (type === '13' || type === '16' || /toiture|chaume|bac acier/.test(text)) {
+        return { m: 0.3 * span, rule: RULES.ridgeHeightFromRoofType };
+      }
+    }
+    return { m: DEFAULT_RIDGE_SPAN_FRACTION * span, rule: RULES.ridgeHeightDefault };
+  }
+
+  /**
+   * Class B roofs: a pitched gable along the long axis (two sloped quads per
+   * roof strip + gable triangles on the end strips) instead of a flat slab.
+   * DPE roofs keep their id and area; strips split along X as before.
+   */
+  private roofElements(building: Building, fp: Footprint): GeometryElement[] {
+    const importDate = building.importedAt;
+    const { width, depth, height } = fp;
+    const ridge = this.ridgeHeight(building, fp);
+    const roofs = sortByNumericSuffix(building.roofs);
+    const stripFaces = (x0: number, x1: number, i: number, n: number): Face[] =>
+      pitchedRoofFaces(x0, x1, i === 0, i === n - 1, width, depth, height, ridge.m, WALL_THICKNESS_M);
+    if (roofs.length === 0) {
+      const placement: Placement = {
+        origin: v3(0, 0, height),
+        dimensions: { width, depth, height: ridge.m },
+        orientation: 'horizontal'
+      };
+      return [
+        {
+          id: 'roof-synthesized-1',
+          kind: 'roof',
+          label: 'Toit (inféré)',
+          mesh: { faces: stripFaces(0, width, 0, 1) },
+          areaM2: createConfidence(width * depth, RULES.roofFromFootprint.source, RULES.roofFromFootprint.confidence, importDate),
+          uValueWm2K: null,
+          orientation: createConfidence('horizontal', RULES.roofFromFootprint.source, RULES.roofFromFootprint.confidence, importDate),
+          placement: placementConfidence(importDate, placement, [RULES.roofFromFootprint, ridge.rule]),
+          inferred: true
+        }
+      ];
+    }
+    const totalArea = width * depth;
+    const areas = roofs.map((r) => (r.areaM2 !== null && r.areaM2.value > 0 ? r.areaM2.value : totalArea / roofs.length));
+    const sum = areas.reduce((a, b) => a + b, 0);
+    let x = 0;
+    return roofs.map((roof, i) => {
+      const w = (areas[i] as number) / sum * width;
+      const x0 = x;
+      x += w;
+      const placement: Placement = {
+        origin: v3(x0, 0, height),
+        dimensions: { width: w, depth, height: ridge.m },
+        orientation: 'horizontal'
+      };
+      // null/zero area → equal-share fallback, recorded as a named rule
+      const areaProvenance: Confidence<unknown> | Rule =
+        roof.areaM2 !== null && roof.areaM2.value > 0 ? roof.areaM2 : RULES.slabAreaEqualShare;
+      const prov = placementConfidence(importDate, placement, [areaProvenance, ridge.rule]);
+      const out: GeometryElement = {
+        id: roof.id,
+        kind: 'roof',
+        label: roof.description.value || roof.id,
+        mesh: { faces: stripFaces(x0, x, i, roofs.length) },
+        areaM2: roof.areaM2,
+        uValueWm2K: roof.uValueWm2K,
+        orientation: createConfidence('horizontal', 'domain:element-kind-horizontal', 1, importDate),
+        placement: prov,
+        inferred: prov.confidence < 1
+      };
+      return out;
+    });
   }
 
   private buildFloors(building: Building, fp: Footprint): GeometryElement[] {
-    return this.splitTop(
+    const importDate = building.importedAt;
+    const ground = this.splitTop(
       building.floors,
       fp.width * fp.depth,
       0,
@@ -595,40 +852,70 @@ export class ReconstructionService {
       false,
       'floor',
       (el, i) => (building.floors[i]?.description.value ?? el.id),
-      building.importedAt,
+      importDate,
       RULES.floorFromFootprint
     );
+    // Class B: horizontal slab at each intermediate level boundary (rule
+    // `inter-level-floor-slab`), so stacked levels read as separate floors.
+    const slabs: GeometryElement[] = [];
+    if (fp.levels > 1) {
+      // keep synthesized ids unique: the ground synthesized floor (if any) took index 1
+      const base = building.floors.length === 0 ? 2 : 1;
+      for (let level = 1; level < fp.levels; level += 1) {
+        const z = level * fp.ceiling;
+        const face = horizontalFace(0, fp.width, fp.depth, z, true);
+        const placement: Placement = {
+          origin: v3(0, 0, z),
+          dimensions: { width: fp.width, depth: fp.depth, height: 0 },
+          orientation: 'horizontal'
+        };
+        slabs.push({
+          id: `floor-synthesized-${base + level - 1}`,
+          kind: 'floor',
+          label: `Plancher intermédiaire niveau ${level + 1} (inféré)`,
+          mesh: { faces: [face] },
+          areaM2: createConfidence(fp.width * fp.depth, RULES.interLevelFloorSlab.source, RULES.interLevelFloorSlab.confidence, importDate),
+          uValueWm2K: null,
+          orientation: createConfidence('horizontal', RULES.interLevelFloorSlab.source, RULES.interLevelFloorSlab.confidence, importDate),
+          placement: placementConfidence(importDate, placement, [RULES.interLevelFloorSlab]),
+          inferred: true
+        });
+      }
+    }
+    return [...ground, ...slabs];
   }
 
-  private buildOpenings(
+  /**
+   * Plans each opening on its host wall (same orientation, else the longest
+   * wall by full quad area), clamping the cursor so openings never overflow
+   * the host wall corner. `from` is absolute along the side.
+   */
+  private planOpenings(
     building: Building,
     openings: readonly (Window | Door)[],
     kind: 'window' | 'door',
     fp: Footprint,
-    wallElements: readonly GeometryElement[]
-  ): GeometryElement[] {
-    const importDate = building.importedAt;
-    const { width, depth } = fp;
+    placedWalls: readonly PlacedWall[]
+  ): OpeningPlan[] {
+    const { height } = fp;
     const sorted = sortByNumericSuffix(openings);
     if (sorted.length === 0) return [];
 
-    const hostWalls = wallElements.filter((el) => el.kind === 'wall');
     const openingCursor = new Map<string, number>();
-    const out: GeometryElement[] = [];
+    const out: OpeningPlan[] = [];
 
     for (const opening of sorted) {
       const openingOrientation = 'orientation' in opening ? opening.orientation : null;
       const rawOrientation = openingOrientation === null ? null : parseOrientation(openingOrientation.value);
       const card = toCardinal(rawOrientation);
-      let host = card === null ? null : (hostWalls.find((w) => w.placement.value.orientation === card) ?? null);
+      let host = card === null ? null : (placedWalls.find((w) => w.side === card) ?? null);
       let hostRule: Rule = RULES.openingHostWallByOrientation;
       if (host === null) {
-        host = [...hostWalls].sort((a, b) => meshArea(b.mesh) - meshArea(a.mesh))[0] ?? null;
+        host = [...placedWalls].sort((a, b) => b.length * height - a.length * height)[0] ?? null;
         hostRule = RULES.openingHostWallLongest;
       }
       if (host === null) continue;
-      const hostSide = host.placement.value.orientation as Cardinal;
-      const hostLen = host.placement.value.dimensions.width;
+      const hostLen = host.length;
       const area = opening.areaM2 !== null && opening.areaM2.value > 0 ? opening.areaM2.value : 1;
       const isWindow = kind === 'window';
       const h = isWindow ? WINDOW_HEIGHT_M : DOOR_HEIGHT_M;
@@ -638,38 +925,66 @@ export class ReconstructionService {
       const unclampedFrom = openingCursor.get(cursorKey) ?? 0.1 * hostLen;
       // clamp the cursor so openings never overflow past the host wall corner
       const maxFrom = Math.max(0.05, hostLen - w - 0.05);
-      const from = Math.min(unclampedFrom, maxFrom);
-      const clamped = from < unclampedFrom;
-      openingCursor.set(cursorKey, from + w + 0.1);
-      const face = openingFace(hostSide, from, from + w, z0, z0 + h, width, depth, WALL_THICKNESS_M, OPENING_OFFSET_M);
-      const orientation: Orientation = rawOrientation ?? (hostSide as Orientation);
+      const relFrom = Math.min(unclampedFrom, maxFrom);
+      const clamped = relFrom < unclampedFrom;
+      openingCursor.set(cursorKey, relFrom + w + 0.1);
+      const orientation: Orientation = rawOrientation ?? (host.side as Orientation);
       const orientationConf: Confidence<unknown> | Rule = openingOrientation ?? RULES.openingOrientationFromHostWall;
-      const placement: Placement = {
-        origin: openingOrigin(hostSide, from, z0, width, depth),
-        dimensions: { width: w, depth: 0, height: h },
-        orientation
-      };
-      const prov = placementConfidence(importDate, placement, [
-        opening.areaM2,
-        orientationConf,
-        isWindow ? RULES.windowHeight : RULES.doorHeight,
-        isWindow ? RULES.windowSill : null,
-        hostRule,
-        clamped ? RULES.openingCursorClamped : null
-      ]);
       out.push({
-        id: opening.id,
+        opening,
         kind,
-        label: opening.description.value || opening.id,
-        mesh: { faces: [face] },
-        areaM2: opening.areaM2,
-        uValueWm2K: opening.uValueWm2K,
-        orientation: createConfidence(orientation, orientationConf.source, orientationConf.confidence, importDate),
-        placement: prov,
-        inferred: true
+        host,
+        from: host.from + relFrom,
+        w,
+        z0,
+        h,
+        orientation,
+        orientationConf,
+        hostRule,
+        clamped
       });
     }
     return out;
+  }
+
+  /**
+   * Class B opening elements: a recessed frame set into the wall thickness
+   * (glazing + 4 reveals, rule `opening-hole-subtraction`) whose placement
+   * origin sits on the wall plane — the +0.05 m floating panel is gone.
+   */
+  private openingElements(building: Building, fp: Footprint, plans: readonly OpeningPlan[]): GeometryElement[] {
+    const importDate = building.importedAt;
+    const { width, depth } = fp;
+    return plans.map((plan) => {
+      const { host, opening, kind } = plan;
+      const faces = openingFrameFaces(host.side, plan.from, plan.from + plan.w, plan.z0, plan.z0 + plan.h, width, depth, WALL_THICKNESS_M);
+      const placement: Placement = {
+        origin: openingOrigin(host.side, plan.from, plan.z0, width, depth),
+        dimensions: { width: plan.w, depth: WALL_THICKNESS_M, height: plan.h },
+        orientation: plan.orientation
+      };
+      const isWindow = kind === 'window';
+      const prov = placementConfidence(importDate, placement, [
+        opening.areaM2,
+        plan.orientationConf,
+        isWindow ? RULES.windowHeight : RULES.doorHeight,
+        isWindow ? RULES.windowSill : null,
+        plan.hostRule,
+        plan.clamped ? RULES.openingCursorClamped : null,
+        RULES.openingHoleSubtraction
+      ]);
+      return {
+        id: opening.id,
+        kind,
+        label: opening.description.value || opening.id,
+        mesh: { faces },
+        areaM2: opening.areaM2,
+        uValueWm2K: opening.uValueWm2K,
+        orientation: createConfidence(plan.orientation, plan.orientationConf.source, plan.orientationConf.confidence, importDate),
+        placement: prov,
+        inferred: true
+      };
+    });
   }
 
   private buildRooms(building: Building, fp: Footprint): GeometryElement[] {

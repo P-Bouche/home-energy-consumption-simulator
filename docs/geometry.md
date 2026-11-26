@@ -34,18 +34,33 @@ overlay projection. Implementation: `packages/domain/src/geometry.ts` +
 The DPE gives **areas, U-values and orientations — never coordinates**. The
 reconstruction is therefore a rectangular footprint (aspect ratio 4:3) with:
 
-- one wall quad per DPE wall, placed on the side matching its orientation
+- one wall per DPE wall, placed on the side matching its orientation
   (3CL `enum_orientation_id` 1=N … 8=NW; diagonals map to their primary
   cardinal), `length = area / totalHeight`, clamped to the side; walls without
   orientation take the side with the most remaining capacity;
-- openings (windows/doors) as panels on their host wall (same orientation, else
-  the longest wall), offset 5 cm outward;
-- roofs / floors as horizontal slabs split along X proportionally to their
-  areas (synthesized from the footprint when absent);
-- rooms as floor strips along X proportional to their areas, with DOM labels at
-  the strip center.
+- **Class B (ADR-0005, `inferenceRulesVersion = 2.0.0`)**: walls stack per level
+  from `levelCount` (one quad per level from `z = level × ceiling height`),
+  with a horizontal floor slab at each intermediate level boundary;
+- openings (windows/doors) are **real holes**: the host wall quad (same
+  orientation, else the longest wall) is split into sub-faces around the
+  opening rectangle (left / below sill / above lintel / right), and the
+  opening itself is a **recessed frame set into the 0.2 m wall thickness**
+  (glazing + 4 reveals) with its placement origin on the wall plane — no more
+  floating panel at +0.05 m;
+- roofs as a **pitched gable roof along the long footprint axis** (two sloped
+  quads + two gable triangles per roof), ridge height inferred from
+  `roofType`/description with a named default rule when absent, split along X
+  proportionally to roof areas (synthesized from the footprint when absent);
+- floors as horizontal slabs split along X proportionally to their areas
+  (synthesized from the footprint when absent), plus the inter-level slabs;
+- rooms as floor strips along X proportional to their areas on the ground
+  level, with DOM labels at the strip center.
 
-## Inference rules catalog (`inferenceRulesVersion = 1.0.0`)
+## Inference rules catalog (`inferenceRulesVersion = 2.0.0`)
+
+2.0.0 = Class B (ADR-0005, issue #66): pitched roof, openings as holes with
+recessed frames, multi-level stacking. Consumers branch on
+`inferenceRulesVersion`; old 1.0.0 mesh hashes are not reinterpreted.
 
 Every rule is named `inference:<rule>` and carried, with its confidence score,
 in the `Confidence` of each produced element (`placement`, `areaM2`,
@@ -76,6 +91,11 @@ provenance has confidence < 1 or it was synthesized. Bump
 | `roof-from-footprint` / `floor-from-footprint` | footprint slab | 0.5 | no `plancher_haut` / `plancher_bas` |
 | `walls-from-perimeter` | 4 synthesized walls | 0.3 | no `mur` at all |
 | `room-from-footprint` | single room | 0.5 | no rooms |
+| `ridge-height-from-roof-type` | 0.35 × short span (combles aménagés/rampant) or 0.30 × short span (toiture/chaume/bac acier) | 0.7 | Class B: `roofType`/description denotes a pitched roof |
+| `ridge-height-default` | 0.25 × short span | 0.4 | Class B: no usable roof type → default gable ridge height |
+| `opening-hole-subtraction` | wall quad split into sub-faces around the opening; recessed frame in the wall thickness | 0.5 | Class B: every window/door opening |
+| `per-level-wall-stacking` | one wall quad per level from z = level × ceiling | 0.5 | Class B: `levelCount` > 1 |
+| `inter-level-floor-slab` | horizontal slab at each intermediate level boundary (`floor-synthesized-N`) | 0.5 | Class B: `levelCount` > 1 |
 
 Assumption (confidence: high for the *pipeline*, medium for the *shape*): a
 single rectangular footprint is a display model, not a survey. Inferred elements

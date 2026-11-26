@@ -142,7 +142,7 @@ test('viewer renders the building upright, marks inferred elements, tooltip + pi
   const apiGeometry = await fetchGeometry(page, buildingId);
   // deterministic geometry: rendered hash === API hash (same building → same mesh)
   expect(apiGeometry.meshHash).toBe(hash);
-  expect(apiGeometry.inferenceRulesVersion).toBe('1.0.0');
+  expect(apiGeometry.inferenceRulesVersion).toBe('2.0.0');
   expect(apiGeometry.elements.length).toBeGreaterThan(0);
   expect(apiGeometry.elements.some((e) => e.inferred)).toBe(true);
 
