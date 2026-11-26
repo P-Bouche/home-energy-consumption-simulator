@@ -131,6 +131,7 @@ const RULES = {
   slabAreaEqualShare: rule('slab-area-equal-share', 0.4),
   roomAreaEqualShare: rule('room-area-equal-share', 0.4),
   openingCursorClamped: rule('opening-cursor-clamped-to-host-wall', 0.5),
+  openingWidthScaledToFitHost: rule('opening-width-scaled-to-fit-host', 0.5),
   // Class B (ADR-0005, inferenceRulesVersion 2.0.0)
   ridgeHeightFromRoofType: rule('ridge-height-from-roof-type', 0.7),
   ridgeHeightDefault: rule('ridge-height-default', 0.4),
@@ -267,6 +268,7 @@ interface OpeningPlan {
   readonly orientationConf: Confidence<unknown> | Rule;
   readonly hostRule: Rule;
   readonly clamped: boolean;
+  readonly scaled: boolean;
 }
 
 function sideLength(side: Cardinal, width: number, depth: number): number {
@@ -498,15 +500,19 @@ export class ReconstructionService {
     // Class B (ADR-0005): walls are placed first, openings planned against
     // them, then wall meshes are split around the opening holes.
     const placedWalls = this.placeWalls(building, footprint);
-    const windowPlans = this.planOpenings(building, building.windows, 'window', footprint, placedWalls);
-    const doorPlans = this.planOpenings(building, building.doors, 'door', footprint, placedWalls);
+    // Windows and doors are planned together so they share each host wall
+    // without overlapping (they are laid out side by side, see planOpenings).
+    const openingInputs: { opening: Window | Door; kind: 'window' | 'door' }[] = [
+      ...building.windows.map((opening) => ({ opening, kind: 'window' as const })),
+      ...building.doors.map((opening) => ({ opening, kind: 'door' as const }))
+    ];
+    const plans = this.planOpenings(building, openingInputs, footprint, placedWalls);
 
     const elements: GeometryElement[] = [];
-    elements.push(...this.wallElements(building, footprint, placedWalls, [...windowPlans, ...doorPlans]));
+    elements.push(...this.wallElements(building, footprint, placedWalls, plans));
     elements.push(...this.roofElements(building, footprint));
     elements.push(...this.buildFloors(building, footprint));
-    elements.push(...this.openingElements(building, footprint, windowPlans));
-    elements.push(...this.openingElements(building, footprint, doorPlans));
+    elements.push(...this.openingElements(building, footprint, plans));
     elements.push(...this.buildRooms(building, footprint));
 
     const meshHash = computeMeshHash(this.inferenceRulesVersion, elements);
@@ -678,6 +684,26 @@ export class ReconstructionService {
         areaM2: wall.areaM2,
         uValueWm2K: wall.uValueWm2K
       });
+    }
+    // Envelope closure: any side with no DPE wall gets a synthesized
+    // full-length wall (same rule and id pattern as the zero-wall case) so
+    // the model never shows an open side.
+    for (const side of SIDE_ORDER) {
+      if (countOnSide[side] === 0) {
+        out.push({
+          wall: null,
+          id: `wall-synthesized-${SIDE_ORDER.indexOf(side) + 1}`,
+          label: `Mur ${side} (inféré)`,
+          side,
+          from: 0,
+          length: sideLength(side, width, depth),
+          orientation: side as Orientation,
+          orientationConf: RULES.wallsFromPerimeter,
+          areaConf: RULES.wallsFromPerimeter,
+          areaM2: null,
+          uValueWm2K: null
+        });
+      }
     }
     return out;
   }
@@ -924,23 +950,34 @@ export class ReconstructionService {
 
   /**
    * Plans each opening on its host wall (same orientation, else the longest
-   * wall), clamping the cursor so openings never overflow the host wall
-   * corner. `from` is absolute along the side.
+   * wall). Openings sharing a host are laid out side by side along the wall;
+   * when their natural widths don't fit, every width is scaled down
+   * proportionally (rule `opening-width-scaled-to-fit-host`) so openings never
+   * stack on top of each other. `from` is absolute along the side.
    */
   private planOpenings(
     building: Building,
-    openings: readonly (Window | Door)[],
-    kind: 'window' | 'door',
+    openings: readonly { opening: Window | Door; kind: 'window' | 'door' }[],
     fp: Footprint,
     placedWalls: readonly PlacedWall[]
   ): OpeningPlan[] {
-    const sorted = sortByNumericSuffix(openings);
-    if (sorted.length === 0) return [];
+    if (openings.length === 0) return [];
+    const sorted = sortByNumericSuffix(openings.map((o) => ({ id: o.opening.id, ...o })));
 
-    const openingCursor = new Map<string, number>();
-    const out: OpeningPlan[] = [];
-
-    for (const opening of sorted) {
+    interface Pending {
+      readonly opening: Window | Door;
+      readonly kind: 'window' | 'door';
+      readonly host: PlacedWall;
+      readonly hostRule: Rule;
+      readonly w: number;
+      readonly h: number;
+      readonly z0: number;
+      readonly orientation: Orientation;
+      readonly orientationConf: Confidence<unknown> | Rule;
+    }
+    const pending: Pending[] = [];
+    for (const item of sorted) {
+      const { opening, kind } = item;
       const openingOrientation = 'orientation' in opening ? opening.orientation : null;
       const rawOrientation = openingOrientation === null ? null : parseOrientation(openingOrientation.value);
       const card = toCardinal(rawOrientation);
@@ -951,36 +988,63 @@ export class ReconstructionService {
         hostRule = RULES.openingHostWallLongest;
       }
       if (host === null) continue;
-      const hostLen = host.length;
       const area = opening.areaM2 !== null && opening.areaM2.value > 0 ? opening.areaM2.value : 1;
       const isWindow = kind === 'window';
       const h = isWindow ? WINDOW_HEIGHT_M : DOOR_HEIGHT_M;
-      const z0 = isWindow ? WINDOW_SILL_M : 0;
-      const w = Math.min(area / h, hostLen);
-      const cursorKey = host.id;
-      const unclampedFrom = openingCursor.get(cursorKey) ?? 0.1 * hostLen;
-      // clamp the cursor so openings never overflow past the host wall corner
-      const maxFrom = Math.max(0.05, hostLen - w - 0.05);
-      const relFrom = Math.min(unclampedFrom, maxFrom);
-      const clamped = relFrom < unclampedFrom;
-      openingCursor.set(cursorKey, relFrom + w + 0.1);
-      const orientation: Orientation = rawOrientation ?? (host.side as Orientation);
-      const orientationConf: Confidence<unknown> | Rule = openingOrientation ?? RULES.openingOrientationFromHostWall;
-      out.push({
+      pending.push({
         opening,
         kind,
         host,
-        from: host.from + relFrom,
-        w,
-        z0,
-        h,
-        orientation,
-        orientationConf,
         hostRule,
-        clamped
+        w: Math.min(area / h, host.length),
+        h,
+        z0: isWindow ? WINDOW_SILL_M : 0,
+        orientation: rawOrientation ?? (host.side as Orientation),
+        orientationConf: openingOrientation ?? RULES.openingOrientationFromHostWall
       });
     }
-    return out;
+
+    // Side-by-side layout per host wall, with proportional width scaling when
+    // the openings don't fit (they must never overlap or stack).
+    const MARGIN = 0.05;
+    const GAP = 0.1;
+    const layout = new Map<Window | Door, { from: number; w: number; clamped: boolean; scaled: boolean }>();
+    const hostIds = [...new Set(pending.map((p) => p.host.id))];
+    for (const hostId of hostIds) {
+      const host = (pending.find((p) => p.host.id === hostId) as Pending).host;
+      const group = pending.filter((p) => p.host.id === hostId);
+      const available = host.length - 2 * MARGIN;
+      const sumW = group.reduce((s, p) => s + p.w, 0);
+      const gaps = GAP * (group.length - 1);
+      const scale = sumW > 0 && sumW + gaps > available ? Math.max(0.05, (available - gaps) / sumW) : 1;
+      let rel = MARGIN;
+      for (const p of group) {
+        const w = p.w * scale;
+        // safety clamp so an opening never overflows past the host wall corner
+        const maxFrom = Math.max(MARGIN, host.length - w - MARGIN);
+        const clampedFrom = Math.min(rel, maxFrom);
+        layout.set(p.opening, { from: host.from + clampedFrom, w, clamped: clampedFrom < rel, scaled: scale < 1 });
+        rel = clampedFrom + w + GAP;
+      }
+    }
+
+    return pending.map((p) => {
+      const l = layout.get(p.opening) as { from: number; w: number; clamped: boolean; scaled: boolean };
+      return {
+        opening: p.opening,
+        kind: p.kind,
+        host: p.host,
+        from: l.from,
+        w: l.w,
+        z0: p.z0,
+        h: p.h,
+        orientation: p.orientation,
+        orientationConf: p.orientationConf,
+        hostRule: p.hostRule,
+        clamped: l.clamped,
+        scaled: l.scaled
+      };
+    });
   }
 
   /**
@@ -1007,6 +1071,7 @@ export class ReconstructionService {
         isWindow ? RULES.windowSill : null,
         plan.hostRule,
         plan.clamped ? RULES.openingCursorClamped : null,
+        plan.scaled ? RULES.openingWidthScaledToFitHost : null,
         RULES.openingHoleSubtraction
       ]);
       return {

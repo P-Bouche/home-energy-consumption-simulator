@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Box, Chip, Divider, Paper, Typography, useTheme } from '@mui/material';
+import { Box, Chip, Divider, Paper, Typography } from '@mui/material';
 import { useViewerStore } from '../store/viewer-store.ts';
 import { confidenceInWords } from '../services/confidence-words.ts';
 import { ConfidenceBadge } from './ConfidenceBadge.tsx';
@@ -42,7 +42,6 @@ function ValueWithConfidence({
 }
 
 export function ElementPanel() {
-  const theme = useTheme();
   const geometry = useViewerStore((s) => s.geometry);
   const selectedElementId = useViewerStore((s) => s.selectedElementId);
   const element = geometry?.elements.find((el) => el.id === selectedElementId) ?? null;
@@ -55,8 +54,7 @@ export function ElementPanel() {
         width: { xs: '100%', md: 320 },
         maxHeight: { xs: '38vh', md: 'none' },
         p: 2,
-        overflowY: 'auto',
-        borderRadius: theme.shape.borderRadius
+        overflowY: 'auto'
       }}
     >
       <Typography variant="h6" component="h2">

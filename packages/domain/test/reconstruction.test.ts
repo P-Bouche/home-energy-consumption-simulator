@@ -483,4 +483,50 @@ describe('ReconstructionService (P3)', () => {
     const r1 = g.elements.find((e) => e.id === 'room-1');
     expect(r1?.placement.value.origin.z).toBeCloseTo(0.001, 6);
   });
+
+  it('envelope closure: sides without a DPE wall get a synthesized full-length inferred wall', () => {
+    const input = { ...completeInput(), walls: [wall('wall-1', '1', 20)] };
+    const g = service.reconstruct(Building.createForImport(input));
+    const walls = g.elements.filter((e) => e.kind === 'wall');
+    expect(walls).toHaveLength(4);
+    const synth = walls.filter((e) => e.id.startsWith('wall-synthesized-'));
+    expect(synth).toHaveLength(3);
+    expect(synth.map((s) => s.placement.value.orientation).sort()).toEqual(['E', 'S', 'W']);
+    for (const s of synth) {
+      expect(s.inferred).toBe(true);
+      expect(s.placement.source).toBe('inference:walls-from-perimeter');
+    }
+  });
+
+  it('openings sharing a host wall are laid out side by side, scaled to fit — never stacked', () => {
+    // 4 windows of 6 m² on the S wall (wall-3, length 20/2.5 = 8 m): natural
+    // widths 5 m each cannot fit side by side → widths are scaled down.
+    const input = {
+      ...completeInput(),
+      windows: [window('window-1', '5', 6), window('window-2', '5', 6), window('window-3', '5', 6), window('window-4', '5', 6)],
+      doors: [door('door-1', 2)]
+    };
+    const g = service.reconstruct(Building.createForImport(input));
+    const windows = g.elements.filter((e) => e.kind === 'window');
+    expect(windows).toHaveLength(4);
+    const ranges = windows.map((o) => {
+      const origin = o.placement.value.origin;
+      const w = o.placement.value.dimensions.width;
+      return { from: origin.x, to: origin.x + w };
+    });
+    const sortedRanges = [...ranges].sort((a, b) => a.from - b.from);
+    // non-overlapping (side by side, not stacked on each other)
+    for (let i = 1; i < sortedRanges.length; i += 1) {
+      expect((sortedRanges[i] as { from: number }).from).toBeGreaterThanOrEqual((sortedRanges[i - 1] as { to: number }).to + 1e-9);
+    }
+    // all inside the host wall span (S side = footprint width)
+    const width = Math.sqrt(96 * (4 / 3));
+    for (const r of ranges) {
+      expect(r.from).toBeGreaterThanOrEqual(-1e-9);
+      expect(r.to).toBeLessThanOrEqual(width + 1e-9);
+    }
+    // the host wall band is split around the 4 holes
+    const host = g.elements.find((e) => e.id === 'wall-3');
+    expect((host?.mesh.faces.length ?? 0)).toBeGreaterThan(4);
+  });
 });

@@ -83,13 +83,14 @@ provenance has confidence < 1 or it was synthesized. Bump
 | `slab-area-equal-share` | footprint area / slab count | 0.4 | roof/floor with missing area |
 | `room-area-equal-share` | footprint area / room count | 0.4 | room with missing area |
 | `opening-cursor-clamped-to-host-wall` | clamp cursor to host wall | 0.5 | openings would overflow the host wall corner |
+| `opening-width-scaled-to-fit-host` | all opening widths on a host wall scaled down proportionally so they fit side by side | 0.5 | combined opening widths + gaps exceed the host wall length |
 | `footprint-area-per-level` | footprint = living area / levelCount | (via levelCount provenance) | always — the living area is total over levels |
 | `window-height-1-2` / `window-sill-0-9` | 1.2 m / 0.9 m | 0.5 | always (DPE has no opening dims) |
 | `door-height-2-0` | 2.0 m | 0.5 | always |
 | `opening-host-wall-by-orientation` / `-longest` | host wall choice | 0.6 / 0.4 | opening placement |
 | `opening-orientation-from-host-wall` | host wall orientation | 0.6 | opening orientation missing |
 | `roof-from-footprint` / `floor-from-footprint` | footprint slab | 0.5 | no `plancher_haut` / `plancher_bas` |
-| `walls-from-perimeter` | 4 synthesized walls | 0.3 | no `mur` at all |
+| `walls-from-perimeter` | synthesized full-length wall on a side with no DPE `mur` (4 walls when there are none) | 0.3 | envelope closure — a side without a `mur` gets an inferred wall |
 | `room-from-footprint` | single room | 0.5 | no rooms |
 | `ridge-height-from-roof-type` | 0.35 × short span (combles aménagés/rampant) or 0.30 × short span (toiture/chaume/bac acier) | 0.7 | Class B: `roofType`/description denotes a pitched roof |
 | `ridge-height-default` | 0.25 × short span | 0.4 | Class B: no usable roof type → default gable ridge height |

@@ -93,11 +93,17 @@ describe('projectHeatLoss (read-only overlay projection, FR-P3-04)', () => {
     const wall1 = overlay.shares.find((s) => s.elementId === 'wall-1');
     const wall2 = overlay.shares.find((s) => s.elementId === 'wall-2');
     const win = overlay.shares.find((s) => s.elementId === 'window-1');
-    // mur 100 W/K split 10:30 between the walls; baie 50 W/K on the single window
-    expect(wall1?.share).toBeCloseTo((100 / 150) * (10 / 40), 9);
-    expect(wall2?.share).toBeCloseTo((100 / 150) * (30 / 40), 9);
+    // mur 100 W/K split across ALL wall elements by area (envelope closure
+    // synthesizes the E/W sides, so they participate too); baie 50 W/K on the
+    // single window
+    const totalWallArea = geometry.elements
+      .filter((e) => e.kind === 'wall')
+      .reduce((s, e) => s + (e.areaM2?.value ?? 0), 0);
+    const areaOf = (id: string): number => geometry.elements.find((e) => e.id === id)?.areaM2?.value ?? 0;
+    expect(wall1?.share).toBeCloseTo((100 / 150) * (areaOf('wall-1') / totalWallArea), 9);
+    expect(wall2?.share).toBeCloseTo((100 / 150) * (areaOf('wall-2') / totalWallArea), 9);
     expect(win?.share).toBeCloseTo(50 / 150, 9);
-    expect(wall1?.lossWk).toBeCloseTo(25, 6);
+    expect(wall1?.lossWk).toBeCloseTo(100 * (areaOf('wall-1') / totalWallArea), 6);
     expect(win?.lossWk).toBeCloseTo(50, 6);
     // rooms are not envelope elements
     expect(overlay.shares.some((s) => s.kind === 'room')).toBe(false);

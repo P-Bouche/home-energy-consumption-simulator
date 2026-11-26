@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { Alert, AppBar, Box, Button, FormControlLabel, LinearProgress, Switch, Toolbar, Typography } from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { Canvas, useThree } from '@react-three/fiber';
 import { ContactShadows, OrbitControls } from '@react-three/drei';
 import { ACESFilmicToneMapping, Object3D, PCFShadowMap, type DirectionalLight, type PerspectiveCamera as ThreePerspectiveCamera } from 'three';
@@ -128,8 +129,8 @@ export function ViewerPage({ buildingId }: Readonly<{ buildingId: string }>) {
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
       <AppBar position="static" color="default" elevation={1}>
         <Toolbar variant="dense" sx={{ gap: 2, flexWrap: 'wrap' }}>
-          <Button size="small" onClick={() => window.location.assign('#/')}>
-            ← Import DPE
+          <Button variant="outlined" size="small" startIcon={<ArrowBackIcon />} onClick={() => window.location.assign('#/')}>
+            Import DPE
           </Button>
           <Box sx={{ minWidth: 0 }}>
             <Typography variant="h6" component="h1" noWrap>
