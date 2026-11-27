@@ -180,6 +180,16 @@ describe('work-catalog service (work-first scenarios, US 10 / F7)', () => {
     expect(composeWorkCommand('nope', 'wall-1', {})).toBeUndefined();
   });
 
+  it('exposes the heated surface on heating commands, coerced to a number (issue #90)', () => {
+    const entry = catalogEntryFor('building.heating-system.update.v1');
+    expect(entry?.fields.some((f) => f.key === 'heatedAreaM2' && f.input === 'number')).toBe(true);
+    expect(composeWorkCommand('heating-change', 'heating-1', { heatedAreaM2: '40' })).toEqual({
+      type: 'building.heating-system.update.v1',
+      systemId: 'heating-1',
+      heatedAreaM2: 40
+    });
+  });
+
   it('sends generatorType through the v2 command as a string (ADR-0004, issue #73 follow-up)', () => {
     // generatorType is v2-only: the v1 command rejects it as an unknown field
     expect(composeWorkCommand('heating-change', 'heating-1', { generatorType: '7' })).toEqual({

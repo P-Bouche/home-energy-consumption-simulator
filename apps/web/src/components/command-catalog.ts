@@ -92,7 +92,9 @@ export const COMMAND_CATALOG: readonly CommandCatalogEntry[] = [
     targetIdField: 'systemId',
     fields: [
       { key: 'installationType', label: 'Type d’installation', input: 'text', placeholder: '4', enumKind: 'installationType' },
-      { key: 'generatorType', label: 'Type de générateur', input: 'text', placeholder: '97', enumKind: 'generatorType' }
+      { key: 'generatorType', label: 'Type de générateur', input: 'text', placeholder: '97', enumKind: 'generatorType' },
+      // issue #90: editable heated surface (mixed-heating renovation, ADR-0006)
+      { key: 'heatedAreaM2', label: 'Surface chauffée (m²)', input: 'number', min: 0, max: 10000 }
     ],
     // generatorType is a v2-only field (ADR-0004): sending it on the v1
     // command is rejected by the domain ("unknown field")
