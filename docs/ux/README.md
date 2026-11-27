@@ -47,9 +47,10 @@ Both audits are fully triaged: every finding maps to an issue, and all presentat
 | UI F6 — scenario row action overload (minor) | #67 | open — PR #87 in review |
 | UI F8–F12 — viewer axis, void, heat-loss scale, picking, chrome | #29 | closed 2026-11-22 |
 | Mobile — viewer canvas + tabs on small screens | #42 | closed 2026-11-23 |
-| Post-audit user report — scenario « Travaux envisagés » form (umbrella #71, closed as split 2026-11-26) | #72–#77 | open — PRs #78, #79, #81, #82, #84, #86 in review |
+| Post-audit user report — scenario « Travaux envisagés » form (umbrella #71, closed as split 2026-11-26) | #72–#77, #90 | open — PRs #78, #79, #81, #82, #84, #86, #91 in review |
+| Bug found while testing the above — ADR-0004 generator overlay clobbered the `generateur_chauffage` array → 422 on simulate | #88 | open — PR #89 in review |
 
-Remaining audit-derived work as of 2026-11-26: **#67 and #72–#77** (PRs in review above). This table is refreshed by #68, which is deliberately merged **last**, after those PRs, so the status it records is current at merge time.
+Remaining audit-derived work as of 2026-11-26: **#67, #72–#77, #88, #90** (PRs in review above). This table is refreshed by #68, which is deliberately merged **last**, after those PRs, so the status it records is current at merge time.
 
 ## Shared guards (in every prompt)
 
