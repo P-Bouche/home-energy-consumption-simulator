@@ -10,6 +10,7 @@ import {
   IconButton,
   InputLabel,
   ListItemText,
+  Menu,
   MenuItem,
   Paper,
   Select,
@@ -20,6 +21,7 @@ import {
   TableHead,
   TableRow,
   TextField,
+  Tooltip,
   Typography
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
@@ -27,16 +29,20 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { useScenarioStore } from '../store/scenario-store.ts';
 import { buildCommand, catalogEntryFor, COMMAND_CATALOG, type CommandCatalogField } from './command-catalog.ts';
 import { useEnumLabels } from '../hooks/use-enum-labels.ts';
-import { enumOptions } from '../services/enum-labels.ts';
+import { ENUM_KINDS, enumOptions } from '../services/enum-labels.ts';
+import { presetsForCatalogField } from '../services/presets.ts';
 import { describeU } from '../services/u-reading.ts';
 import {
   catalogEntryForWork,
-  composeWorkCommand,
+  commandRowsToWorkRows,
+  composeWorkCommands,
   elementOptionsForWork,
   uNounForTargetKind,
+  workRowsToCommandRows,
   WORK_CATALOG
 } from '../services/work-catalog.ts';
 import type { CommandJson, ComparisonEntryJson } from '../types.ts';
@@ -112,7 +118,13 @@ export function ScenarioPanel({ buildingId }: { readonly buildingId: string }) {
   const [works, setWorks] = useState<WorkRow[]>([{ ...DEFAULT_WORK_ROW, values: { ...DEFAULT_WORK_ROW.values } }]);
   const [rows, setRows] = useState<CommandRow[]>([{ ...DEFAULT_COMMAND_ROW, values: { ...DEFAULT_COMMAND_ROW.values } }]);
   const [formError, setFormError] = useState<string | null>(null);
-  const enumTables = useEnumLabels(['orientation', 'installationType', 'ventilationType']);
+  // issue #67: secondary row actions live in one kebab menu per scenario row
+  const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
+  const [menuFor, setMenuFor] = useState<string | null>(null);
+  // All catalog enum kinds (issue #73): the scenario form must resolve every
+  // enumKind a command field declares — including generatorType — else the
+  // select renders with no options. Tables are cached per kind per session.
+  const enumTables = useEnumLabels(ENUM_KINDS);
 
   useEffect(() => {
     void load(buildingId);
@@ -142,14 +154,16 @@ export function ScenarioPanel({ buildingId }: { readonly buildingId: string }) {
     targetKind: string,
     values: Record<string, string>,
     setValue: (next: string) => void,
+    setPatch: (patch: Record<string, string>) => void,
     testId: string
   ): React.ReactElement => {
     const value = values[field.key] ?? '';
+    let control: React.ReactElement;
     if (field.enumKind !== undefined) {
       const table = enumTables[field.enumKind] ?? null;
       const options = enumOptions(table, value);
-      return (
-        <FormControl key={field.key} size="small" sx={{ minWidth: 220, flexShrink: 0 }} data-testid={testId}>
+      control = (
+        <FormControl size="small" sx={{ minWidth: 220, flexShrink: 0 }} data-testid={testId}>
           <InputLabel>{field.label}</InputLabel>
           <Select label={field.label} value={value} onChange={(e) => setValue(String(e.target.value))}>
             <MenuItem value="" disabled>
@@ -167,30 +181,61 @@ export function ScenarioPanel({ buildingId }: { readonly buildingId: string }) {
           <FormHelperText>{value === '' ? ' ' : `Valeur envoyée : id ${value}`}</FormHelperText>
         </FormControl>
       );
+    } else {
+      const typedNum = value.trim() === '' ? Number.NaN : Number(value);
+      const noun = uNounForTargetKind(targetKind);
+      const reading = Number.isFinite(typedNum) && typedNum > 0 ? describeU(typedNum, noun.noun, noun.gender) : '';
+      const helper = [reading, field.helper].filter((p) => p !== undefined && p !== '').join(' · ');
+      control = (
+        <TextField
+          size="small"
+          type={field.input === 'number' ? 'number' : 'text'}
+          label={field.label}
+          placeholder={field.placeholder}
+          value={value}
+          data-testid={testId}
+          slotProps={{
+            htmlInput: {
+              ...(field.min !== undefined ? { min: field.min } : {}),
+              ...(field.max !== undefined ? { max: field.max } : {})
+            }
+          }}
+          helperText={helper === '' ? ' ' : helper}
+          // issue #76: wide enough for the floating label (« Uw (W/m².K) ») and allowed to shrink,
+          // so the label/helper never overlap the field in the wrapping row
+          sx={{ minWidth: 200 }}
+          onChange={(e) => setValue(e.target.value)}
+        />
+      );
     }
-    const typedNum = value.trim() === '' ? Number.NaN : Number(value);
+    // issue #77: level-M preset chips (same tables as the editor) under the raw field
+    const presets = presetsForCatalogField(field.key, targetKind);
+    if (presets.length === 0) return control;
+    const current = value.trim();
     const noun = uNounForTargetKind(targetKind);
-    const reading = Number.isFinite(typedNum) && typedNum > 0 ? describeU(typedNum, noun.noun, noun.gender) : '';
-    const helper = [reading, field.helper].filter((p) => p !== undefined && p !== '').join(' · ');
     return (
-      <TextField
-        key={field.key}
-        size="small"
-        type={field.input === 'number' ? 'number' : 'text'}
-        label={field.label}
-        placeholder={field.placeholder}
-        value={value}
-        data-testid={testId}
-        slotProps={{
-          htmlInput: {
-            ...(field.min !== undefined ? { min: field.min } : {}),
-            ...(field.max !== undefined ? { max: field.max } : {})
-          }
-        }}
-        helperText={helper === '' ? ' ' : helper}
-        sx={{ minWidth: 120, flexShrink: 0 }}
-        onChange={(e) => setValue(e.target.value)}
-      />
+      <Stack key={field.key} spacing={0.5} sx={{ flexShrink: 0 }} data-testid={`presets-${testId}`}>
+        {control}
+        <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+          {presets.map((p) => {
+            const hint =
+              field.input === 'number'
+                ? describeU(Number(p.value), noun.noun, noun.gender, targetKind === 'windows' ? 'window' : 'wall')
+                : '';
+            return (
+              <Chip
+                key={p.value}
+                size="small"
+                label={hint !== '' ? `${p.label} — ${hint}` : p.label}
+                color={current === p.value ? 'primary' : 'default'}
+                variant={current === p.value ? 'filled' : 'outlined'}
+                data-testid={`preset-${testId}-${p.value}`}
+                onClick={() => setPatch(p.apply ?? { [field.key]: p.value })}
+              />
+            );
+          })}
+        </Box>
+      </Stack>
     );
   };
 
@@ -209,7 +254,13 @@ export function ScenarioPanel({ buildingId }: { readonly buildingId: string }) {
           setFormError('Chaque travail doit avoir un élément cible.');
           return;
         }
-        commands.push(composeWorkCommand(work.workId, work.targetId, work.values) as CommandJson);
+        // issue #72: « Tous les … » expands to one frozen command per element
+        const composed = composeWorkCommands(work.workId, work.targetId, work.values, building);
+        if (composed.length === 0) {
+          setFormError('Chaque travail doit avoir un élément cible.');
+          return;
+        }
+        commands.push(...(composed as CommandJson[]));
       }
     } else {
       for (const row of rows) {
@@ -218,7 +269,7 @@ export function ScenarioPanel({ buildingId }: { readonly buildingId: string }) {
           setFormError('Chaque commande doit avoir un type et un élément cible.');
           return;
         }
-        commands.push(buildCommand(row.type, entry.targetIdField, row.targetId, row.values));
+        commands.push(buildCommand(entry, row.targetId, row.values));
       }
     }
     try {
@@ -266,23 +317,59 @@ export function ScenarioPanel({ buildingId }: { readonly buildingId: string }) {
                 {scenario.name}
               </Typography>
               <Chip size="small" variant="outlined" label={`${scenario.commands.length} commande(s)`} />
-              <Chip size="small" variant="outlined" label={`version de base ${scenario.baselineVersion}`} />
+              <Tooltip title={`version de base ${scenario.baselineVersion}`}>
+                <Chip size="small" variant="outlined" label={`v${scenario.baselineVersion}`} />
+              </Tooltip>
               {sim !== undefined && (
                 <LabelChip label={`${sim.result.energyLabel}/${sim.result.climateLabel}`} testId={`scenario-label-${scenario.id}`} />
               )}
               <Button size="small" startIcon={<PlayArrowIcon />} data-testid={`simulate-scenario-${scenario.id}`} onClick={() => void simulate(scenario.id)}>
                 Simuler
               </Button>
-              <Button size="small" color="success" startIcon={<CheckCircleIcon />} data-testid={`apply-scenario-${scenario.id}`} onClick={() => void apply(scenario.id)}>
-                Appliquer
-              </Button>
-              <IconButton size="small" aria-label="supprimer" data-testid={`delete-scenario-${scenario.id}`} onClick={() => void remove(scenario.id)}>
-                <DeleteIcon fontSize="small" />
+              <IconButton
+                size="small"
+                aria-label="actions du scénario"
+                data-testid={`scenario-menu-${scenario.id}`}
+                onClick={(e) => {
+                  setMenuAnchor(e.currentTarget);
+                  setMenuFor(scenario.id);
+                }}
+              >
+                <MoreVertIcon fontSize="small" />
               </IconButton>
             </Box>
           );
         })}
       </Box>
+      <Menu
+        open={menuFor !== null}
+        anchorEl={menuAnchor}
+        onClose={() => {
+          setMenuFor(null);
+          setMenuAnchor(null);
+        }}
+      >
+        <MenuItem
+          data-testid={menuFor === null ? undefined : `apply-scenario-${menuFor}`}
+          onClick={() => {
+            if (menuFor !== null) void apply(menuFor);
+            setMenuFor(null);
+            setMenuAnchor(null);
+          }}
+        >
+          <CheckCircleIcon fontSize="small" sx={{ mr: 1 }} color="success" /> Appliquer
+        </MenuItem>
+        <MenuItem
+          data-testid={menuFor === null ? undefined : `delete-scenario-${menuFor}`}
+          onClick={() => {
+            if (menuFor !== null) void remove(menuFor);
+            setMenuFor(null);
+            setMenuAnchor(null);
+          }}
+        >
+          <DeleteIcon fontSize="small" sx={{ mr: 1 }} /> Supprimer
+        </MenuItem>
+      </Menu>
 
       <Divider sx={{ my: 2 }} />
       <Stack direction="row" spacing={1} sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
@@ -291,7 +378,13 @@ export function ScenarioPanel({ buildingId }: { readonly buildingId: string }) {
           size="small"
           variant={mode === 'advanced' ? 'outlined' : 'text'}
           data-testid="advanced-mode-toggle"
-          onClick={() => setMode(mode === 'work' ? 'advanced' : 'work')}
+          onClick={() => {
+            // issue #74: carry the in-progress draft across the mode switch
+            // (work rows ↔ command rows are the same frozen commands)
+            if (mode === 'work') setRows(workRowsToCommandRows(works));
+            else setWorks(commandRowsToWorkRows(rows));
+            setMode(mode === 'work' ? 'advanced' : 'work');
+          }}
         >
           {mode === 'advanced' ? 'Mode travaux' : 'Mode avancé'}
         </Button>
@@ -309,7 +402,7 @@ export function ScenarioPanel({ buildingId }: { readonly buildingId: string }) {
             const entry = catalogEntryForWork(work.workId);
             const options = elementOptionsForWork(work.workId, building, enumTables);
             return (
-              <Stack direction="row" spacing={1} key={index} sx={{ mt: 1, alignItems: 'center', flexWrap: 'wrap' }} data-testid={`work-row-${index}`}>
+              <Stack direction="row" spacing={1} key={index} sx={{ mt: 1, alignItems: 'flex-start', flexWrap: 'wrap', rowGap: 1 }} data-testid={`work-row-${index}`}>
                 <FormControl size="small" sx={{ minWidth: 240, flexShrink: 0 }} data-testid={`work-type-${index}`}>
                   <InputLabel>Travail</InputLabel>
                   <Select
@@ -350,7 +443,7 @@ export function ScenarioPanel({ buildingId }: { readonly buildingId: string }) {
                       Élément…
                     </MenuItem>
                     {options.map((o) => (
-                      <MenuItem key={o.id} value={o.id} sx={{ whiteSpace: 'normal' }}>
+                      <MenuItem key={o.id} value={o.id} sx={{ whiteSpace: 'normal' }} title={o.secondaryFull}>
                         <ListItemText primary={o.primary} secondary={o.secondary} />
                       </MenuItem>
                     ))}
@@ -362,6 +455,7 @@ export function ScenarioPanel({ buildingId }: { readonly buildingId: string }) {
                     entry.targetKind,
                     work.values,
                     (next) => setWorks(works.map((w, i) => (i === index ? { ...w, values: { ...w.values, [field.key]: next } } : w))),
+                    (patch) => setWorks(works.map((w, i) => (i === index ? { ...w, values: { ...w.values, ...patch } } : w))),
                     `work-field-${index}-${field.key}`
                   )
                 )}
@@ -378,7 +472,7 @@ export function ScenarioPanel({ buildingId }: { readonly buildingId: string }) {
             const entry = catalogEntryFor(row.type);
             const targets = entry === undefined ? [] : (targetOptions[entry.targetKind] ?? []);
             return (
-              <Stack direction="row" spacing={1} key={index} sx={{ mt: 1, alignItems: 'center', flexWrap: 'wrap' }} data-testid={`command-row-${index}`}>
+              <Stack direction="row" spacing={1} key={index} sx={{ mt: 1, alignItems: 'flex-start', flexWrap: 'wrap', rowGap: 1 }} data-testid={`command-row-${index}`}>
                 <Select
                   size="small"
                   value={row.type}
@@ -418,6 +512,7 @@ export function ScenarioPanel({ buildingId }: { readonly buildingId: string }) {
                     entry.targetKind,
                     row.values,
                     (next) => setRows(rows.map((r, i) => (i === index ? { ...r, values: { ...r.values, [field.key]: next } } : r))),
+                    (patch) => setRows(rows.map((r, i) => (i === index ? { ...r, values: { ...r.values, ...patch } } : r))),
                     `command-field-${index}-${field.key}`
                   )
                 )}
@@ -464,10 +559,8 @@ export function ScenarioPanel({ buildingId }: { readonly buildingId: string }) {
           <Table size="small">
             <TableHead>
               <TableRow>
-                <TableCell>Rang</TableCell>
                 <TableCell>Scénario</TableCell>
-                <TableCell>Énergie</TableCell>
-                <TableCell>Climat</TableCell>
+                <TableCell>Étiquettes</TableCell>
                 <TableCell align="right">kWh (5 usages)</TableCell>
                 <TableCell align="right">kg CO₂e</TableCell>
                 <TableCell align="right">Δ kWh</TableCell>
@@ -477,15 +570,14 @@ export function ScenarioPanel({ buildingId }: { readonly buildingId: string }) {
             </TableHead>
             <TableBody>
               <TableRow data-testid="comparison-row-baseline">
-                <TableCell>—</TableCell>
                 <TableCell>
                   <strong>État initial</strong>
                 </TableCell>
                 <TableCell>
-                  <LabelChip label={comparison.baseline.energyLabel} testId="baseline-energy-label" />
-                </TableCell>
-                <TableCell>
-                  <LabelChip label={comparison.baseline.climateLabel} testId="baseline-climate-label" />
+                  <Stack direction="row" spacing={0.5}>
+                    <LabelChip label={comparison.baseline.energyLabel} testId="baseline-energy-label" />
+                    <LabelChip label={comparison.baseline.climateLabel} testId="baseline-climate-label" />
+                  </Stack>
                 </TableCell>
                 <TableCell align="right" data-testid="baseline-kwh">
                   {comparison.baseline.consumptionKwh.toLocaleString('fr-FR')}
@@ -497,20 +589,27 @@ export function ScenarioPanel({ buildingId }: { readonly buildingId: string }) {
               </TableRow>
               {comparison.entries.map((entry: ComparisonEntryJson) => (
                 <TableRow key={entry.scenarioId} data-testid={`comparison-row-${entry.scenarioId}`}>
-                  <TableCell data-testid={`rank-${entry.scenarioId}`}>{entry.rank}</TableCell>
                   <TableCell>{entry.name}</TableCell>
                   <TableCell>
-                    <LabelChip label={entry.result.energyLabel} testId={`entry-energy-label-${entry.scenarioId}`} />
-                  </TableCell>
-                  <TableCell>
-                    <LabelChip label={entry.result.climateLabel} testId={`entry-climate-label-${entry.scenarioId}`} />
+                    <Stack direction="row" spacing={0.5}>
+                      <LabelChip label={entry.result.energyLabel} testId={`entry-energy-label-${entry.scenarioId}`} />
+                      <LabelChip label={entry.result.climateLabel} testId={`entry-climate-label-${entry.scenarioId}`} />
+                    </Stack>
                   </TableCell>
                   <TableCell align="right">{entry.result.consumptionKwh.toLocaleString('fr-FR')}</TableCell>
                   <TableCell align="right">{entry.result.emissionsKg.toLocaleString('fr-FR')}</TableCell>
-                  <TableCell align="right" data-testid={`delta-kwh-${entry.scenarioId}`}>
+                  <TableCell
+                    align="right"
+                    data-testid={`delta-kwh-${entry.scenarioId}`}
+                    sx={{ color: entry.deltaKwh <= 0 ? 'success.main' : 'error.main', fontWeight: 600 }}
+                  >
                     {formatDelta(entry.deltaKwh, 'kWh')}
                   </TableCell>
-                  <TableCell align="right" data-testid={`delta-kg-${entry.scenarioId}`}>
+                  <TableCell
+                    align="right"
+                    data-testid={`delta-kg-${entry.scenarioId}`}
+                    sx={{ color: entry.deltaKgCo2 <= 0 ? 'success.main' : 'error.main', fontWeight: 600 }}
+                  >
                     {formatDelta(entry.deltaKgCo2, 'kg CO₂e')}
                   </TableCell>
                   <TableCell data-testid={`label-change-${entry.scenarioId}`}>

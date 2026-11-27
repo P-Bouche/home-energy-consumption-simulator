@@ -111,7 +111,8 @@ test('create 2 scenarios, compare, and the table shows correct deltas and the la
   expect(wallEntry.energyLabelChange).toEqual({ from: 'D', to: 'C' });
   await expect(page.getByTestId(`entry-energy-label-${wallScenario.id}`)).toContainText('C');
   await expect(page.getByTestId(`label-change-${wallScenario.id}`)).toContainText('D → C');
-  await expect(page.getByTestId(`rank-${wallScenario.id}`)).toContainText('1'); // most kWh saved → rank 1
+  // issue #67: the Rang column is gone — the sort order carries the rank (most kWh saved first)
+  await expect(page.locator('[data-testid^="comparison-row-"]').nth(1)).toHaveAttribute('data-testid', `comparison-row-${wallScenario.id}`);
 
   const domDelta = (await page.getByTestId(`delta-kwh-${wallScenario.id}`).textContent()) ?? '';
   const parsed = Number(domDelta.replace(/[^\d,-]/g, '').replace(',', '.'));
@@ -125,6 +126,8 @@ test('create 2 scenarios, compare, and the table shows correct deltas and the la
   expect(Math.abs(parsedW - windowEntry.deltaKwh)).toBeLessThan(0.05);
 
   // AC-P5-03 (UI side): apply the wall-insulation scenario → version bump + audit row + baseline re-simulated
+  // issue #67: secondary actions moved into the row kebab menu
+  await page.getByTestId(`scenario-menu-${wallScenario.id}`).click();
   await page.getByTestId(`apply-scenario-${wallScenario.id}`).click();
   await expect(page.getByTestId('apply-success')).toContainText('version 0 → 1', { timeout: 30_000 });
   const buildingAfter = await page.request.get(`/api/buildings/${buildingId}`);
@@ -136,11 +139,141 @@ test('create 2 scenarios, compare, and the table shows correct deltas and the la
   expect(((await audit.json()) as { entries: { commandType: string; version: number }[] }).entries).toHaveLength(1);
 
   // AC-P5-04 (UI side): deleting a scenario keeps the building and the other scenario
+  await page.getByTestId(`scenario-menu-${windowScenario.id}`).click();
   await page.getByTestId(`delete-scenario-${windowScenario.id}`).click();
   await expect(page.getByTestId(`scenario-row-${windowScenario.id}`)).toHaveCount(0);
   await expect(page.getByTestId(`scenario-row-${wallScenario.id}`)).toBeVisible();
   const building = await page.request.get(`/api/buildings/${buildingId}`);
   expect(building.ok()).toBe(true);
+});
+
+/**
+ * Issue #73 (bug): in advanced mode, « Type de générateur » must be a labeled
+ * select fed by the vendored `generatorType` enum table — previously the
+ * scenario panel never fetched that kind, so the select had no options.
+ */
+test('issue #73: advanced mode — « Type de générateur » is a labeled select with enum options', async ({ page }) => {
+  await page.goto('/');
+  await page.getByTestId('file-input').setInputFiles(fixture);
+  await expect(page.getByTestId('upload-success')).toContainText('Bâtiment importé');
+  await page.getByTestId('tab-scenarios').click();
+  await expect(page.getByTestId('scenario-panel')).toBeVisible();
+
+  await page.getByTestId('advanced-mode-toggle').click();
+  await expect(page.getByTestId('command-row-0')).toBeVisible();
+  await selectOption(page, 'command-type-0', /chaudière/i);
+
+  const combo = page.getByTestId('command-field-0-generatorType').locator('div[role="combobox"]');
+  await combo.click();
+  // « Non modifié » + the vendored labeled generator ids (raw id kept in secondary)
+  await expect(page.getByRole('option').first()).toBeVisible();
+  expect(await page.getByRole('option').count()).toBeGreaterThan(3);
+
+  // close the listbox before moving on: its backdrop would intercept the next clicks
+  await page.keyboard.press('Escape');
+
+  // selecting a generator must produce a v2 command (ADR-0004) — v1 rejects the field
+  const buildingId = (await page.getByTestId('building-id').textContent())?.trim() ?? '';
+  await selectOption(page, 'command-target-0', /heating-1/);
+  await selectOption(page, 'command-field-0-generatorType', /pac air\/eau installée après 2017/);
+  await inputOf(page, 'new-scenario-name').fill('Pompe à chaleur air/eau');
+  await page.getByTestId('create-scenario-button').click();
+  await expect(page.locator('[data-testid^="scenario-row-"]')).toHaveCount(1);
+  const list = await page.request.get(`/api/buildings/${buildingId}/scenarios`);
+  const scenarios = ((await list.json()) as { scenarios: { commands: unknown[] }[] }).scenarios;
+  expect(scenarios[0].commands).toEqual([
+    { type: 'building.heating-system.update.v2', buildingId, systemId: 'heating-1', generatorType: '7' }
+  ]);
+});
+
+/**
+ * Issue #77 (enh): the work form exposes the editor's level-M presets; one
+ * click on a glazing preset fills Uw + glazingType + Sw in a single frozen
+ * v1 command.
+ */
+test('issue #77: work form preset fills the coherent window group', async ({ page }) => {
+  await page.goto('/');
+  await page.getByTestId('file-input').setInputFiles(fixture);
+  await expect(page.getByTestId('upload-success')).toContainText('Bâtiment importé');
+  await page.getByTestId('tab-scenarios').click();
+  await expect(page.getByTestId('scenario-panel')).toBeVisible();
+
+  const buildingId = (await page.getByTestId('building-id').textContent())?.trim() ?? '';
+  await selectOption(page, 'work-type-0', /Remplacement des fenêtres/i);
+  await selectOption(page, 'work-target-0', /Fenêtre ouest/);
+  await page.getByTestId('preset-work-field-0-uValueWm2K-2.4').click();
+  await expect(inputOf(page, 'work-field-0-uValueWm2K')).toHaveValue('2.4');
+
+  await inputOf(page, 'new-scenario-name').fill('Fenêtres double vitrage');
+  await page.getByTestId('create-scenario-button').click();
+  await expect(page.locator('[data-testid^="scenario-row-"]')).toHaveCount(1);
+
+  const list = await page.request.get(`/api/buildings/${buildingId}/scenarios`);
+  const scenarios = ((await list.json()) as { scenarios: { commands: unknown[] }[] }).scenarios;
+  expect(scenarios[0].commands).toEqual([
+    {
+      type: 'building.window.update.v1',
+      buildingId,
+      windowId: expect.stringMatching(/^window-\d+$/),
+      uValueWm2K: 2.4,
+      glazingType: '2',
+      solarFactorSw: 0.52
+    }
+  ]);
+});
+
+/**
+ * Issue #72 (enh): « Toutes les fenêtres » in the work form creates one
+ * frozen window command per window of the building (bulk renovation).
+ */
+test('issue #72: bulk target « Toutes les fenêtres » emits one command per window', async ({ page }) => {
+  await page.goto('/');
+  await page.getByTestId('file-input').setInputFiles(fixture);
+  await expect(page.getByTestId('upload-success')).toContainText('Bâtiment importé');
+  await page.getByTestId('tab-scenarios').click();
+  await expect(page.getByTestId('scenario-panel')).toBeVisible();
+
+  const buildingId = (await page.getByTestId('building-id').textContent())?.trim() ?? '';
+  await selectOption(page, 'work-type-0', /Remplacement des fenêtres/i);
+  await selectOption(page, 'work-target-0', /Toutes les fenêtres \(6\)/);
+  await inputOf(page, 'work-field-0-uValueWm2K').fill('1.1');
+  await inputOf(page, 'new-scenario-name').fill('Toutes les fenêtres double vitrage');
+  await page.getByTestId('create-scenario-button').click();
+  await expect(page.locator('[data-testid^="scenario-row-"]')).toHaveCount(1);
+
+  const list = await page.request.get(`/api/buildings/${buildingId}/scenarios`);
+  const scenarios = ((await list.json()) as { scenarios: { commands: Record<string, unknown>[] }[] }).scenarios;
+  expect(scenarios).toHaveLength(1);
+  expect(scenarios[0].commands).toHaveLength(6); // the fixture has 6 windows
+  for (const command of scenarios[0].commands) {
+    expect(command).toMatchObject({ type: 'building.window.update.v1', buildingId, uValueWm2K: 1.1 });
+    expect(String(command.windowId)).toMatch(/^window-\d+$/);
+  }
+});
+
+/**
+ * Issue #74 (bug): toggling the form between « travaux » and « avancé » must
+ * not lose the in-progress draft — both modes now edit the same frozen
+ * commands, converted on toggle.
+ */
+test('issue #74: mode toggle keeps the in-progress work row', async ({ page }) => {
+  await page.goto('/');
+  await page.getByTestId('file-input').setInputFiles(fixture);
+  await expect(page.getByTestId('upload-success')).toContainText('Bâtiment importé');
+  await page.getByTestId('tab-scenarios').click();
+  await expect(page.getByTestId('scenario-panel')).toBeVisible();
+
+  await selectOption(page, 'work-type-0', /Remplacement des fenêtres/i);
+  await selectOption(page, 'work-target-0', /Fenêtre ouest/);
+  await inputOf(page, 'work-field-0-uValueWm2K').fill('1.1');
+
+  await page.getByTestId('advanced-mode-toggle').click();
+  await expect(page.getByTestId('command-row-0')).toBeVisible();
+  await expect(inputOf(page, 'command-field-0-uValueWm2K')).toHaveValue('1.1');
+
+  await page.getByTestId('advanced-mode-toggle').click();
+  await expect(page.getByTestId('work-row-0')).toBeVisible();
+  await expect(inputOf(page, 'work-field-0-uValueWm2K')).toHaveValue('1.1');
 });
 
 /**
@@ -210,5 +343,6 @@ test('work-first flow: create 2 scenarios from named works, byte-identical paylo
 
   // same comparison content as the advanced flow: label improvement D → C, rank 1 for the wall work
   await expect(page.getByTestId(`label-change-${wallScenario.id}`)).toContainText('D → C');
-  await expect(page.getByTestId(`rank-${wallScenario.id}`)).toContainText('1');
+  // issue #67: rank carried by the row order, not a column
+  await expect(page.locator('[data-testid^="comparison-row-"]').nth(1)).toHaveAttribute('data-testid', `comparison-row-${wallScenario.id}`);
 });
