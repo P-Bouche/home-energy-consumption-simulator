@@ -30,7 +30,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { useScenarioStore } from '../store/scenario-store.ts';
 import { buildCommand, catalogEntryFor, COMMAND_CATALOG, type CommandCatalogField } from './command-catalog.ts';
 import { useEnumLabels } from '../hooks/use-enum-labels.ts';
-import { enumOptions } from '../services/enum-labels.ts';
+import { ENUM_KINDS, enumOptions } from '../services/enum-labels.ts';
 import { describeU } from '../services/u-reading.ts';
 import {
   catalogEntryForWork,
@@ -112,7 +112,10 @@ export function ScenarioPanel({ buildingId }: { readonly buildingId: string }) {
   const [works, setWorks] = useState<WorkRow[]>([{ ...DEFAULT_WORK_ROW, values: { ...DEFAULT_WORK_ROW.values } }]);
   const [rows, setRows] = useState<CommandRow[]>([{ ...DEFAULT_COMMAND_ROW, values: { ...DEFAULT_COMMAND_ROW.values } }]);
   const [formError, setFormError] = useState<string | null>(null);
-  const enumTables = useEnumLabels(['orientation', 'installationType', 'ventilationType']);
+  // All catalog enum kinds (issue #73): the scenario form must resolve every
+  // enumKind a command field declares — including generatorType — else the
+  // select renders with no options. Tables are cached per kind per session.
+  const enumTables = useEnumLabels(ENUM_KINDS);
 
   useEffect(() => {
     void load(buildingId);
@@ -188,7 +191,9 @@ export function ScenarioPanel({ buildingId }: { readonly buildingId: string }) {
           }
         }}
         helperText={helper === '' ? ' ' : helper}
-        sx={{ minWidth: 120, flexShrink: 0 }}
+        // issue #76: wide enough for the floating label (« Uw (W/m².K) ») and allowed to shrink,
+        // so the label/helper never overlap the field in the wrapping row
+        sx={{ minWidth: 200 }}
         onChange={(e) => setValue(e.target.value)}
       />
     );
@@ -218,7 +223,7 @@ export function ScenarioPanel({ buildingId }: { readonly buildingId: string }) {
           setFormError('Chaque commande doit avoir un type et un élément cible.');
           return;
         }
-        commands.push(buildCommand(row.type, entry.targetIdField, row.targetId, row.values));
+        commands.push(buildCommand(entry, row.targetId, row.values));
       }
     }
     try {
@@ -309,7 +314,7 @@ export function ScenarioPanel({ buildingId }: { readonly buildingId: string }) {
             const entry = catalogEntryForWork(work.workId);
             const options = elementOptionsForWork(work.workId, building, enumTables);
             return (
-              <Stack direction="row" spacing={1} key={index} sx={{ mt: 1, alignItems: 'center', flexWrap: 'wrap' }} data-testid={`work-row-${index}`}>
+              <Stack direction="row" spacing={1} key={index} sx={{ mt: 1, alignItems: 'flex-start', flexWrap: 'wrap', rowGap: 1 }} data-testid={`work-row-${index}`}>
                 <FormControl size="small" sx={{ minWidth: 240, flexShrink: 0 }} data-testid={`work-type-${index}`}>
                   <InputLabel>Travail</InputLabel>
                   <Select
@@ -378,7 +383,7 @@ export function ScenarioPanel({ buildingId }: { readonly buildingId: string }) {
             const entry = catalogEntryFor(row.type);
             const targets = entry === undefined ? [] : (targetOptions[entry.targetKind] ?? []);
             return (
-              <Stack direction="row" spacing={1} key={index} sx={{ mt: 1, alignItems: 'center', flexWrap: 'wrap' }} data-testid={`command-row-${index}`}>
+              <Stack direction="row" spacing={1} key={index} sx={{ mt: 1, alignItems: 'flex-start', flexWrap: 'wrap', rowGap: 1 }} data-testid={`command-row-${index}`}>
                 <Select
                   size="small"
                   value={row.type}

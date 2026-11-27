@@ -256,5 +256,5 @@ export function composeWorkCommand(
 ): BuildingCommandJson | undefined {
   const entry = catalogEntryForWork(workId);
   if (entry === undefined) return undefined;
-  return buildCommand(entry.type, entry.targetIdField, targetId, values);
+  return buildCommand(entry, targetId, values);
 }
