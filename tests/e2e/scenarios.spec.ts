@@ -164,6 +164,19 @@ test('issue #73: advanced mode — « Type de générateur » is a labeled selec
   // « Non modifié » + the vendored labeled generator ids (raw id kept in secondary)
   await expect(page.getByRole('option').first()).toBeVisible();
   expect(await page.getByRole('option').count()).toBeGreaterThan(3);
+
+  // selecting a generator must produce a v2 command (ADR-0004) — v1 rejects the field
+  const buildingId = (await page.getByTestId('building-id').textContent())?.trim() ?? '';
+  await selectOption(page, 'command-target-0', /heating-1/);
+  await selectOption(page, 'command-field-0-generatorType', /pac air\/eau installée après 2017/);
+  await inputOf(page, 'new-scenario-name').fill('Pompe à chaleur air/eau');
+  await page.getByTestId('create-scenario-button').click();
+  await expect(page.locator('[data-testid^="scenario-row-"]')).toHaveCount(1);
+  const list = await page.request.get(`/api/buildings/${buildingId}/scenarios`);
+  const scenarios = ((await list.json()) as { scenarios: { commands: unknown[] }[] }).scenarios;
+  expect(scenarios[0].commands).toEqual([
+    { type: 'building.heating-system.update.v2', buildingId, systemId: 'heating-1', generatorType: '7' }
+  ]);
 });
 
 /**

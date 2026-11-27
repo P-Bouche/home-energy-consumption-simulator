@@ -1,5 +1,5 @@
 import type { BuildingCommandJson } from '../types.ts';
-import type { EnumLabelKind } from '../services/enum-labels.ts';
+import { ENUM_KINDS, type EnumLabelKind } from '../services/enum-labels.ts';
 
 /**
  * Command catalog (P5 headless, built on the frozen P4 command vocabulary) —
@@ -20,6 +20,12 @@ export interface CommandCatalogEntry {
   readonly targetKind: 'walls' | 'roofs' | 'floors' | 'windows' | 'heatingSystems' | 'ventilationSystems';
   readonly targetIdField: string;
   readonly fields: readonly CommandCatalogField[];
+  /**
+   * When one of these fields is set, the command is sent with the mapped type
+   * instead (ADR-0004): `generatorType` only exists on
+   * `building.heating-system.update.v2`, never on the v1 command.
+   */
+  readonly typeWhenFieldSet?: Readonly<Record<string, string>>;
 }
 
 export interface CommandCatalogField {
@@ -87,7 +93,10 @@ export const COMMAND_CATALOG: readonly CommandCatalogEntry[] = [
     fields: [
       { key: 'installationType', label: 'Type d’installation', input: 'text', placeholder: '4', enumKind: 'installationType' },
       { key: 'generatorType', label: 'Type de générateur', input: 'text', placeholder: '97', enumKind: 'generatorType' }
-    ]
+    ],
+    // generatorType is a v2-only field (ADR-0004): sending it on the v1
+    // command is rejected by the domain ("unknown field")
+    typeWhenFieldSet: { generatorType: 'building.heating-system.update.v2' }
   },
   {
     type: 'building.ventilation-system.update.v1',
@@ -109,21 +118,42 @@ export function catalogEntryFor(type: string): CommandCatalogEntry | undefined {
 }
 
 /**
+ * Effective command type for an entry + raw field values: when a
+ * `typeWhenFieldSet` field is set, the mapped type is used (ADR-0004 —
+ * `generatorType` requires `building.heating-system.update.v2`, the v1
+ * command rejects it as an unknown field).
+ */
+export function effectiveCommandType(entry: CommandCatalogEntry, values: Record<string, string>): string {
+  for (const [fieldKey, overrideType] of Object.entries(entry.typeWhenFieldSet ?? {})) {
+    if ((values[fieldKey] ?? '').trim() !== '') return overrideType;
+  }
+  return entry.type;
+}
+
+/**
  * Builds a frozen-vocabulary command JSON from a catalog row (type tag +
  * target id + field values). Pure data assembly — validation happens
  * server-side (domain parser, HTTP 400/404).
  */
 export function buildCommand(
-  type: string,
-  targetIdField: string,
+  entry: CommandCatalogEntry,
   targetId: string,
   values: Record<string, string>
 ): BuildingCommandJson {
-  const command: Record<string, unknown> = { type, [targetIdField]: targetId };
+  const command: Record<string, unknown> = { type: effectiveCommandType(entry, values), [entry.targetIdField]: targetId };
+  const enumKeys: ReadonlySet<string> = new Set(ENUM_KINDS);
   for (const [key, raw] of Object.entries(values)) {
     if (raw.trim().length === 0) continue;
-    const numeric = Number(raw);
-    command[key] = Number.isNaN(numeric) ? raw : numeric;
+    const field = entry.fields.find((f) => f.key === key);
+    if (field !== undefined) {
+      // coerce per field kind, like the P4 editor: number fields become numbers, enum ids stay strings
+      command[key] = field.input === 'number' ? Number(raw) : raw;
+    } else if (enumKeys.has(key)) {
+      command[key] = raw;
+    } else {
+      const numeric = Number(raw);
+      command[key] = Number.isNaN(numeric) ? raw : numeric;
+    }
   }
   return command as BuildingCommandJson;
 }

@@ -221,7 +221,7 @@ export function ScenarioPanel({ buildingId }: { readonly buildingId: string }) {
           setFormError('Chaque commande doit avoir un type et un élément cible.');
           return;
         }
-        commands.push(buildCommand(row.type, entry.targetIdField, row.targetId, row.values));
+        commands.push(buildCommand(entry, row.targetId, row.values));
       }
     }
     try {
