@@ -329,8 +329,22 @@ export function overlayUserEdits(dpe: Record<string, unknown>, view: BuildingSim
     if (isUser(system.heatedAreaM2)) { de['surface_chauffee'] = userValue(system.heatedAreaM2); log(ctx, 'installation_chauffage/donnee_entree/surface_chauffee', userValue(system.heatedAreaM2)); }
     // ADR-0004: generator type drives the engine result (9_generateur_ch.js) —
     // patch the first generateur_chauffage entry, position-pinned per ADR-0003.
+    // Issue #88: in the parsed source, `generateur_chauffage` is an ARRAY — going
+    // through child() would clobber it with a bare object, the engine would lose
+    // every other generator field and omit ep_conso_5_usages (422 MAPPING).
     if (isUser(system.generatorType)) {
-      const genDe = child(child(child(item, 'generateur_chauffage_collection'), 'generateur_chauffage'), 'donnee_entree');
+      const gcc = child(item, 'generateur_chauffage_collection');
+      const existingGen = gcc['generateur_chauffage'];
+      let genEntry: Record<string, unknown>;
+      if (Array.isArray(existingGen) && existingGen.length > 0) {
+        genEntry = existingGen[0] as Record<string, unknown>;
+      } else if (typeof existingGen === 'object' && existingGen !== null && !Array.isArray(existingGen)) {
+        genEntry = existingGen as Record<string, unknown>;
+      } else {
+        genEntry = {};
+        gcc['generateur_chauffage'] = [genEntry];
+      }
+      const genDe = child(genEntry, 'donnee_entree');
       genDe['enum_type_generateur_ch_id'] = userValue(system.generatorType);
       log(ctx, 'installation_chauffage/generateur_chauffage_collection/generateur_chauffage/donnee_entree/enum_type_generateur_ch_id', userValue(system.generatorType));
     }

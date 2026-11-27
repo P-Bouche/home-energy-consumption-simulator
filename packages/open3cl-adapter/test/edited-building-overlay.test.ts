@@ -81,6 +81,28 @@ describe('edited-building overlay path (P4 edits)', () => {
     expect(
       mapping.defaults.some((d) => d.path.includes('enum_type_generateur_ch_id') && d.source === 'user' && d.value === '97')
     ).toBe(true);
+    // issue #88: the overlay must patch the first array entry IN PLACE — the
+    // source generator fields (energy, usage, intermediates) must survive,
+    // otherwise the engine omits ep_conso_5_usages (422 MAPPING on simulate)
+    expect(Array.isArray(genRaw)).toBe(true);
+    expect(genDe['enum_type_energie_id']).toBe('2');
+    expect(genDe['enum_usage_generateur_id']).toBe('3');
+    const genDi = gen?.['donnee_intermediaire'] as Record<string, unknown> | undefined;
+    expect(genDi).toBeDefined();
+    expect(genDi?.['pn']).toBe(24000);
+  });
+
+  it('issue #88: a v2 generatorType edit still simulates (finite 5-usages consumption)', async () => {
+    const building = importFixture();
+    const edited = building.apply(
+      { type: 'building.heating-system.update.v2', buildingId: building.id, systemId: 'heating-1', generatorType: '7' },
+      editCtx
+    );
+    expect(edited.ok).toBe(true);
+    if (!edited.ok) return;
+    const result = await adapter.simulateBuilding(edited.value);
+    expect(Number.isFinite(result.consumptionKwh)).toBe(true);
+    expect(result.consumptionKwh).toBeGreaterThan(0);
   });
 
   it('ADR-0006: a created heating system appends a source entry; a deleted one drops its entry, survivors keep their ids', () => {
