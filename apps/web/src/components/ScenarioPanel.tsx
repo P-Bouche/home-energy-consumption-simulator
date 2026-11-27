@@ -10,6 +10,7 @@ import {
   IconButton,
   InputLabel,
   ListItemText,
+  Menu,
   MenuItem,
   Paper,
   Select,
@@ -20,6 +21,7 @@ import {
   TableHead,
   TableRow,
   TextField,
+  Tooltip,
   Typography
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
@@ -27,6 +29,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { useScenarioStore } from '../store/scenario-store.ts';
 import { buildCommand, catalogEntryFor, COMMAND_CATALOG, type CommandCatalogField } from './command-catalog.ts';
 import { useEnumLabels } from '../hooks/use-enum-labels.ts';
@@ -115,6 +118,9 @@ export function ScenarioPanel({ buildingId }: { readonly buildingId: string }) {
   const [works, setWorks] = useState<WorkRow[]>([{ ...DEFAULT_WORK_ROW, values: { ...DEFAULT_WORK_ROW.values } }]);
   const [rows, setRows] = useState<CommandRow[]>([{ ...DEFAULT_COMMAND_ROW, values: { ...DEFAULT_COMMAND_ROW.values } }]);
   const [formError, setFormError] = useState<string | null>(null);
+  // issue #67: secondary row actions live in one kebab menu per scenario row
+  const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
+  const [menuFor, setMenuFor] = useState<string | null>(null);
   // All catalog enum kinds (issue #73): the scenario form must resolve every
   // enumKind a command field declares — including generatorType — else the
   // select renders with no options. Tables are cached per kind per session.
@@ -311,23 +317,59 @@ export function ScenarioPanel({ buildingId }: { readonly buildingId: string }) {
                 {scenario.name}
               </Typography>
               <Chip size="small" variant="outlined" label={`${scenario.commands.length} commande(s)`} />
-              <Chip size="small" variant="outlined" label={`version de base ${scenario.baselineVersion}`} />
+              <Tooltip title={`version de base ${scenario.baselineVersion}`}>
+                <Chip size="small" variant="outlined" label={`v${scenario.baselineVersion}`} />
+              </Tooltip>
               {sim !== undefined && (
                 <LabelChip label={`${sim.result.energyLabel}/${sim.result.climateLabel}`} testId={`scenario-label-${scenario.id}`} />
               )}
               <Button size="small" startIcon={<PlayArrowIcon />} data-testid={`simulate-scenario-${scenario.id}`} onClick={() => void simulate(scenario.id)}>
                 Simuler
               </Button>
-              <Button size="small" color="success" startIcon={<CheckCircleIcon />} data-testid={`apply-scenario-${scenario.id}`} onClick={() => void apply(scenario.id)}>
-                Appliquer
-              </Button>
-              <IconButton size="small" aria-label="supprimer" data-testid={`delete-scenario-${scenario.id}`} onClick={() => void remove(scenario.id)}>
-                <DeleteIcon fontSize="small" />
+              <IconButton
+                size="small"
+                aria-label="actions du scénario"
+                data-testid={`scenario-menu-${scenario.id}`}
+                onClick={(e) => {
+                  setMenuAnchor(e.currentTarget);
+                  setMenuFor(scenario.id);
+                }}
+              >
+                <MoreVertIcon fontSize="small" />
               </IconButton>
             </Box>
           );
         })}
       </Box>
+      <Menu
+        open={menuFor !== null}
+        anchorEl={menuAnchor}
+        onClose={() => {
+          setMenuFor(null);
+          setMenuAnchor(null);
+        }}
+      >
+        <MenuItem
+          data-testid={menuFor === null ? undefined : `apply-scenario-${menuFor}`}
+          onClick={() => {
+            if (menuFor !== null) void apply(menuFor);
+            setMenuFor(null);
+            setMenuAnchor(null);
+          }}
+        >
+          <CheckCircleIcon fontSize="small" sx={{ mr: 1 }} color="success" /> Appliquer
+        </MenuItem>
+        <MenuItem
+          data-testid={menuFor === null ? undefined : `delete-scenario-${menuFor}`}
+          onClick={() => {
+            if (menuFor !== null) void remove(menuFor);
+            setMenuFor(null);
+            setMenuAnchor(null);
+          }}
+        >
+          <DeleteIcon fontSize="small" sx={{ mr: 1 }} /> Supprimer
+        </MenuItem>
+      </Menu>
 
       <Divider sx={{ my: 2 }} />
       <Stack direction="row" spacing={1} sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
@@ -517,10 +559,8 @@ export function ScenarioPanel({ buildingId }: { readonly buildingId: string }) {
           <Table size="small">
             <TableHead>
               <TableRow>
-                <TableCell>Rang</TableCell>
                 <TableCell>Scénario</TableCell>
-                <TableCell>Énergie</TableCell>
-                <TableCell>Climat</TableCell>
+                <TableCell>Étiquettes</TableCell>
                 <TableCell align="right">kWh (5 usages)</TableCell>
                 <TableCell align="right">kg CO₂e</TableCell>
                 <TableCell align="right">Δ kWh</TableCell>
@@ -530,15 +570,14 @@ export function ScenarioPanel({ buildingId }: { readonly buildingId: string }) {
             </TableHead>
             <TableBody>
               <TableRow data-testid="comparison-row-baseline">
-                <TableCell>—</TableCell>
                 <TableCell>
                   <strong>État initial</strong>
                 </TableCell>
                 <TableCell>
-                  <LabelChip label={comparison.baseline.energyLabel} testId="baseline-energy-label" />
-                </TableCell>
-                <TableCell>
-                  <LabelChip label={comparison.baseline.climateLabel} testId="baseline-climate-label" />
+                  <Stack direction="row" spacing={0.5}>
+                    <LabelChip label={comparison.baseline.energyLabel} testId="baseline-energy-label" />
+                    <LabelChip label={comparison.baseline.climateLabel} testId="baseline-climate-label" />
+                  </Stack>
                 </TableCell>
                 <TableCell align="right" data-testid="baseline-kwh">
                   {comparison.baseline.consumptionKwh.toLocaleString('fr-FR')}
@@ -550,20 +589,27 @@ export function ScenarioPanel({ buildingId }: { readonly buildingId: string }) {
               </TableRow>
               {comparison.entries.map((entry: ComparisonEntryJson) => (
                 <TableRow key={entry.scenarioId} data-testid={`comparison-row-${entry.scenarioId}`}>
-                  <TableCell data-testid={`rank-${entry.scenarioId}`}>{entry.rank}</TableCell>
                   <TableCell>{entry.name}</TableCell>
                   <TableCell>
-                    <LabelChip label={entry.result.energyLabel} testId={`entry-energy-label-${entry.scenarioId}`} />
-                  </TableCell>
-                  <TableCell>
-                    <LabelChip label={entry.result.climateLabel} testId={`entry-climate-label-${entry.scenarioId}`} />
+                    <Stack direction="row" spacing={0.5}>
+                      <LabelChip label={entry.result.energyLabel} testId={`entry-energy-label-${entry.scenarioId}`} />
+                      <LabelChip label={entry.result.climateLabel} testId={`entry-climate-label-${entry.scenarioId}`} />
+                    </Stack>
                   </TableCell>
                   <TableCell align="right">{entry.result.consumptionKwh.toLocaleString('fr-FR')}</TableCell>
                   <TableCell align="right">{entry.result.emissionsKg.toLocaleString('fr-FR')}</TableCell>
-                  <TableCell align="right" data-testid={`delta-kwh-${entry.scenarioId}`}>
+                  <TableCell
+                    align="right"
+                    data-testid={`delta-kwh-${entry.scenarioId}`}
+                    sx={{ color: entry.deltaKwh <= 0 ? 'success.main' : 'error.main', fontWeight: 600 }}
+                  >
                     {formatDelta(entry.deltaKwh, 'kWh')}
                   </TableCell>
-                  <TableCell align="right" data-testid={`delta-kg-${entry.scenarioId}`}>
+                  <TableCell
+                    align="right"
+                    data-testid={`delta-kg-${entry.scenarioId}`}
+                    sx={{ color: entry.deltaKgCo2 <= 0 ? 'success.main' : 'error.main', fontWeight: 600 }}
+                  >
                     {formatDelta(entry.deltaKgCo2, 'kg CO₂e')}
                   </TableCell>
                   <TableCell data-testid={`label-change-${entry.scenarioId}`}>

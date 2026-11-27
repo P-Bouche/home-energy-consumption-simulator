@@ -111,7 +111,8 @@ test('create 2 scenarios, compare, and the table shows correct deltas and the la
   expect(wallEntry.energyLabelChange).toEqual({ from: 'D', to: 'C' });
   await expect(page.getByTestId(`entry-energy-label-${wallScenario.id}`)).toContainText('C');
   await expect(page.getByTestId(`label-change-${wallScenario.id}`)).toContainText('D → C');
-  await expect(page.getByTestId(`rank-${wallScenario.id}`)).toContainText('1'); // most kWh saved → rank 1
+  // issue #67: the Rang column is gone — the sort order carries the rank (most kWh saved first)
+  await expect(page.locator('[data-testid^="comparison-row-"]').nth(1)).toHaveAttribute('data-testid', `comparison-row-${wallScenario.id}`);
 
   const domDelta = (await page.getByTestId(`delta-kwh-${wallScenario.id}`).textContent()) ?? '';
   const parsed = Number(domDelta.replace(/[^\d,-]/g, '').replace(',', '.'));
@@ -125,6 +126,8 @@ test('create 2 scenarios, compare, and the table shows correct deltas and the la
   expect(Math.abs(parsedW - windowEntry.deltaKwh)).toBeLessThan(0.05);
 
   // AC-P5-03 (UI side): apply the wall-insulation scenario → version bump + audit row + baseline re-simulated
+  // issue #67: secondary actions moved into the row kebab menu
+  await page.getByTestId(`scenario-menu-${wallScenario.id}`).click();
   await page.getByTestId(`apply-scenario-${wallScenario.id}`).click();
   await expect(page.getByTestId('apply-success')).toContainText('version 0 → 1', { timeout: 30_000 });
   const buildingAfter = await page.request.get(`/api/buildings/${buildingId}`);
@@ -136,6 +139,7 @@ test('create 2 scenarios, compare, and the table shows correct deltas and the la
   expect(((await audit.json()) as { entries: { commandType: string; version: number }[] }).entries).toHaveLength(1);
 
   // AC-P5-04 (UI side): deleting a scenario keeps the building and the other scenario
+  await page.getByTestId(`scenario-menu-${windowScenario.id}`).click();
   await page.getByTestId(`delete-scenario-${windowScenario.id}`).click();
   await expect(page.getByTestId(`scenario-row-${windowScenario.id}`)).toHaveCount(0);
   await expect(page.getByTestId(`scenario-row-${wallScenario.id}`)).toBeVisible();
@@ -339,5 +343,6 @@ test('work-first flow: create 2 scenarios from named works, byte-identical paylo
 
   // same comparison content as the advanced flow: label improvement D → C, rank 1 for the wall work
   await expect(page.getByTestId(`label-change-${wallScenario.id}`)).toContainText('D → C');
-  await expect(page.getByTestId(`rank-${wallScenario.id}`)).toContainText('1');
+  // issue #67: rank carried by the row order, not a column
+  await expect(page.locator('[data-testid^="comparison-row-"]').nth(1)).toHaveAttribute('data-testid', `comparison-row-${wallScenario.id}`);
 });
