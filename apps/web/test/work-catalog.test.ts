@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { buildCommand, catalogEntryFor } from '../src/components/command-catalog.ts';
 import {
+  ALL_TARGETS_ID,
   catalogEntryForWork,
   commandRowsToWorkRows,
   commandTypesForWork,
   composeWorkCommand,
+  composeWorkCommands,
   elementOptionFor,
   elementOptionsForWork,
   targetsForWork,
@@ -212,5 +214,27 @@ describe('work-catalog service (work-first scenarios, US 10 / F7)', () => {
     // unknown rows/works are dropped, never crash
     expect(workRowsToCommandRows([{ workId: 'nope', targetId: '', values: {} }])).toEqual([]);
     expect(commandRowsToWorkRows([{ type: 'nope', targetId: '', values: {} }])).toEqual([]);
+  });
+
+  it('offers a « Tous les … » option only with several targets, and expands it to one command per element (issue #72)', () => {
+    const window2: WindowJson = { ...window, id: 'window-2' };
+    const twoWindows = { ...building, windows: [window, window2] } as unknown as BuildingJson;
+
+    const options = elementOptionsForWork('window-replacement', twoWindows, { orientation: ORIENTATION });
+    expect(options).toHaveLength(3);
+    expect(options[0]).toMatchObject({ id: ALL_TARGETS_ID, primary: 'Toutes les fenêtres (2)' });
+    // a single target gets no bulk option
+    const single = elementOptionsForWork('window-replacement', building, { orientation: ORIENTATION });
+    expect(single[0]?.id).toBe('window-1');
+
+    const commands = composeWorkCommands('window-replacement', ALL_TARGETS_ID, { uValueWm2K: '1.1' }, twoWindows);
+    expect(commands).toEqual([
+      { type: 'building.window.update.v1', windowId: 'window-1', uValueWm2K: 1.1 },
+      { type: 'building.window.update.v1', windowId: 'window-2', uValueWm2K: 1.1 }
+    ]);
+    // single target → one command; unknown work / ALL without building → []
+    expect(composeWorkCommands('window-replacement', 'window-1', { uValueWm2K: '1.1' }, building)).toHaveLength(1);
+    expect(composeWorkCommands('nope', 'window-1', {}, building)).toEqual([]);
+    expect(composeWorkCommands('window-replacement', ALL_TARGETS_ID, {}, null)).toEqual([]);
   });
 });

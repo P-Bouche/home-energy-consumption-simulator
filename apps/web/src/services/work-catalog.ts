@@ -106,6 +106,16 @@ const KIND_LABEL: Record<string, string> = {
   ventilationSystems: 'Ventilation'
 };
 
+/** Plain-language « all of this kind » label per target kind (gender agreement, issue #72). */
+const KIND_ALL_LABEL: Record<string, string> = {
+  walls: 'Tous les murs',
+  roofs: 'Toutes les toitures',
+  floors: 'Tous les planchers',
+  windows: 'Toutes les fenêtres',
+  heatingSystems: 'Tous les chauffages',
+  ventilationSystems: 'Toutes les ventilations'
+};
+
 /** noun + gender for the guided U reading (`describeU`), per catalog target kind */
 const U_NOUN: Record<string, { noun: string; gender: 'm' | 'f' }> = {
   walls: { noun: 'mur', gender: 'm' },
@@ -230,8 +240,13 @@ export function elementOptionFor(
   return { id: target.id, primary, secondary: truncate(secondaryFull, SECONDARY_MAX_CHARS), secondaryFull };
 }
 
+/** Sentinel target id meaning « every element of the work's target kind » (issue #72). */
+export const ALL_TARGETS_ID = '__all__';
+
 /**
- * Selectable targets of one work, labeled in plain language.
+ * Selectable targets of one work, labeled in plain language. When the work
+ * has more than one candidate target, a leading « Tous les … (N) » option
+ * (id {@link ALL_TARGETS_ID}) applies the work to all of them at once.
  *
  * @param id - work id
  * @param building - loaded building, or null while loading
@@ -244,7 +259,19 @@ export function elementOptionsForWork(
 ): readonly WorkElementOption[] {
   const entry = catalogEntryForWork(id);
   if (entry === undefined) return [];
-  return targetsForWork(id, building).map((t) => elementOptionFor(t, entry.targetKind, tables));
+  const targets = targetsForWork(id, building);
+  const options = targets.map((t) => elementOptionFor(t, entry.targetKind, tables));
+  if (targets.length > 1) {
+    const allLabel = KIND_ALL_LABEL[entry.targetKind] ?? `Tous les ${(KIND_LABEL[entry.targetKind] ?? entry.targetKind).toLowerCase()}s`;
+    const all: WorkElementOption = {
+      id: ALL_TARGETS_ID,
+      primary: `${allLabel} (${targets.length})`,
+      secondary: 'Appliquer ce travail à tous les éléments de ce type',
+      secondaryFull: 'Appliquer ce travail à tous les éléments de ce type'
+    };
+    return [all, ...options];
+  }
+  return options;
 }
 
 /**
@@ -266,6 +293,30 @@ export function composeWorkCommand(
   const entry = catalogEntryForWork(workId);
   if (entry === undefined) return undefined;
   return buildCommand(entry, targetId, values);
+}
+
+/**
+ * Composes the frozen-vocabulary commands of one work row. A single target
+ * yields one command; the {@link ALL_TARGETS_ID} sentinel yields one identical
+ * command per element of the work's target kind (issue #72 — bulk renovation).
+ *
+ * @param workId - work id
+ * @param targetId - raw element id, or {@link ALL_TARGETS_ID}
+ * @param values - raw field values
+ * @param building - loaded building (needed to expand ALL_TARGETS_ID)
+ * @returns the command list ([] when the work is unknown or ALL has no targets)
+ */
+export function composeWorkCommands(
+  workId: string,
+  targetId: string,
+  values: Record<string, string>,
+  building: BuildingJson | null
+): readonly BuildingCommandJson[] {
+  if (targetId === ALL_TARGETS_ID) {
+    return targetsForWork(workId, building).map((t) => composeWorkCommand(workId, t.id, values)).flatMap((c) => (c === undefined ? [] : [c]));
+  }
+  const command = composeWorkCommand(workId, targetId, values);
+  return command === undefined ? [] : [command];
 }
 
 /** Structural shape of a work-first form row (issue #74 conversions). */

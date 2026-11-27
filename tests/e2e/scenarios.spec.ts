@@ -219,6 +219,35 @@ test('issue #77: work form preset fills the coherent window group', async ({ pag
 });
 
 /**
+ * Issue #72 (enh): « Toutes les fenêtres » in the work form creates one
+ * frozen window command per window of the building (bulk renovation).
+ */
+test('issue #72: bulk target « Toutes les fenêtres » emits one command per window', async ({ page }) => {
+  await page.goto('/');
+  await page.getByTestId('file-input').setInputFiles(fixture);
+  await expect(page.getByTestId('upload-success')).toContainText('Bâtiment importé');
+  await page.getByTestId('tab-scenarios').click();
+  await expect(page.getByTestId('scenario-panel')).toBeVisible();
+
+  const buildingId = (await page.getByTestId('building-id').textContent())?.trim() ?? '';
+  await selectOption(page, 'work-type-0', /Remplacement des fenêtres/i);
+  await selectOption(page, 'work-target-0', /Toutes les fenêtres \(6\)/);
+  await inputOf(page, 'work-field-0-uValueWm2K').fill('1.1');
+  await inputOf(page, 'new-scenario-name').fill('Toutes les fenêtres double vitrage');
+  await page.getByTestId('create-scenario-button').click();
+  await expect(page.locator('[data-testid^="scenario-row-"]')).toHaveCount(1);
+
+  const list = await page.request.get(`/api/buildings/${buildingId}/scenarios`);
+  const scenarios = ((await list.json()) as { scenarios: { commands: Record<string, unknown>[] }[] }).scenarios;
+  expect(scenarios).toHaveLength(1);
+  expect(scenarios[0].commands).toHaveLength(6); // the fixture has 6 windows
+  for (const command of scenarios[0].commands) {
+    expect(command).toMatchObject({ type: 'building.window.update.v1', buildingId, uValueWm2K: 1.1 });
+    expect(String(command.windowId)).toMatch(/^window-\d+$/);
+  }
+});
+
+/**
  * Issue #74 (bug): toggling the form between « travaux » and « avancé » must
  * not lose the in-progress draft — both modes now edit the same frozen
  * commands, converted on toggle.

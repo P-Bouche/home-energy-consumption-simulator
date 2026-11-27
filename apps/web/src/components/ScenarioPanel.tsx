@@ -36,7 +36,7 @@ import { describeU } from '../services/u-reading.ts';
 import {
   catalogEntryForWork,
   commandRowsToWorkRows,
-  composeWorkCommand,
+  composeWorkCommands,
   elementOptionsForWork,
   uNounForTargetKind,
   workRowsToCommandRows,
@@ -248,7 +248,13 @@ export function ScenarioPanel({ buildingId }: { readonly buildingId: string }) {
           setFormError('Chaque travail doit avoir un élément cible.');
           return;
         }
-        commands.push(composeWorkCommand(work.workId, work.targetId, work.values) as CommandJson);
+        // issue #72: « Tous les … » expands to one frozen command per element
+        const composed = composeWorkCommands(work.workId, work.targetId, work.values, building);
+        if (composed.length === 0) {
+          setFormError('Chaque travail doit avoir un élément cible.');
+          return;
+        }
+        commands.push(...(composed as CommandJson[]));
       }
     } else {
       for (const row of rows) {
