@@ -144,6 +144,106 @@ test('create 2 scenarios, compare, and the table shows correct deltas and the la
 });
 
 /**
+ * Issue #73 (bug): in advanced mode, « Type de générateur » must be a labeled
+ * select fed by the vendored `generatorType` enum table — previously the
+ * scenario panel never fetched that kind, so the select had no options.
+ */
+test('issue #73: advanced mode — « Type de générateur » is a labeled select with enum options', async ({ page }) => {
+  await page.goto('/');
+  await page.getByTestId('file-input').setInputFiles(fixture);
+  await expect(page.getByTestId('upload-success')).toContainText('Bâtiment importé');
+  await page.getByTestId('tab-scenarios').click();
+  await expect(page.getByTestId('scenario-panel')).toBeVisible();
+
+  await page.getByTestId('advanced-mode-toggle').click();
+  await expect(page.getByTestId('command-row-0')).toBeVisible();
+  await selectOption(page, 'command-type-0', /chaudière/i);
+
+  const combo = page.getByTestId('command-field-0-generatorType').locator('div[role="combobox"]');
+  await combo.click();
+  // « Non modifié » + the vendored labeled generator ids (raw id kept in secondary)
+  await expect(page.getByRole('option').first()).toBeVisible();
+  expect(await page.getByRole('option').count()).toBeGreaterThan(3);
+
+  // close the listbox before moving on: its backdrop would intercept the next clicks
+  await page.keyboard.press('Escape');
+
+  // selecting a generator must produce a v2 command (ADR-0004) — v1 rejects the field
+  const buildingId = (await page.getByTestId('building-id').textContent())?.trim() ?? '';
+  await selectOption(page, 'command-target-0', /heating-1/);
+  await selectOption(page, 'command-field-0-generatorType', /pac air\/eau installée après 2017/);
+  await inputOf(page, 'new-scenario-name').fill('Pompe à chaleur air/eau');
+  await page.getByTestId('create-scenario-button').click();
+  await expect(page.locator('[data-testid^="scenario-row-"]')).toHaveCount(1);
+  const list = await page.request.get(`/api/buildings/${buildingId}/scenarios`);
+  const scenarios = ((await list.json()) as { scenarios: { commands: unknown[] }[] }).scenarios;
+  expect(scenarios[0].commands).toEqual([
+    { type: 'building.heating-system.update.v2', buildingId, systemId: 'heating-1', generatorType: '7' }
+  ]);
+});
+
+/**
+ * Issue #77 (enh): the work form exposes the editor's level-M presets; one
+ * click on a glazing preset fills Uw + glazingType + Sw in a single frozen
+ * v1 command.
+ */
+test('issue #77: work form preset fills the coherent window group', async ({ page }) => {
+  await page.goto('/');
+  await page.getByTestId('file-input').setInputFiles(fixture);
+  await expect(page.getByTestId('upload-success')).toContainText('Bâtiment importé');
+  await page.getByTestId('tab-scenarios').click();
+  await expect(page.getByTestId('scenario-panel')).toBeVisible();
+
+  const buildingId = (await page.getByTestId('building-id').textContent())?.trim() ?? '';
+  await selectOption(page, 'work-type-0', /Remplacement des fenêtres/i);
+  await selectOption(page, 'work-target-0', /Fenêtre ouest/);
+  await page.getByTestId('preset-work-field-0-uValueWm2K-2.4').click();
+  await expect(inputOf(page, 'work-field-0-uValueWm2K')).toHaveValue('2.4');
+
+  await inputOf(page, 'new-scenario-name').fill('Fenêtres double vitrage');
+  await page.getByTestId('create-scenario-button').click();
+  await expect(page.locator('[data-testid^="scenario-row-"]')).toHaveCount(1);
+
+  const list = await page.request.get(`/api/buildings/${buildingId}/scenarios`);
+  const scenarios = ((await list.json()) as { scenarios: { commands: unknown[] }[] }).scenarios;
+  expect(scenarios[0].commands).toEqual([
+    {
+      type: 'building.window.update.v1',
+      buildingId,
+      windowId: expect.stringMatching(/^window-\d+$/),
+      uValueWm2K: 2.4,
+      glazingType: '2',
+      solarFactorSw: 0.52
+    }
+  ]);
+});
+
+/**
+ * Issue #74 (bug): toggling the form between « travaux » and « avancé » must
+ * not lose the in-progress draft — both modes now edit the same frozen
+ * commands, converted on toggle.
+ */
+test('issue #74: mode toggle keeps the in-progress work row', async ({ page }) => {
+  await page.goto('/');
+  await page.getByTestId('file-input').setInputFiles(fixture);
+  await expect(page.getByTestId('upload-success')).toContainText('Bâtiment importé');
+  await page.getByTestId('tab-scenarios').click();
+  await expect(page.getByTestId('scenario-panel')).toBeVisible();
+
+  await selectOption(page, 'work-type-0', /Remplacement des fenêtres/i);
+  await selectOption(page, 'work-target-0', /Fenêtre ouest/);
+  await inputOf(page, 'work-field-0-uValueWm2K').fill('1.1');
+
+  await page.getByTestId('advanced-mode-toggle').click();
+  await expect(page.getByTestId('command-row-0')).toBeVisible();
+  await expect(inputOf(page, 'command-field-0-uValueWm2K')).toHaveValue('1.1');
+
+  await page.getByTestId('advanced-mode-toggle').click();
+  await expect(page.getByTestId('work-row-0')).toBeVisible();
+  await expect(inputOf(page, 'work-field-0-uValueWm2K')).toHaveValue('1.1');
+});
+
+/**
  * Wave-2 E (UX US 10 / F7): work-first creation — two scenarios built from
  * named works (« Isolation des murs », « Remplacement des fenêtres »), the
  * target picked by plain name/location (« Mur nord — 54,25 m² »), the U via

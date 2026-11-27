@@ -176,8 +176,17 @@ export interface WorkElementOption {
   readonly id: string;
   /** e.g. « Mur nord — 54,25 m² » (labeled kind + orientation label + area) */
   readonly primary: string;
-  /** e.g. « wall-1 · <DPE description> » — the raw id is always kept visible */
+  /** e.g. « wall-1 · <DPE description> », truncated to {@link SECONDARY_MAX_CHARS} (issue #75) */
   readonly secondary: string;
+  /** the untruncated secondary text — kept for the option's tooltip (`title`) */
+  readonly secondaryFull: string;
+}
+
+/** Max length of the secondary line in the « Élément » select (issue #75). */
+export const SECONDARY_MAX_CHARS = 80;
+
+function truncate(text: string, max: number): string {
+  return text.length <= max ? text : `${text.slice(0, max - 1).trimEnd()}…`;
 }
 
 /** raw orientation enum id of an envelope element, when the DPE carried one */
@@ -217,8 +226,8 @@ export function elementOptionFor(
     primary += ` — ${area.toLocaleString('fr-FR')} m²`;
   }
   const description = target.description.value.trim();
-  const secondary = description === '' ? target.id : `${target.id} · ${description}`;
-  return { id: target.id, primary, secondary };
+  const secondaryFull = description === '' ? target.id : `${target.id} · ${description}`;
+  return { id: target.id, primary, secondary: truncate(secondaryFull, SECONDARY_MAX_CHARS), secondaryFull };
 }
 
 /**
@@ -256,5 +265,44 @@ export function composeWorkCommand(
 ): BuildingCommandJson | undefined {
   const entry = catalogEntryForWork(workId);
   if (entry === undefined) return undefined;
-  return buildCommand(entry.type, entry.targetIdField, targetId, values);
+  return buildCommand(entry, targetId, values);
+}
+
+/** Structural shape of a work-first form row (issue #74 conversions). */
+export interface WorkRowLike {
+  readonly workId: string;
+  readonly targetId: string;
+  readonly values: Record<string, string>;
+}
+
+/** Structural shape of an advanced command-row form row (issue #74 conversions). */
+export interface CommandRowLike {
+  readonly type: string;
+  readonly targetId: string;
+  readonly values: Record<string, string>;
+}
+
+/**
+ * Converts work-first rows into advanced command rows, one frozen command per
+ * work (same type the work maps to). Used when toggling the form to advanced
+ * mode so the in-progress draft is not lost (issue #74). Rows of unknown
+ * works are dropped (they cannot be represented as a command).
+ */
+export function workRowsToCommandRows(works: readonly WorkRowLike[]): CommandRowLike[] {
+  return works.flatMap((w) => {
+    const entry = catalogEntryForWork(w.workId);
+    return entry === undefined ? [] : [{ type: entry.type, targetId: w.targetId, values: { ...w.values } }];
+  });
+}
+
+/**
+ * Converts advanced command rows back into work-first rows (the work whose
+ * first command type matches). Used when toggling back to work mode (issue
+ * #74). Rows of unknown command types are dropped (no named work behind them).
+ */
+export function commandRowsToWorkRows(rows: readonly CommandRowLike[]): WorkRowLike[] {
+  return rows.flatMap((r) => {
+    const work = WORK_CATALOG.find((w) => w.commandTypes[0] === r.type);
+    return work === undefined ? [] : [{ workId: work.id, targetId: r.targetId, values: { ...r.values } }];
+  });
 }

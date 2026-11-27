@@ -65,3 +65,43 @@ export const VENTILATION_PRESETS: readonly VentilationPreset[] = [
   { label: 'VMC simple flux', ventilationType: '6' },
   { label: 'VMC double flux', ventilationType: '20' }
 ];
+
+/** One preset chip for a catalog field: label + the raw value the command sends. */
+export interface CatalogPreset {
+  readonly label: string;
+  readonly value: string;
+  /** extra field values applied together with the preset's own field (window group: Uw + glazingType + Sw) */
+  readonly apply?: Record<string, string>;
+}
+
+/**
+ * Presets available for one command-catalog field of a given target kind
+ * (issue #77: reuse the editor's level-M presets in the scenario work form).
+ * Pure mapping over the preset tables above — the command contract is unchanged.
+ *
+ * @param fieldKey - command catalog field key (`uValueWm2K`, `generatorType`, …)
+ * @param targetKind - catalog target kind (`walls`, `windows`, `heatingSystems`, …)
+ */
+export function presetsForCatalogField(fieldKey: string, targetKind: string): readonly CatalogPreset[] {
+  if (fieldKey === 'uValueWm2K') {
+    if (targetKind === 'windows') {
+      // window preset = the whole coherent group Uw + glazingType + Sw (one v1 command)
+      return WINDOW_PRESETS.map((p) => ({
+        label: p.label,
+        value: String(p.uw),
+        apply: { uValueWm2K: String(p.uw), glazingType: p.glazingType, solarFactorSw: String(p.sw) }
+      }));
+    }
+    if (targetKind === 'walls' || targetKind === 'roofs' || targetKind === 'floors') {
+      return U_PRESETS.map((p) => ({ label: p.label, value: String(p.u) }));
+    }
+    return [];
+  }
+  if (fieldKey === 'generatorType' && targetKind === 'heatingSystems') {
+    return HEATING_PRESETS.map((p) => ({ label: p.label, value: p.generatorType }));
+  }
+  if (fieldKey === 'ventilationType' && targetKind === 'ventilationSystems') {
+    return VENTILATION_PRESETS.map((p) => ({ label: p.label, value: p.ventilationType }));
+  }
+  return [];
+}
