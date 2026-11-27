@@ -25,7 +25,7 @@ D and E were parallel and independent; both merged 2026-11-23 (issues #30 and #3
 Wave 3 — status 2026-11-26: **#32 closed 2026-11-25** (level M presets landed via PR #60; level L
 **deferred** as a standing product decision — cost-band data provenance unsettled, see #32).
 **#33 closed 2026-11-26** as decision-recorded (approved 2026-11-25, ADR-0005 via PR #58); its
-implementation is tracked solely by **#66 (open, ready-for-agent)** — 3D geometry Class B.
+implementation was tracked solely by **#66**, closed 2026-11-26 — Class B merged via PR #70.
 Also closed outside the waves: #42 (mobile viewer/tabs), #47/#48 (level-M prerequisites),
 #61, #62.
 
@@ -38,17 +38,18 @@ Both audits are fully triaged: every finding maps to an issue, and all presentat
 | UX US 1 (blocker) — plain-language editor | #28 (level S), #32 (level M) | closed; level L deferred (product decision, #32) |
 | UX US 2+3 — workspace tabs, Synthèse, primary sim action | #26 | closed 2026-11-22 |
 | UX US 4+7 — edit impact, confidence wording | #30 | closed 2026-11-23 |
-| UX US 5 — 3D reads as a house | #29 (visual part) + **#66** (geometry Class B) | visual merged 2026-11-22; geometry open |
+| UX US 5 — 3D reads as a house | #29 (visual part) + #66 (geometry Class B) | both merged (wave-1 C 2026-11-22; PR #70 2026-11-26) |
 | UX US 6+11 + UI F1, F2, F4, F7 — report, theme, copy | #27 | closed 2026-11-22 |
 | UX US 8+9 — labeled enums, French validation | #28, #48 | closed |
 | UX US 10 / F7 — work-first scenarios | #31 | closed 2026-11-23 |
 | UI F3 — one long page | #26 | closed 2026-11-22 |
 | UI F5 — editor row overload | #28, #30 | closed |
-| UI F6 — scenario row action overload (minor) | #67 | open (needs-triage: implement or wontfix) |
+| UI F6 — scenario row action overload (minor) | #67 | open — PR #87 in review |
 | UI F8–F12 — viewer axis, void, heat-loss scale, picking, chrome | #29 | closed 2026-11-22 |
 | Mobile — viewer canvas + tabs on small screens | #42 | closed 2026-11-23 |
+| Post-audit user report — scenario « Travaux envisagés » form (umbrella #71, closed as split 2026-11-26) | #72–#77 | open — PRs #78, #79, #81, #82, #84, #86 in review |
 
-Remaining audit-derived work as of 2026-11-26: **#66** (3D geometry Class B) plus the minor UI F6 decision (#67).
+Remaining audit-derived work as of 2026-11-26: **#67 and #72–#77** (PRs in review above). This table is refreshed by #68, which is deliberately merged **last**, after those PRs, so the status it records is current at merge time.
 
 ## Shared guards (in every prompt)
 
