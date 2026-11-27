@@ -30,7 +30,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { useScenarioStore } from '../store/scenario-store.ts';
 import { buildCommand, catalogEntryFor, COMMAND_CATALOG, type CommandCatalogField } from './command-catalog.ts';
 import { useEnumLabels } from '../hooks/use-enum-labels.ts';
-import { enumOptions } from '../services/enum-labels.ts';
+import { ENUM_KINDS, enumOptions } from '../services/enum-labels.ts';
 import { describeU } from '../services/u-reading.ts';
 import {
   catalogEntryForWork,
@@ -112,7 +112,10 @@ export function ScenarioPanel({ buildingId }: { readonly buildingId: string }) {
   const [works, setWorks] = useState<WorkRow[]>([{ ...DEFAULT_WORK_ROW, values: { ...DEFAULT_WORK_ROW.values } }]);
   const [rows, setRows] = useState<CommandRow[]>([{ ...DEFAULT_COMMAND_ROW, values: { ...DEFAULT_COMMAND_ROW.values } }]);
   const [formError, setFormError] = useState<string | null>(null);
-  const enumTables = useEnumLabels(['orientation', 'installationType', 'ventilationType']);
+  // All catalog enum kinds (issue #73): the scenario form must resolve every
+  // enumKind a command field declares — including generatorType — else the
+  // select renders with no options. Tables are cached per kind per session.
+  const enumTables = useEnumLabels(ENUM_KINDS);
 
   useEffect(() => {
     void load(buildingId);
@@ -218,7 +221,7 @@ export function ScenarioPanel({ buildingId }: { readonly buildingId: string }) {
           setFormError('Chaque commande doit avoir un type et un élément cible.');
           return;
         }
-        commands.push(buildCommand(row.type, entry.targetIdField, row.targetId, row.values));
+        commands.push(buildCommand(entry, row.targetId, row.values));
       }
     }
     try {
