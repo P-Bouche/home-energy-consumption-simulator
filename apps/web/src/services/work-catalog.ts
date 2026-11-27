@@ -106,6 +106,16 @@ const KIND_LABEL: Record<string, string> = {
   ventilationSystems: 'Ventilation'
 };
 
+/** Plain-language « all of this kind » label per target kind (gender agreement, issue #72). */
+const KIND_ALL_LABEL: Record<string, string> = {
+  walls: 'Tous les murs',
+  roofs: 'Toutes les toitures',
+  floors: 'Tous les planchers',
+  windows: 'Toutes les fenêtres',
+  heatingSystems: 'Tous les chauffages',
+  ventilationSystems: 'Toutes les ventilations'
+};
+
 /** noun + gender for the guided U reading (`describeU`), per catalog target kind */
 const U_NOUN: Record<string, { noun: string; gender: 'm' | 'f' }> = {
   walls: { noun: 'mur', gender: 'm' },
@@ -176,8 +186,17 @@ export interface WorkElementOption {
   readonly id: string;
   /** e.g. « Mur nord — 54,25 m² » (labeled kind + orientation label + area) */
   readonly primary: string;
-  /** e.g. « wall-1 · <DPE description> » — the raw id is always kept visible */
+  /** e.g. « wall-1 · <DPE description> », truncated to {@link SECONDARY_MAX_CHARS} (issue #75) */
   readonly secondary: string;
+  /** the untruncated secondary text — kept for the option's tooltip (`title`) */
+  readonly secondaryFull: string;
+}
+
+/** Max length of the secondary line in the « Élément » select (issue #75). */
+export const SECONDARY_MAX_CHARS = 80;
+
+function truncate(text: string, max: number): string {
+  return text.length <= max ? text : `${text.slice(0, max - 1).trimEnd()}…`;
 }
 
 /** raw orientation enum id of an envelope element, when the DPE carried one */
@@ -217,12 +236,17 @@ export function elementOptionFor(
     primary += ` — ${area.toLocaleString('fr-FR')} m²`;
   }
   const description = target.description.value.trim();
-  const secondary = description === '' ? target.id : `${target.id} · ${description}`;
-  return { id: target.id, primary, secondary };
+  const secondaryFull = description === '' ? target.id : `${target.id} · ${description}`;
+  return { id: target.id, primary, secondary: truncate(secondaryFull, SECONDARY_MAX_CHARS), secondaryFull };
 }
 
+/** Sentinel target id meaning « every element of the work's target kind » (issue #72). */
+export const ALL_TARGETS_ID = '__all__';
+
 /**
- * Selectable targets of one work, labeled in plain language.
+ * Selectable targets of one work, labeled in plain language. When the work
+ * has more than one candidate target, a leading « Tous les … (N) » option
+ * (id {@link ALL_TARGETS_ID}) applies the work to all of them at once.
  *
  * @param id - work id
  * @param building - loaded building, or null while loading
@@ -235,7 +259,19 @@ export function elementOptionsForWork(
 ): readonly WorkElementOption[] {
   const entry = catalogEntryForWork(id);
   if (entry === undefined) return [];
-  return targetsForWork(id, building).map((t) => elementOptionFor(t, entry.targetKind, tables));
+  const targets = targetsForWork(id, building);
+  const options = targets.map((t) => elementOptionFor(t, entry.targetKind, tables));
+  if (targets.length > 1) {
+    const allLabel = KIND_ALL_LABEL[entry.targetKind] ?? `Tous les ${(KIND_LABEL[entry.targetKind] ?? entry.targetKind).toLowerCase()}s`;
+    const all: WorkElementOption = {
+      id: ALL_TARGETS_ID,
+      primary: `${allLabel} (${targets.length})`,
+      secondary: 'Appliquer ce travail à tous les éléments de ce type',
+      secondaryFull: 'Appliquer ce travail à tous les éléments de ce type'
+    };
+    return [all, ...options];
+  }
+  return options;
 }
 
 /**
@@ -256,5 +292,68 @@ export function composeWorkCommand(
 ): BuildingCommandJson | undefined {
   const entry = catalogEntryForWork(workId);
   if (entry === undefined) return undefined;
-  return buildCommand(entry.type, entry.targetIdField, targetId, values);
+  return buildCommand(entry, targetId, values);
+}
+
+/**
+ * Composes the frozen-vocabulary commands of one work row. A single target
+ * yields one command; the {@link ALL_TARGETS_ID} sentinel yields one identical
+ * command per element of the work's target kind (issue #72 — bulk renovation).
+ *
+ * @param workId - work id
+ * @param targetId - raw element id, or {@link ALL_TARGETS_ID}
+ * @param values - raw field values
+ * @param building - loaded building (needed to expand ALL_TARGETS_ID)
+ * @returns the command list ([] when the work is unknown or ALL has no targets)
+ */
+export function composeWorkCommands(
+  workId: string,
+  targetId: string,
+  values: Record<string, string>,
+  building: BuildingJson | null
+): readonly BuildingCommandJson[] {
+  if (targetId === ALL_TARGETS_ID) {
+    return targetsForWork(workId, building).map((t) => composeWorkCommand(workId, t.id, values)).flatMap((c) => (c === undefined ? [] : [c]));
+  }
+  const command = composeWorkCommand(workId, targetId, values);
+  return command === undefined ? [] : [command];
+}
+
+/** Structural shape of a work-first form row (issue #74 conversions). */
+export interface WorkRowLike {
+  readonly workId: string;
+  readonly targetId: string;
+  readonly values: Record<string, string>;
+}
+
+/** Structural shape of an advanced command-row form row (issue #74 conversions). */
+export interface CommandRowLike {
+  readonly type: string;
+  readonly targetId: string;
+  readonly values: Record<string, string>;
+}
+
+/**
+ * Converts work-first rows into advanced command rows, one frozen command per
+ * work (same type the work maps to). Used when toggling the form to advanced
+ * mode so the in-progress draft is not lost (issue #74). Rows of unknown
+ * works are dropped (they cannot be represented as a command).
+ */
+export function workRowsToCommandRows(works: readonly WorkRowLike[]): CommandRowLike[] {
+  return works.flatMap((w) => {
+    const entry = catalogEntryForWork(w.workId);
+    return entry === undefined ? [] : [{ type: entry.type, targetId: w.targetId, values: { ...w.values } }];
+  });
+}
+
+/**
+ * Converts advanced command rows back into work-first rows (the work whose
+ * first command type matches). Used when toggling back to work mode (issue
+ * #74). Rows of unknown command types are dropped (no named work behind them).
+ */
+export function commandRowsToWorkRows(rows: readonly CommandRowLike[]): WorkRowLike[] {
+  return rows.flatMap((r) => {
+    const work = WORK_CATALOG.find((w) => w.commandTypes[0] === r.type);
+    return work === undefined ? [] : [{ workId: work.id, targetId: r.targetId, values: { ...r.values } }];
+  });
 }
