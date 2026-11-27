@@ -165,12 +165,13 @@ test('issue #73: advanced mode — « Type de générateur » is a labeled selec
   await expect(page.getByRole('option').first()).toBeVisible();
   expect(await page.getByRole('option').count()).toBeGreaterThan(3);
 
+  // close the listbox before moving on: its backdrop would intercept the next clicks
+  await page.keyboard.press('Escape');
+
   // selecting a generator must produce a v2 command (ADR-0004) — v1 rejects the field
-  // (the listbox is already open from the count above: click the option directly,
-  // re-clicking the combobox would close it)
   const buildingId = (await page.getByTestId('building-id').textContent())?.trim() ?? '';
   await selectOption(page, 'command-target-0', /heating-1/);
-  await page.getByRole('option', { name: /pac air\/eau installée après 2017/ }).first().click();
+  await selectOption(page, 'command-field-0-generatorType', /pac air\/eau installée après 2017/);
   await inputOf(page, 'new-scenario-name').fill('Pompe à chaleur air/eau');
   await page.getByTestId('create-scenario-button').click();
   await expect(page.locator('[data-testid^="scenario-row-"]')).toHaveCount(1);
