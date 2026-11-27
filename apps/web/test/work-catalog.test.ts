@@ -136,6 +136,21 @@ describe('work-catalog service (work-first scenarios, US 10 / F7)', () => {
     expect(heatingOption.secondary).toBe('heating-1 · Chaudière gaz standard');
   });
 
+  it('truncates a long secondary line in the « Élément » select but keeps the full text for the tooltip (issue #75)', () => {
+    const longWindow: WindowJson = {
+      ...window,
+      description: conf('Fenêtres battantes bois, orientées Ouest, simple vitrage avec volets battants bois et grille de ventilation')
+    };
+    const option = elementOptionFor(longWindow, 'windows', { orientation: ORIENTATION });
+    expect(option.primary).toBe('Fenêtre est — 1,44 m²');
+    expect(option.secondary.length).toBeLessThanOrEqual(81); // 80 chars + ellipsis
+    expect(option.secondary.endsWith('…')).toBe(true);
+    expect(option.secondaryFull).toBe(`window-1 · ${longWindow.description.value}`);
+    // short descriptions are not truncated
+    const short = elementOptionFor(wall, 'walls', { orientation: ORIENTATION });
+    expect(short.secondary).toBe(short.secondaryFull);
+  });
+
   it('provides the guided U noun per target kind', () => {
     expect(uNounForTargetKind('walls')).toEqual({ noun: 'mur', gender: 'm' });
     expect(uNounForTargetKind('roofs')).toEqual({ noun: 'toiture', gender: 'f' });
@@ -145,14 +160,15 @@ describe('work-catalog service (work-first scenarios, US 10 / F7)', () => {
 
   it('composes byte-identical commands with the advanced command-row editor (buildCommand)', () => {
     const viaWork = composeWorkCommand('wall-insulation', 'wall-1', { uValueWm2K: '0.2' });
-    const viaRow = buildCommand('building.wall.update.v1', 'wallId', 'wall-1', { uValueWm2K: '0.2' });
+    const viaRow = buildCommand(catalogEntryFor('building.wall.update.v1')!, 'wall-1', { uValueWm2K: '0.2' });
     expect(viaWork).toEqual(viaRow);
     expect(viaWork).toEqual({ type: 'building.wall.update.v1', wallId: 'wall-1', uValueWm2K: 0.2 });
 
     const viaWorkEnum = composeWorkCommand('heating-change', 'heating-1', { installationType: '4' });
-    const viaRowEnum = buildCommand('building.heating-system.update.v1', 'systemId', 'heating-1', { installationType: '4' });
+    const viaRowEnum = buildCommand(catalogEntryFor('building.heating-system.update.v1')!, 'heating-1', { installationType: '4' });
     expect(viaWorkEnum).toEqual(viaRowEnum);
-    expect(viaWorkEnum).toEqual({ type: 'building.heating-system.update.v1', systemId: 'heating-1', installationType: 4 });
+    // enum ids stay strings: the domain validates string fields strictly
+    expect(viaWorkEnum).toEqual({ type: 'building.heating-system.update.v1', systemId: 'heating-1', installationType: '4' });
 
     // empty values are skipped exactly like the advanced flow
     expect(composeWorkCommand('window-replacement', 'window-1', { uValueWm2K: '' })).toEqual({
@@ -160,5 +176,18 @@ describe('work-catalog service (work-first scenarios, US 10 / F7)', () => {
       windowId: 'window-1'
     });
     expect(composeWorkCommand('nope', 'wall-1', {})).toBeUndefined();
+  });
+
+  it('sends generatorType through the v2 command as a string (ADR-0004, issue #73 follow-up)', () => {
+    // generatorType is v2-only: the v1 command rejects it as an unknown field
+    expect(composeWorkCommand('heating-change', 'heating-1', { generatorType: '7' })).toEqual({
+      type: 'building.heating-system.update.v2',
+      systemId: 'heating-1',
+      generatorType: '7'
+    });
+    // installation-only changes stay on v1
+    expect(composeWorkCommand('heating-change', 'heating-1', { installationType: '4' })?.type).toBe(
+      'building.heating-system.update.v1'
+    );
   });
 });

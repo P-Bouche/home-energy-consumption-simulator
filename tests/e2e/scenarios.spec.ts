@@ -144,6 +144,45 @@ test('create 2 scenarios, compare, and the table shows correct deltas and the la
 });
 
 /**
+ * Issue #73 (bug): in advanced mode, « Type de générateur » must be a labeled
+ * select fed by the vendored `generatorType` enum table — previously the
+ * scenario panel never fetched that kind, so the select had no options.
+ */
+test('issue #73: advanced mode — « Type de générateur » is a labeled select with enum options', async ({ page }) => {
+  await page.goto('/');
+  await page.getByTestId('file-input').setInputFiles(fixture);
+  await expect(page.getByTestId('upload-success')).toContainText('Bâtiment importé');
+  await page.getByTestId('tab-scenarios').click();
+  await expect(page.getByTestId('scenario-panel')).toBeVisible();
+
+  await page.getByTestId('advanced-mode-toggle').click();
+  await expect(page.getByTestId('command-row-0')).toBeVisible();
+  await selectOption(page, 'command-type-0', /chaudière/i);
+
+  const combo = page.getByTestId('command-field-0-generatorType').locator('div[role="combobox"]');
+  await combo.click();
+  // « Non modifié » + the vendored labeled generator ids (raw id kept in secondary)
+  await expect(page.getByRole('option').first()).toBeVisible();
+  expect(await page.getByRole('option').count()).toBeGreaterThan(3);
+
+  // close the listbox before moving on: its backdrop would intercept the next clicks
+  await page.keyboard.press('Escape');
+
+  // selecting a generator must produce a v2 command (ADR-0004) — v1 rejects the field
+  const buildingId = (await page.getByTestId('building-id').textContent())?.trim() ?? '';
+  await selectOption(page, 'command-target-0', /heating-1/);
+  await selectOption(page, 'command-field-0-generatorType', /pac air\/eau installée après 2017/);
+  await inputOf(page, 'new-scenario-name').fill('Pompe à chaleur air/eau');
+  await page.getByTestId('create-scenario-button').click();
+  await expect(page.locator('[data-testid^="scenario-row-"]')).toHaveCount(1);
+  const list = await page.request.get(`/api/buildings/${buildingId}/scenarios`);
+  const scenarios = ((await list.json()) as { scenarios: { commands: unknown[] }[] }).scenarios;
+  expect(scenarios[0].commands).toEqual([
+    { type: 'building.heating-system.update.v2', buildingId, systemId: 'heating-1', generatorType: '7' }
+  ]);
+});
+
+/**
  * Wave-2 E (UX US 10 / F7): work-first creation — two scenarios built from
  * named works (« Isolation des murs », « Remplacement des fenêtres »), the
  * target picked by plain name/location (« Mur nord — 54,25 m² »), the U via
